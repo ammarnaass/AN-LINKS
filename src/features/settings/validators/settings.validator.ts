@@ -35,3 +35,4 @@ export function validatePasswordChange(
   }
   return { valid: true };
 }
+

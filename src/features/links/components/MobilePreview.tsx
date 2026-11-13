@@ -61,3 +61,4 @@ export function MobilePreview({ profile, username, links, socials }: MobilePrevi
     </div>
   );
 }
+

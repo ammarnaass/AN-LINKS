@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { CreditCard, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { CreditCard, ShieldCheck, ArrowLeft } from "lucide-react";
 
 export function SubscriptionTab() {
   return (
@@ -23,9 +24,13 @@ export function SubscriptionTab() {
                 <span className="font-mono text-primary font-bold">468.00 ر.س</span>
               </p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-primary-container/20 text-primary flex items-center justify-center shadow-lg">
-              <span className="material-symbols-outlined text-[26px]">military_tech</span>
-            </div>
+            <Link
+              href="/pricing"
+              className="px-4 py-2 rounded-xl bg-surface-container-highest hover:bg-surface-container-high text-on-surface text-xs font-bold border border-white/5 flex items-center gap-1.5 transition-all shadow-md shrink-0"
+            >
+              <span>تغيير الخطة</span>
+              <ArrowLeft className="w-3.5 h-3.5" />
+            </Link>
           </div>
 
           {/* Consumption Indicators */}
@@ -148,3 +153,4 @@ export function SubscriptionTab() {
     </section>
   );
 }
+

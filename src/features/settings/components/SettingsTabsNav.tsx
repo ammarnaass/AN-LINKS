@@ -78,3 +78,4 @@ export function SettingsTabsNav({ activeTab, onSelectTab }: SettingsTabsNavProps
     </nav>
   );
 }
+

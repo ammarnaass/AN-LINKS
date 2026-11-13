@@ -13,3 +13,4 @@ export interface PasswordChangeResult {
   valid: boolean;
   error?: string;
 }
+

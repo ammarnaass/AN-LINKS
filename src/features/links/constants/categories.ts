@@ -11,3 +11,4 @@ export const CATEGORIES: LinkCategory[] = [
   { id: "blog", label: "مدونة تقنية", color: "bg-secondary-container/20 text-secondary border-secondary/30" },
   { id: "link", label: "رابط مخصص", color: "bg-surface-container-highest text-on-surface-variant border-outline-variant/30" },
 ];
+

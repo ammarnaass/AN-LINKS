@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { ThemeToggle } from "@/shared/ui";
 
 interface DashboardHeaderProps {
   displayName: string;
@@ -41,8 +42,7 @@ export function DashboardHeader({
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span>المزامنة التلقائية فورية</span>
           </span>
-          <span className="text-outline-variant text-xs">|</span>
-          <span className="text-xs text-on-surface-variant">آخر تحديث: قبل لحظات</span>
+          <ThemeToggle />
         </div>
       </div>
 

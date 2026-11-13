@@ -40,3 +40,4 @@ export function LinkHealthBanner({ onToggleAdd, isAdding }: LinkHealthBannerProp
     </div>
   );
 }
+
