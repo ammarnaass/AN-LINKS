@@ -123,3 +123,4 @@
   Run `npm run build` ensuring successful static generation of `/`.
 - [ ] **Step 5: Commit & Push**
   `git commit -m "feat(landing): complete root landing page with full SSR and metadata"` and `git push origin main`.
+

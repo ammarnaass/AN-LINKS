@@ -86,3 +86,13 @@ describe("HowItWorksSection Component", () => {
     expect(typeof HowItWorksSection).toBe("function");
   });
 });
+
+describe("Root Landing Page Integration", () => {
+  it("should export metadata and default LandingPage component", async () => {
+    const pageModule = await import("@/app/page");
+    expect(pageModule.default).toBeDefined();
+    expect(typeof pageModule.default).toBe("function");
+    expect(pageModule.metadata).toBeDefined();
+    expect(pageModule.metadata.title).toContain("AN LINKS");
+  });
+});

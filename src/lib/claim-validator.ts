@@ -55,3 +55,4 @@ export function sanitizeClaimUsername(rawInput: string): ClaimResult {
     targetUrl: `/register?username=${encodeURIComponent(cleaned)}`,
   };
 }
+
