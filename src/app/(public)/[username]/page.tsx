@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
-import { getPublicProfileData, generateProfileMetadata } from "@/lib/profile-service";
-import { BioPageContent } from "@/components/public/BioPageContent";
+import {
+  getPublicProfileData,
+  generateProfileMetadata,
+  BioPageContent,
+} from "@/features/bio";
 import type { Metadata } from "next";
 
 interface PageProps {

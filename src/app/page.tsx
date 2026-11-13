@@ -1,10 +1,12 @@
 import { Metadata } from "next";
-import { LandingHeader } from "@/components/landing/LandingHeader";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { PhoneMockup } from "@/components/landing/PhoneMockup";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
-import { LandingFooter } from "@/components/landing/LandingFooter";
+import {
+  LandingHeader,
+  HeroSection,
+  PhoneMockup,
+  FeaturesSection,
+  HowItWorksSection,
+  LandingFooter,
+} from "@/features/landing";
 
 export const metadata: Metadata = {
   title: "AN LINKS | المنصة العربية الأولى لصفحات الروابط والـ Bio",
@@ -22,7 +24,10 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container" dir="rtl">
+    <div
+      className="min-h-screen flex flex-col bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container"
+      dir="rtl"
+    >
       {/* Navigation Header */}
       <LandingHeader />
 
@@ -50,4 +55,3 @@ export default function LandingPage() {
     </div>
   );
 }
-

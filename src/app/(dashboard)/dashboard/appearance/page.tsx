@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { ThemeCustomizer } from "@/components/dashboard/ThemeCustomizer";
-import { MobilePreview } from "@/components/dashboard/MobilePreview";
+import { ThemeCustomizer } from "@/features/appearance";
+import { MobilePreview, LinkData, SocialItem } from "@/features/links";
 import { ProfileData } from "@/components/public/BioPageContent";
-import { LinkData } from "@/components/dashboard/LinkEditor";
-import { SocialItem } from "@/components/public/ProfileCard";
 import { Check, Save } from "lucide-react";
 
 export default function AppearancePage() {
