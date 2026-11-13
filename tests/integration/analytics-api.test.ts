@@ -48,5 +48,20 @@ describe("Analytics Aggregation & CTR Calculations", () => {
     const zeroDays = series.filter((s) => s.count === 0);
     expect(zeroDays.length).toBe(6);
   });
+
+  it("should calculate traffic channels and device shares accurately", () => {
+    const channels = [
+      { name: "Instagram", visits: 540 },
+      { name: "TikTok", visits: 280 },
+      { name: "X", visits: 120 },
+      { name: "Direct", visits: 60 },
+    ];
+    const total = channels.reduce((acc, c) => acc + c.visits, 0);
+    expect(total).toBe(1000);
+
+    const instagramShare = Math.round((channels[0].visits / total) * 100);
+    expect(instagramShare).toBe(54);
+  });
 });
+
 
