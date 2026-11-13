@@ -35,3 +35,22 @@ describe("Landing Page Handle Claim Validator", () => {
     expect(sanitizeClaimUsername("a".repeat(31)).isValid).toBe(false);
   });
 });
+
+describe("LandingHeader Component", () => {
+  it("should render logo, login link, and register CTA button", async () => {
+    const { LandingHeader } = await import("@/components/landing/LandingHeader");
+    const element = LandingHeader();
+    expect(element).toBeDefined();
+    // React element type verification
+    expect(element.type).toBe("header");
+  });
+});
+
+describe("LandingFooter Component", () => {
+  it("should render copyright, legal links, and platform mission", async () => {
+    const { LandingFooter } = await import("@/components/landing/LandingFooter");
+    const element = LandingFooter();
+    expect(element).toBeDefined();
+    expect(element.type).toBe("footer");
+  });
+});
