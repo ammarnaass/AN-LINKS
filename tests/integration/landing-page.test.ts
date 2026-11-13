@@ -62,3 +62,27 @@ describe("HeroSection Component", () => {
     expect(typeof HeroSection).toBe("function");
   });
 });
+
+describe("PhoneMockup Component", () => {
+  it("should export PhoneMockup component", async () => {
+    const { PhoneMockup } = await import("@/components/landing/PhoneMockup");
+    expect(PhoneMockup).toBeDefined();
+    expect(typeof PhoneMockup).toBe("function");
+  });
+});
+
+describe("FeaturesSection Component", () => {
+  it("should export FeaturesSection component", async () => {
+    const { FeaturesSection } = await import("@/components/landing/FeaturesSection");
+    expect(FeaturesSection).toBeDefined();
+    expect(typeof FeaturesSection).toBe("function");
+  });
+});
+
+describe("HowItWorksSection Component", () => {
+  it("should export HowItWorksSection component", async () => {
+    const { HowItWorksSection } = await import("@/components/landing/HowItWorksSection");
+    expect(HowItWorksSection).toBeDefined();
+    expect(typeof HowItWorksSection).toBe("function");
+  });
+});
