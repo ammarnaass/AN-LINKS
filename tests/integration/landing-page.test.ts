@@ -54,3 +54,11 @@ describe("LandingFooter Component", () => {
     expect(element.type).toBe("footer");
   });
 });
+
+describe("HeroSection Component", () => {
+  it("should export HeroSection component properly", async () => {
+    const { HeroSection } = await import("@/components/landing/HeroSection");
+    expect(HeroSection).toBeDefined();
+    expect(typeof HeroSection).toBe("function");
+  });
+});
