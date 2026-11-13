@@ -1,17 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { THEMES } from "@/lib/themes";
-import {
-  Instagram,
-  Twitter,
-  Youtube,
-  Github,
-  Linkedin,
-  Facebook,
-  Send,
-  MessageCircle,
-  Share2,
-} from "lucide-react";
+import { SOCIAL_ICON_MAP, GenericLinkIcon } from "./SocialIcons";
 
 export interface SocialItem {
   id: string;
@@ -28,18 +18,6 @@ interface ProfileCardProps {
   socials?: SocialItem[];
   isPreview?: boolean;
 }
-
-const SOCIAL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  instagram: Instagram,
-  x: Twitter,
-  twitter: Twitter,
-  youtube: Youtube,
-  github: Github,
-  linkedin: Linkedin,
-  facebook: Facebook,
-  telegram: Send,
-  whatsapp: MessageCircle,
-};
 
 export function ProfileCard({
   displayName,
@@ -91,7 +69,7 @@ export function ProfileCard({
         <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
           {socials.map((social) => {
             const IconComponent =
-              SOCIAL_ICONS[social.network.toLowerCase()] || MessageCircle;
+              SOCIAL_ICON_MAP[social.network.toLowerCase()] || GenericLinkIcon;
 
             const content = (
               <div
