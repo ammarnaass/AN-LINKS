@@ -49,3 +49,4 @@ describe("URL Sanitizer", () => {
     expect(sanitizeUrl("https://").valid).toBe(false);
   });
 });
+

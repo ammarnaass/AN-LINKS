@@ -90,3 +90,4 @@ export function AnalyticsChart({ viewsSeries, clicksSeries }: AnalyticsChartProp
     </div>
   );
 }
+

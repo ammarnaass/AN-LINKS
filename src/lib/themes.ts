@@ -89,3 +89,4 @@ export const FONTS: Record<string, { name: string; nameAr: string; className: st
     className: "font-mono",
   },
 };
+

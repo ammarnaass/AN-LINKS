@@ -64,3 +64,4 @@ describe("Image Upload Security & Sharp Processing", () => {
     expect(result.error).toContain("أبعاد الصورة تتجاوز الحد الأقصى المسموح (4000×4000)");
   });
 });
+

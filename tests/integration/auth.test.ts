@@ -95,3 +95,4 @@ describe("Authentication & Registration Logic", () => {
     expect(isWrongMatch).toBe(false);
   });
 });
+

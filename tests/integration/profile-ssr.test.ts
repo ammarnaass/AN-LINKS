@@ -50,3 +50,4 @@ describe("Public Profile & Themes Configuration", () => {
     expect(active.map((l) => l.id)).toEqual(["1", "3"]);
   });
 });
+

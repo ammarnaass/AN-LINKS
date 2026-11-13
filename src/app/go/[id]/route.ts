@@ -38,3 +38,4 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 }
+

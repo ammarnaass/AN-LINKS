@@ -39,3 +39,4 @@ describe("Analytics Tracking & Click Redirection Helpers", () => {
     expect(shouldCountClick("Mozilla/5.0", prefetchHeaders)).toBe(false);
   });
 });
+

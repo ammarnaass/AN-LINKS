@@ -57,3 +57,4 @@ describe("Bot Detector & Privacy Helpers", () => {
     expect(truncateIp("invalid-ip")).toBe("unknown");
   });
 });
+

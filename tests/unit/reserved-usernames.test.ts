@@ -40,3 +40,4 @@ describe("Reserved Usernames Utility", () => {
     expect(RESERVED_USERNAMES.length).toBeGreaterThan(15);
   });
 });
+

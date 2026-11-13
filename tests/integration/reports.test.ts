@@ -48,3 +48,4 @@ describe("Abuse Reporting Validation", () => {
     expect(tooLong.error).toContain("يجب ألا تتجاوز تفاصيل البلاغ 500 حرف");
   });
 });
+
