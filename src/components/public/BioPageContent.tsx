@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { ProfileCard, SocialItem } from "./ProfileCard";
 import { LinkButton, LinkItem } from "./LinkButton";
+import { ReportModal } from "./ReportModal";
 import { THEMES } from "@/lib/themes";
 
 export interface ProfileData {
@@ -84,8 +85,8 @@ export function BioPageContent({
         )}
       </div>
 
-      {/* Platform Branding Badge */}
-      <footer className="mt-8 text-center">
+      {/* Platform Branding Badge & Report Action */}
+      <footer className="mt-8 text-center flex flex-col items-center gap-2.5">
         <a
           href="/"
           target={isPreview ? "_self" : "_blank"}
@@ -95,6 +96,8 @@ export function BioPageContent({
           <span>صُنع بواسطة</span>
           <span className="font-bold tracking-wide">AN LINKS</span>
         </a>
+
+        {!isPreview && <ReportModal username={username} />}
       </footer>
     </div>
   );
