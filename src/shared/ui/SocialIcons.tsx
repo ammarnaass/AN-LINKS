@@ -120,3 +120,4 @@ export const SOCIAL_ICON_MAP: Record<string, React.ComponentType<{ className?: s
   whatsapp: WhatsappIcon,
   tiktok: TikTokIcon,
 };
+

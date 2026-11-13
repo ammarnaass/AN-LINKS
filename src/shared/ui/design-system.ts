@@ -86,3 +86,42 @@ export function getThemeTokens(themeKey?: string): ThemeDefinition {
   }
   return STITCH_THEMES.layanDark;
 }
+
+export interface ModeTokens {
+  surface: string;
+  surfaceContainer: string;
+  onSurface: string;
+  primary: string;
+  primaryContainer: string;
+  secondary: string;
+  tertiary: string;
+}
+
+export const THEME_TOKENS: Record<"dark" | "light", ModeTokens> = {
+  dark: {
+    surface: "#0f131c",
+    surfaceContainer: "#1c2028",
+    onSurface: "#dfe2ee",
+    primary: "#4edea3",
+    primaryContainer: "#10b981",
+    secondary: "#d0bcff",
+    tertiary: "#4cd7f6",
+  },
+  light: {
+    surface: "#f9f9fe",
+    surfaceContainer: "#edeef4",
+    onSurface: "#191c20",
+    primary: "#006948",
+    primaryContainer: "#6ffbbe",
+    secondary: "#4d6356",
+    tertiary: "#3d6473",
+  },
+};
+
+export type ThemeMode = "dark" | "light" | "system";
+
+export function resolveThemeClasses(mode: ThemeMode): string {
+  if (mode === "dark") return "dark";
+  if (mode === "light") return "light";
+  return "dark";
+}
