@@ -118,3 +118,4 @@ export async function getProfileAnalytics(username: string, days: number = 7): P
     topLinks: topLinksList,
   };
 }
+

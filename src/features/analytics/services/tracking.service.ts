@@ -69,3 +69,4 @@ export async function recordPageView(username: string, userAgent: string | null,
     console.error("Failed to record page view:", error);
   }
 }
+

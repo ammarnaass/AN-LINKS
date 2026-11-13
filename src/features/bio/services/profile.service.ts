@@ -61,3 +61,4 @@ export async function getPublicProfileData(username: string) {
     socials: user.socials,
   };
 }
+

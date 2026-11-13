@@ -34,3 +34,4 @@ export function TrafficSourcesTable({ sources }: TrafficSourcesTableProps) {
     </div>
   );
 }
+

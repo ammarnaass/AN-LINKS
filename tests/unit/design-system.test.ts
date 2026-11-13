@@ -30,3 +30,4 @@ describe("Stitch Design System Tokens", () => {
     expect(fallbackTokens.name).toBe("Layan Dark Arabic Bento");
   });
 });
+

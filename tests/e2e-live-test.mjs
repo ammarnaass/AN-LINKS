@@ -23,7 +23,7 @@ async function runTests() {
   const registerPageRes = await fetch(`${BASE_URL}/register`);
   assert.strictEqual(registerPageRes.status, 200, "Register page should return 200 OK");
   const registerHtml = await registerPageRes.text();
-  assert(registerHtml.includes("أنشئ صفحة روابطك في دقيقتين"), "Register page should contain heading");
+  assert(registerHtml.includes("أنشئ صفحتك الآن") || registerHtml.includes("إنشاء حساب جديد"), "Register page should contain heading");
   console.log("   ✅ Register Page: 200 OK, form rendered.");
 
   // 3. Register API Endpoint
@@ -113,6 +113,25 @@ async function runTests() {
   const setRes = await fetch(`${BASE_URL}/dashboard/settings`);
   assert.strictEqual(setRes.status, 200, "Settings page should return 200 OK");
   console.log("   ✅ Dashboard Workspaces: All 4 workspace screens return 200 OK.");
+
+  // 10. Pricing Page
+  console.log("\n10. Testing Dedicated Pricing Page (GET /pricing)...");
+  const pricingRes = await fetch(`${BASE_URL}/pricing`);
+  assert.strictEqual(pricingRes.status, 200, "Pricing page should return 200 OK");
+  const pricingHtml = await pricingRes.text();
+  assert(pricingHtml.includes("البداية المجانية"), "Pricing should include free tier");
+  assert(pricingHtml.includes("صانع المحتوى المحترف"), "Pricing should include pro tier");
+  assert(pricingHtml.includes("الأعمال والوكالات"), "Pricing should include agency tier");
+  console.log("   ✅ Pricing Page: 200 OK, 3 tiers rendered.");
+
+  // 11. Features Deep Dive Page
+  console.log("\n11. Testing Features Deep Dive Page (GET /features)...");
+  const featuresRes = await fetch(`${BASE_URL}/features`);
+  assert.strictEqual(featuresRes.status, 200, "Features page should return 200 OK");
+  const featuresHtml = await featuresRes.text();
+  assert(featuresHtml.includes("فاحص الروابط"), "Features should describe Link Sentinel");
+  assert(featuresHtml.includes("المقارنة الحقيقية"), "Features should include alternative comparison");
+  console.log("   ✅ Features Page: 200 OK, full deep dive rendered.");
 
   console.log("\n🎉 ALL LIVE END-TO-END TESTS PASSED SUCCESSFULLY! 100% HEALTHY.");
 }

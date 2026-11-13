@@ -38,3 +38,4 @@ describe("Appearance & Themes Customizer Logic", () => {
     expect(BORDER_RADIUS_MAP).toHaveProperty("full");
   });
 });
+

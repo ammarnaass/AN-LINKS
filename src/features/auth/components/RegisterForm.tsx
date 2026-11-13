@@ -41,8 +41,8 @@ export function RegisterForm() {
     try {
       const regRes = await registerAccount(formData);
 
-      if (!regRes.success) {
-        setErrors(regRes.errors || [regRes.error || "فشل إنشاء الحساب"]);
+      if (!regRes.ok) {
+        setErrors(regRes.errors || ["فشل إنشاء الحساب"]);
         setIsLoading(false);
         return;
       }

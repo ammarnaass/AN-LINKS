@@ -1,7 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { Check, ArrowLeft, Star } from "lucide-react";
-import { PricingPlan, calculatePrice } from "../types/pricing.types";
+import { PricingPlan } from "../types/pricing.types";
+import { calculatePrice } from "../constants/pricing-plans";
 
 interface PricingCardProps {
   plan: PricingPlan;

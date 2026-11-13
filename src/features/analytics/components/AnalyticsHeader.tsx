@@ -66,3 +66,4 @@ export function AnalyticsHeader({ range, onRangeChange, onExportCsv }: Analytics
     </div>
   );
 }
+

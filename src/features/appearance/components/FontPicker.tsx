@@ -43,3 +43,4 @@ export function FontPicker({ selectedFont, onFontChange }: FontPickerProps) {
     </section>
   );
 }
+

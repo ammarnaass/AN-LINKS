@@ -57,3 +57,4 @@ export function isUsernameReserved(username: string): boolean {
   if (!username || typeof username !== "string") return true;
   return RESERVED_SET.has(username.trim().toLowerCase());
 }
+

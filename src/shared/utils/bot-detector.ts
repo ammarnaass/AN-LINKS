@@ -67,3 +67,4 @@ export function truncateIp(ip: string): string {
 
   return "unknown";
 }
+

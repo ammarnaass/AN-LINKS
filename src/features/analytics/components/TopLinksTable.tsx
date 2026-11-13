@@ -74,3 +74,4 @@ export function TopLinksTable({ topLinks }: TopLinksTableProps) {
     </div>
   );
 }
+

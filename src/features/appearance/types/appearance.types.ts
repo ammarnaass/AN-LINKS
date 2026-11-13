@@ -6,3 +6,4 @@ export interface AppearanceCustomizerProps {
   profile: ProfileData;
   onProfileChange: (newProfile: ProfileData) => void;
 }
+

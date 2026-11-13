@@ -34,3 +34,4 @@ export function validateReportInput(input: ReportValidationInput): ReportValidat
     details: input.details ? input.details.trim() : null,
   };
 }
+

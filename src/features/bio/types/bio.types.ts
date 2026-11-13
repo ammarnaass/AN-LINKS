@@ -44,3 +44,4 @@ export interface ReportValidationResult {
   details?: string | null;
   error?: string;
 }
+

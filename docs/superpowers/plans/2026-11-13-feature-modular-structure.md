@@ -91,3 +91,4 @@ Refactor the monolithic frontend and scattered domain logic into a clean, featur
 - [ ] Run `npm run build` (Next.js production build must compile all 13 routes).
 - [ ] Test live server with `node tests/e2e-live-test.mjs`.
 - [ ] Commit and push to GitHub.
+

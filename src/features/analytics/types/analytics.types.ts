@@ -44,3 +44,4 @@ export interface CountryItem {
   percentage: string;
   flag: string;
 }
+
