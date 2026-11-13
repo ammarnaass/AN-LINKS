@@ -78,3 +78,4 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || "default_development_secret_key_change_in_production",
 };
+

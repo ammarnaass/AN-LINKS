@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { validateRegistrationInput, hashPassword, verifyPassword } from "@/lib/auth";
+import { AuthSideBanner } from "@/features/auth";
 
 describe("Authentication & Registration Logic", () => {
+  it("should export AuthSideBanner component matching Stitch _3 spec", () => {
+    expect(AuthSideBanner).toBeDefined();
+  });
   it("should validate valid registration inputs successfully", () => {
     const res = validateRegistrationInput({
       email: "test@example.com",

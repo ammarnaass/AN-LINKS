@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Sparkles, AlertCircle, CheckCircle2, User, Mail, Lock, AtSign } from "lucide-react";
 import { validateUsernameFormat } from "../validators/auth.validator";
 import { registerAccount, loginWithCredentials } from "../services/auth.service";
 
@@ -38,72 +38,86 @@ export function RegisterForm() {
 
     setIsLoading(true);
 
-    const result = await registerAccount(formData);
-    if (!result.ok) {
-      setErrors(result.errors || ["فشل إنشاء الحساب"]);
-      setIsLoading(false);
-      return;
-    }
+    try {
+      const regRes = await registerAccount(formData);
 
-    const loginResult = await loginWithCredentials(formData.email, formData.password);
-    if (loginResult?.error) {
-      router.push("/login");
-    } else {
+      if (!regRes.success) {
+        setErrors(regRes.errors || [regRes.error || "فشل إنشاء الحساب"]);
+        setIsLoading(false);
+        return;
+      }
+
+      await loginWithCredentials(formData.email, formData.password);
       router.push("/dashboard");
       router.refresh();
+    } catch {
+      setErrors(["حدث خطأ غير متوقع أثناء إنشاء الحساب"]);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
-    <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-      <div className="text-center">
-        <div className="mx-auto h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-200">
-          <Sparkles className="h-6 w-6" />
-        </div>
-        <h2 className="mt-4 text-2xl font-bold tracking-tight text-gray-900">
-          أنشئ صفحة روابطك في دقيقتين
-        </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          لديك حساب بالفعل؟{" "}
-          <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-500">
-            تسجيل الدخول
-          </Link>
+    <div className="w-full max-w-md p-8 rounded-3xl bg-surface-container-high/60 border border-white/5 shadow-2xl space-y-6 text-on-surface">
+      {/* Tab Switcher */}
+      <div className="p-1 rounded-2xl bg-surface-container-lowest border border-white/5 flex items-center gap-1">
+        <Link
+          href="/login"
+          className="flex-1 py-2 text-center text-xs font-semibold rounded-xl text-on-surface-variant hover:text-on-surface transition-all"
+        >
+          تسجيل الدخول
+        </Link>
+        <Link
+          href="/register"
+          className="flex-1 py-2 text-center text-xs font-bold rounded-xl bg-primary-container text-on-primary-container shadow-md transition-all"
+        >
+          إنشاء حساب جديد
+        </Link>
+      </div>
+
+      <div className="space-y-1">
+        <h2 className="text-2xl font-black text-on-surface">أنشئ صفحتك الآن</h2>
+        <p className="text-xs text-on-surface-variant">
+          ابدأ مجاناً في دقيقتين وامتلك صفحة بايو باحترافية استثنائية
         </p>
       </div>
 
       {errors.length > 0 && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl space-y-1 text-sm">
-          {errors.map((err, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-500" />
+        <div className="bg-error-container/20 border border-error/30 text-error p-3.5 rounded-2xl space-y-1 text-xs">
+          {errors.map((err, i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{err}</span>
             </div>
           ))}
         </div>
       )}
 
-      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            اسمك أو اسم نشاطك
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="space-y-1">
+          <label className="block text-xs font-semibold text-on-surface-variant">
+            الاسم الظاهر
           </label>
-          <input
-            type="text"
-            name="displayName"
-            required
-            value={formData.displayName}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900"
-            placeholder="مثال: سارة أحمد"
-          />
+          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <User className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
+            <input
+              type="text"
+              name="displayName"
+              required
+              value={formData.displayName}
+              onChange={handleChange}
+              className="w-full bg-transparent py-2.5 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
+              placeholder="مثال: سارة العتيبي"
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            اسم المستخدم لرابط صفحتك
+        <div className="space-y-1">
+          <label className="block text-xs font-semibold text-on-surface-variant">
+            اسم المستخدم الفريد (الرابط)
           </label>
-          <div className="relative rounded-xl shadow-sm">
+          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <AtSign className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
             <input
               type="text"
               name="username"
@@ -111,64 +125,62 @@ export function RegisterForm() {
               value={formData.username}
               onChange={handleChange}
               dir="ltr"
-              className={`w-full px-4 py-2.5 rounded-xl border ${
-                usernameError ? "border-red-300" : "border-gray-200"
-              } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-left text-gray-900 pl-24`}
-              placeholder="username"
+              className="w-full bg-transparent py-2.5 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
+              placeholder="sara"
             />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-gray-400 text-sm font-mono">rawabet.me/</span>
-            </div>
           </div>
-          {usernameError && (
-            <p className="mt-1 text-xs text-red-600">{usernameError}</p>
-          )}
-          {!usernameError && formData.username.length >= 3 && (
-            <p className="mt-1 text-xs text-green-600 flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>اسم المستخدم متاح ومطابق للشروط</span>
+          {formData.username && !usernameError && (
+            <p className="text-[11px] text-primary flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" /> رابطك سيكون: rawabet.me/{formData.username}
             </p>
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-1">
+          <label className="block text-xs font-semibold text-on-surface-variant">
             البريد الإلكتروني
           </label>
-          <input
-            type="email"
-            name="email"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            dir="ltr"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-right text-gray-900"
-            placeholder="name@example.com"
-          />
+          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <Mail className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
+            <input
+              type="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              dir="ltr"
+              className="w-full bg-transparent py-2.5 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
+              placeholder="sara@example.com"
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-1">
+          <label className="block text-xs font-semibold text-on-surface-variant">
             كلمة المرور
           </label>
-          <input
-            type="password"
-            name="password"
-            required
-            value={formData.password}
-            onChange={handleChange}
-            dir="ltr"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-right text-gray-900"
-            placeholder="8 أحرف على الأقل"
-          />
+          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <Lock className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
+            <input
+              type="password"
+              name="password"
+              required
+              value={formData.password}
+              onChange={handleChange}
+              dir="ltr"
+              className="w-full bg-transparent py-2.5 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
+              placeholder="8 أحرف على الأقل"
+            />
+          </div>
         </div>
 
         <button
           type="submit"
-          disabled={isLoading || Boolean(usernameError)}
-          className="w-full flex items-center justify-center py-3 px-4 rounded-xl text-white bg-blue-600 hover:bg-blue-700 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition disabled:opacity-50 mt-2"
+          disabled={isLoading || !!usernameError}
+          className="w-full py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary shadow-[0_0_24px_rgba(16,185,129,0.35)] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
         >
-          {isLoading ? "جاري إنشاء الحساب..." : "إنشاء الحساب وبدء التجربة"}
+          <Sparkles className="w-4 h-4" />
+          <span>{isLoading ? "جاري إنشاء الحساب..." : "إنشاء الحساب مجاناً"}</span>
         </button>
       </form>
     </div>
