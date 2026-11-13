@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ProfileCard, SocialItem } from "./ProfileCard";
 import { LinkButton, LinkItem } from "./LinkButton";
 import { ReportModal } from "./ReportModal";
+import { QrShareModal } from "./QrShareModal";
 import { THEMES } from "@/lib/themes";
 
 export interface ProfileData {
@@ -32,6 +33,9 @@ export function BioPageContent({
   socials = [],
   isPreview = false,
 }: BioPageContentProps) {
+  const [isQrOpen, setIsQrOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+
   const themeKey = profile.themeKey || "default";
   const theme = THEMES[themeKey] || THEMES.default;
 
@@ -48,10 +52,16 @@ export function BioPageContent({
 
   return (
     <div
-      className={`min-h-screen w-full flex flex-col items-center justify-between p-6 sm:p-8 transition-colors duration-300 ${theme.backgroundClass}`}
+      className={`min-h-screen w-full flex flex-col items-center justify-center p-3 sm:p-6 relative overflow-hidden transition-colors duration-300 ${theme.backgroundClass}`}
       dir="rtl"
     >
-      <div className="w-full max-w-md mx-auto space-y-8 my-auto">
+      {/* Atmospheric Ambient Glows (Stitch Public Bio Page) */}
+      <div className="absolute -top-32 right-1/4 w-80 h-80 rounded-full bg-primary/10 blur-[110px] pointer-events-none" />
+      <div className="absolute top-1/3 -left-20 w-72 h-72 rounded-full bg-tertiary/10 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-16 right-10 w-96 h-96 rounded-full bg-secondary/15 blur-[120px] pointer-events-none" />
+
+      {/* Main Glass Bento Viewport Frame (max-w ~460px) */}
+      <div className="relative w-full max-w-[460px] bg-surface-container-lowest/90 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl p-5 sm:p-7 flex flex-col items-center z-10 my-4">
         {/* Profile Card Header */}
         <ProfileCard
           displayName={profile.displayName}
@@ -61,12 +71,14 @@ export function BioPageContent({
           themeKey={themeKey}
           socials={socials}
           isPreview={isPreview}
+          onOpenQr={() => setIsQrOpen(true)}
+          onOpenShare={() => setIsQrOpen(true)}
         />
 
-        {/* Links List */}
-        {links.length > 0 ? (
-          <div className="space-y-3.5 w-full">
-            {links.map((link) => (
+        {/* Links Deck */}
+        <nav aria-label={`روابط ${profile.displayName}`} className="w-full flex flex-col gap-3.5 my-4">
+          {links.length > 0 ? (
+            links.map((link) => (
               <LinkButton
                 key={link.id}
                 link={link}
@@ -76,29 +88,50 @@ export function BioPageContent({
                 accentColor={profile.accentColor}
                 isPreview={isPreview}
               />
-            ))}
+            ))
+          ) : (
+            <div className="text-center py-6 px-4 rounded-xl bg-surface-container-low border border-dashed border-outline-variant/40">
+              <p className="text-xs text-on-surface-variant font-medium">
+                لا توجد روابط منشورة حالياً
+              </p>
+            </div>
+          )}
+        </nav>
+
+        {/* Footer Actions: Platform Badge & Report */}
+        <div className="pt-6 w-full flex flex-col items-center gap-3 border-t border-white/5">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-on-surface-variant hover:text-primary transition-colors">
+            <span>⚡ صُمم بواسطة</span>
+            <span className="font-bold text-on-surface">AN LINKS</span>
           </div>
-        ) : (
-          <div className="py-8 text-center opacity-40 text-sm">
-            لا توجد روابط مضافة حالياً
-          </div>
-        )}
+
+          {!isPreview && (
+            <button
+              onClick={() => setIsReportOpen(true)}
+              className="text-[10px] text-outline hover:text-red-400 transition"
+            >
+              إبلاغ عن محتوى غير لائق
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Platform Branding Badge & Report Action */}
-      <footer className="mt-8 text-center flex flex-col items-center gap-2.5">
-        <a
-          href="/"
-          target={isPreview ? "_self" : "_blank"}
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 backdrop-blur-sm transition-opacity opacity-75 hover:opacity-100"
-        >
-          <span>صُنع بواسطة</span>
-          <span className="font-bold tracking-wide">AN LINKS</span>
-        </a>
+      {/* QR & Share Modal */}
+      <QrShareModal
+        isOpen={isQrOpen}
+        onClose={() => setIsQrOpen(false)}
+        username={username}
+        displayName={profile.displayName}
+      />
 
-        {!isPreview && <ReportModal username={username} />}
-      </footer>
+      {/* Abuse Report Modal */}
+      {!isPreview && (
+        <ReportModal
+          isOpen={isReportOpen}
+          onClose={() => setIsReportOpen(false)}
+          username={username}
+        />
+      )}
     </div>
   );
 }

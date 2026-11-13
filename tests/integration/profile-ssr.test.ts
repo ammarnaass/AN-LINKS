@@ -49,5 +49,11 @@ describe("Public Profile & Themes Configuration", () => {
     expect(active).toHaveLength(2);
     expect(active.map((l) => l.id)).toEqual(["1", "3"]);
   });
+
+  it("should export QrShareModal component", async () => {
+    const { QrShareModal } = await import("@/components/public/QrShareModal");
+    expect(QrShareModal).toBeDefined();
+    expect(typeof QrShareModal).toBe("function");
+  });
 });
 
