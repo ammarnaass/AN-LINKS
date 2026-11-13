@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white selection:bg-blue-600 selection:text-white" dir="rtl">
+    <div className="min-h-screen flex flex-col bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container" dir="rtl">
       {/* Navigation Header */}
       <LandingHeader />
 
