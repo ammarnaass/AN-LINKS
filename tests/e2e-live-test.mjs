@@ -12,9 +12,10 @@ async function runTests() {
   const landingHtml = await landingRes.text();
   assert(landingHtml.includes("AN LINKS"), "Landing page should contain brand name 'AN LINKS'");
   assert(landingHtml.includes("dir=\"rtl\""), "Landing page must be RTL");
-  assert(landingHtml.includes("anlinks.to/"), "Landing page should have handle claim prefix");
+  assert(landingHtml.includes("rawabet.me/"), "Landing page should have handle claim prefix");
   assert(landingHtml.includes("احجز رابطك"), "Landing page should contain claim CTA button");
-  assert(landingHtml.includes("سارة أحمد"), "Landing page should render phone mockup showcase");
+
+  assert(landingHtml.includes("طارق المنصور"), "Landing page should render phone mockup showcase");
   console.log("   ✅ Landing Page: 200 OK, RTL verified, Hero & Mockup present.");
 
   // 2. Registration Page
@@ -96,8 +97,26 @@ async function runTests() {
   assert(notFoundHtml.includes("الصفحة غير موجودة"), "404 page should render custom Arabic not found message");
   console.log("   ✅ 404 Not Found: custom Arabic page rendered correctly.");
 
+  // 9. Dashboard Pages
+  console.log("\n9. Testing Dashboard Workspaces (GET /dashboard, /dashboard/appearance, /dashboard/analytics, /dashboard/settings)...");
+  const dashRes = await fetch(`${BASE_URL}/dashboard`);
+  assert.strictEqual(dashRes.status, 200, "Dashboard should return 200 OK");
+  const dashHtml = await dashRes.text();
+  assert(dashHtml.includes("لوحة التحكم"), "Dashboard should contain Arabic workspace breadcrumb");
+
+  const appRes = await fetch(`${BASE_URL}/dashboard/appearance`);
+  assert.strictEqual(appRes.status, 200, "Appearance customizer should return 200 OK");
+
+  const anlRes = await fetch(`${BASE_URL}/dashboard/analytics`);
+  assert.strictEqual(anlRes.status, 200, "Analytics dashboard should return 200 OK");
+
+  const setRes = await fetch(`${BASE_URL}/dashboard/settings`);
+  assert.strictEqual(setRes.status, 200, "Settings page should return 200 OK");
+  console.log("   ✅ Dashboard Workspaces: All 4 workspace screens return 200 OK.");
+
   console.log("\n🎉 ALL LIVE END-TO-END TESTS PASSED SUCCESSFULLY! 100% HEALTHY.");
 }
+
 
 runTests().catch((err) => {
   console.error("❌ Live test failed:", err);

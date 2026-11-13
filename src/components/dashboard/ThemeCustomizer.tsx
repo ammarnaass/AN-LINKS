@@ -18,7 +18,7 @@ export function ThemeCustomizer({ profile, onProfileChange }: ThemeCustomizerPro
     });
   };
 
-  const currentTheme = THEMES[profile.themeKey] || THEMES.layanDark;
+  const currentTheme = (profile.themeKey && THEMES[profile.themeKey]) ? THEMES[profile.themeKey] : THEMES.layanDark;
 
   return (
     <div className="space-y-6">
