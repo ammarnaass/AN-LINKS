@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   validateLinkInput,
   reorderLinkItems,
+  filterLinks,
+  calculateQuickMetrics,
 } from "@/lib/dashboard-actions";
 
 describe("Dashboard Actions & Link Management Logic", () => {
@@ -59,5 +61,25 @@ describe("Dashboard Actions & Link Management Logic", () => {
     expect(reordered.map((i) => i.id)).toEqual(["c", "a", "b"]);
     expect(reordered.map((i) => i.position)).toEqual([0, 1, 2]);
   });
+
+  it("should filter links correctly based on status tab", () => {
+    const sampleLinks = [
+      { id: "1", title: "رابط 1", url: "https://a.com", isActive: true, position: 0 },
+      { id: "2", title: "رابط 2", url: "https://b.com", isActive: false, position: 1 },
+      { id: "3", title: "رابط 3", url: "https://c.com", isActive: true, position: 2 },
+    ];
+
+    expect(filterLinks(sampleLinks, "all").length).toBe(3);
+    expect(filterLinks(sampleLinks, "active").map((l) => l.id)).toEqual(["1", "3"]);
+    expect(filterLinks(sampleLinks, "draft").map((l) => l.id)).toEqual(["2"]);
+  });
+
+  it("should calculate CTR and quick metrics accurately", () => {
+    const metrics = calculateQuickMetrics(28450, 9120);
+    expect(metrics.totalViews).toBe(28450);
+    expect(metrics.totalClicks).toBe(9120);
+    expect(metrics.ctrPercentage).toBe("32.1%");
+  });
 });
+
 

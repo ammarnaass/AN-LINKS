@@ -59,3 +59,22 @@ export function reorderLinkItems<T extends { id: string; position: number }>(
   }));
 }
 
+export function filterLinks<T extends { isActive: boolean }>(
+  links: T[],
+  filter: "all" | "active" | "draft"
+): T[] {
+  if (filter === "active") return links.filter((l) => l.isActive);
+  if (filter === "draft") return links.filter((l) => !l.isActive);
+  return links;
+}
+
+export function calculateQuickMetrics(totalViews: number, totalClicks: number) {
+  const ctr = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0;
+  return {
+    totalViews,
+    totalClicks,
+    ctrPercentage: `${ctr.toFixed(1)}%`,
+  };
+}
+
+
