@@ -4,3 +4,4 @@ export interface ClaimResult {
   targetUrl: string;
   error?: string;
 }
+
