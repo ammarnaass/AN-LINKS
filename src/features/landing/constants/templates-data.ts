@@ -1,80 +1,135 @@
+export interface LandingTemplateLink {
+  title: string;
+  subtitle?: string;
+  icon: string;
+  color?: string;
+  badge?: string;
+}
+
 export interface LandingTemplate {
   id: string;
-  category: "visual" | "author" | "designer" | "tech";
+  category: "creator" | "store" | "podcast" | "writer";
   categoryName: string;
   creatorName: string;
   handle: string;
-  role: string;
+  role?: string;
   avatarUrl: string;
   bio: string;
-  themeName: string;
-  links: { title: string; subtitle: string; icon: string; badge?: string }[];
+  url: string;
+  links: LandingTemplateLink[];
 }
 
 export const LANDING_TEMPLATES: LandingTemplate[] = [
   {
-    id: "visual-creator",
-    category: "visual",
-    categoryName: "صانع محتوى مرئي",
+    id: "creator",
+    category: "creator",
+    categoryName: "صانع محتوى ومرئي",
     creatorName: "سارة المهيدب",
-    handle: "sara.cine",
-    role: "صانعة محتوى سينمائي وأسلوب حياة",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    bio: "صانعة محتوى في أسلوب الحياة والتصوير السينمائي. هنا تجد أعمالي، ورش العمل، وروابط المعدات المفضلة لدي.",
-    themeName: "شفق البنفسج (Cyber Violet)",
+    handle: "sarah_m",
+    avatarUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBW5Y6crJZQO6qFIJexjW6RZIKABM2b0vI_3lsCXvjLKlPALIP9y0fuaXG7-RvySmwdsMR0GDwJhGx7bgumRDwt7cmOXjNswkjuxC9niY9lbP2E4oPr6yg3GbCvTO7q9PiCh3CbXgG9W1Vp5ahbE-YV7UhRR2GH88O2spkmCF8QtwHMMpzOZlWI6shUOaQKOK_F52EOqSeO9CYGcB56dH5qDobW3GTns3bcXb-yBWPm",
+    bio: "صانعة محتوى في أسلوب الحياة والتصوير السينمائي. هنا تجد أعمالي، ورش العمل، وروابط المعدات التي استخدمها.",
+    url: "rawabet.me/sarah_m",
     links: [
-      { title: "قناتي على يوتيوب - أحدث فلوق سينمائي", subtitle: "240K مشاهدة", icon: "video", badge: "جديد" },
-      { title: "حزمة فلاتر التصوير السينمائي (LUTs Pack)", subtitle: "متجر رقمي - تحميل فوري", icon: "shopping-bag", badge: "الأكثر طلباً" },
-      { title: "معدات التصوير والإضاءة التي أستخدمها", subtitle: "روابط مع خصم حصري 15%", icon: "camera" },
+      {
+        icon: "play_circle",
+        title: "شاهد أحدث فيلم وثائقي: روح العمارة",
+        color: "text-primary",
+      },
+      {
+        icon: "download",
+        title: "تحميل حزمة ألوان LUTs السينمائية مجاناً",
+        color: "text-secondary",
+      },
+      {
+        icon: "calendar_today",
+        title: "حجز جلسة استشارية تصوير (30 دقيقة)",
+        color: "text-tertiary",
+      },
     ],
   },
   {
-    id: "author-creator",
-    category: "author",
-    categoryName: "الكاتب والمؤلف",
-    creatorName: "عبدالله الراشد",
-    handle: "alrashed.writer",
-    role: "كاتب وباحث في الاقتصاد الرقمي",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-    bio: "مؤلف كتاب «اقتصاد الانتباه». أكتب أسبوعياً عن استراتيجيات النمو والتحول الرقمي لأكثر من 40,000 قارئ.",
-    themeName: "سليت الحداثة (Minimal Slate)",
+    id: "store",
+    category: "store",
+    categoryName: "متجر وعلامة تجارية",
+    creatorName: "متجر نبتة وخزف",
+    handle: "nabtastore",
+    avatarUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAiHQG-5svtX-byGr_5cfpU0mSLy0pofVz155SvSQQH1UwfxOH314vLEALfTETuPcpFpVborvY04-gRQQ5j0UOWNybAKJm6nI4sMsXlKFvWuYNZAf3HzfMxMFFC--yeAENJu8o-r3sUcTxmvgr-VQz4gtN7NDci5-hRrqOjyquNEayOUDOWhju3b6VME6vbBRITTVzHkNhLqHCidvKyWx33-wgjG-43Bn8EAopprhsv",
+    bio: "نباتات داخلية فاخرة وأوانٍ فخارية مصنوعة يدوياً بحب. شحن سريع لكافة مناطق المملكة والخليج.",
+    url: "rawabet.me/nabtastore",
     links: [
-      { title: "تحميل الفصل الأول من كتاب «اقتصاد الانتباه»", subtitle: "PDF مجاني", icon: "book-open", badge: "هدية مجانية" },
-      { title: "الاشتراك في نشرتي البريدية الأسبوعية", subtitle: "تصل كل يوم سبت صباحاً", icon: "mail" },
-      { title: "شراء النسخة الكاملة من الكتاب عبر أمازون", subtitle: "متوفر ورقي وإلكتروني", icon: "shopping-cart" },
+      {
+        icon: "shopping_cart",
+        title: "تصفح أحدث تشكيلة نباتات الظل 2025",
+        color: "text-primary",
+      },
+      {
+        icon: "local_offer",
+        title: "كود خصم حصري لمتابعي البايو: RAWABET15",
+        color: "text-secondary",
+      },
+      {
+        icon: "support_agent",
+        title: "محادثة خدمة العملاء المباشرة عبر واتساب",
+        color: "text-tertiary",
+      },
     ],
   },
   {
-    id: "designer-creator",
-    category: "designer",
-    categoryName: "المصمم والمبدع",
-    creatorName: "ليان ناصر",
-    handle: "layan.ui",
-    role: "مصممة هوية بصرية وواجهات مستخدم",
-    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-    bio: "أساعد الشركات التقنية الناشئة في بناء هويات بصرية لا تُنسى. شريكة تصميم معتمدة في Figma.",
-    themeName: "نيون الزمرد (Emerald Dark)",
+    id: "podcast",
+    category: "podcast",
+    categoryName: "بودكاست وإعلام رقمي",
+    creatorName: "بودكاست زاوية أخرى",
+    handle: "zawayapod",
+    avatarUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBgPlBXkXf6weLj6T7HFZuTb8brTKmEbFRpZ7Urh56JYbGOJizjp6qKXBIgXnIphtTdkolEITHiU7wKO46Hn2Mv0T3BPGXmCebVYTN9k1IJXs6av5MEnr3m-5Iu0hojMMqrvUp_4Fjel5DgUFdp8T0wlkPxW8EGOHN8HR8flXjLhUkwytHFMpFNizyJAF5kF9eXPlZ8lVgGkeHCOJD6_o2GURD3Ufg5cmfBTeh8raVu",
+    bio: "حوارات عميقة ومثيرة مع خبراء التقنية والاقتصاد الجديد. استمع لجميع الحلقات على منصتك المفضلة.",
+    url: "rawabet.me/zawayapod",
     links: [
-      { title: "معرض أعمالي على Behance و Dribbble", subtitle: "+50 مشروع موثق", icon: "layout", badge: "معرض الأعمال" },
-      { title: "حجز جلسة استشارة تصميم 1:1", subtitle: "جلسة 45 دقيقة عبر Google Meet", icon: "calendar", badge: "متاح مقعدين" },
-      { title: "مكتبة أيقونات ومكونات Figma الجاهزة", subtitle: "تحميل مجاني للمصممين", icon: "box" },
+      {
+        icon: "podcasts",
+        title: "استمع إلى الحلقة الأخيرة على Apple Podcasts",
+        color: "text-primary",
+      },
+      {
+        icon: "graphic_eq",
+        title: "مكتبة الحلقات الصوتية على Spotify",
+        color: "text-secondary",
+      },
+      {
+        icon: "mail",
+        title: "اشتراك النشرة البريدية الأسبوعية لتحليل الحلقة",
+        color: "text-tertiary",
+      },
     ],
   },
   {
-    id: "tech-creator",
-    category: "tech",
-    categoryName: "رائد أعمال تقني",
-    creatorName: "فيصل الشمري",
-    handle: "faisal.tech",
-    role: "مؤسس استوديو «ابتكار» ومستثمر ملائكي",
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
-    bio: "أبني منتجات تقنية تخدم الملايين. أشارك دروس ريادة الأعمال والذكاء الاصطناعي أسبوعياً.",
-    themeName: "ذهبي فاخر (Obsidian Gold)",
+    id: "writer",
+    category: "writer",
+    categoryName: "كاتب واستشاري مستقل",
+    creatorName: "د. طارق المنصور",
+    handle: "almansoor",
+    avatarUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuA7Ve0qepnRYSX9CgXi15HbtLRQp_bmSrGqNcLu3Y7QX-XI81vQswMkizB_PtZmdLk_vl4_F9-sB0ym6JRB-Yl8b0fjos138P69385kZa8kiJHz1QZujfn9fiI51DuiByhIA3obbnzKKzDRRsKl1zvuIDb3wkuuwKhd82hrSvV_Oktz37n-mTY7U78lC5ntl4IWAeN8FdJ9Lw0CBWxi5q8k38IGBw-Pyhr_JT42iree",
+    bio: "كاتب ومستشار استراتيجيات النمو المؤسسي. أشارك مقالات متخصصة وأدلة تنفيذية لرواد الأعمال.",
+    url: "rawabet.me/almansoor",
     links: [
-      { title: "استمع إلى أحدث حلقة من بودكاست «تقنية الغد»", subtitle: "مع ضيف مميز من وادي السيليكون", icon: "mic", badge: "حلقة جديدة" },
-      { title: "حجز استشارة نمو الشركات الناشئة", subtitle: "تقييم نموذج العمل وخطة التوسع", icon: "trending-up" },
-      { title: "الانضمام إلى مجتمع رواد الأعمال على تلغرام", subtitle: "+15,000 مؤسس ومبرمج", icon: "send" },
+      {
+        icon: "menu_book",
+        title: "تحميل كتاب: استراتيجية المحيط الرقمي (PDF)",
+        color: "text-primary",
+      },
+      {
+        icon: "article",
+        title: "قراءة أحدث مقال في نشرة لينكد إن الأسبوعية",
+        color: "text-secondary",
+      },
+      {
+        icon: "event_available",
+        title: "طلب استشارة تخطيط استراتيجي للشركات",
+        color: "text-tertiary",
+      },
     ],
   },
 ];
-

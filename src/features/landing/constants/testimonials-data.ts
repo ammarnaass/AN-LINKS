@@ -4,57 +4,67 @@ export interface LandingTestimonial {
   avatarUrl: string;
   rating: number;
   quote: string;
-  badge: string;
 }
 
 export const LANDING_TESTIMONIALS: LandingTestimonial[] = [
   {
-    name: "د. هتان بن خالد",
-    role: "مستشار ومؤلف رقمي",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    name: "عبدالعزيز القرني",
+    role: "مؤسس بودكاست مدار • 120k متابع",
+    avatarUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBgPlBXkXf6weLj6T7HFZuTb8brTKmEbFRpZ7Urh56JYbGOJizjp6qKXBIgXnIphtTdkolEITHiU7wKO46Hn2Mv0T3BPGXmCebVYTN9k1IJXs6av5MEnr3m-5Iu0hojMMqrvUp_4Fjel5DgUFdp8T0wlkPxW8EGOHN8HR8flXjLhUkwytHFMpFNizyJAF5kF9eXPlZ8lVgGkeHCOJD6_o2GURD3Ufg5cmfBTeh8raVu",
     rating: 5,
-    quote: "ميزة التنبيه عند تعطل أي رابط أنقذتني في حملة إطلاق دورتي التدريبية الأخيرة. تم إشعاري فوراً وقمت بتصحيح الرابط دون خسارة أي مبيعة أو زائر مهتم.",
-    badge: "مؤلف الأكثر مبيعاً",
+    quote:
+      "«ميزة التنبيه عند تعطل أي رابط أنقذتني في حملة إطلاق دورتي التدريبية الأخيرة. تم إشعارنا فوراً بخطأ في صفحة السلة وأصلحناه دون خسارة تسجيل واحد!»",
   },
   {
-    name: "ريم السليمان",
-    role: "مؤسسة براند مجوهرات وحلي فاخرة",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    name: "نورة الصالح",
+    role: "مصممة هوية واستشارية علامات • 45k متابع",
+    avatarUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuB0zFfyrIX7NyPWPQ0fschvaejWd25AtrZvCqe9M-U6BoV6QjfxD-foqxyUJn5nMjI2uDaYXjG2PgFgBpYc03SbzRNliDCVYrVtdt8SVAMgqNiIGqoHLiULvhCnnqz-M1V6yUgX7hftNaSDFsJouBFW0p2PEz3w_2iybhLIowSkAe76kfAUyM5HCb6KrdeIedvIWgaTkwYZXGFZASRSj_I4-k3NxsrRzm_tKsHIbFqX",
     rating: 5,
-    quote: "أفضل تجربة RTL على الإطلاق. الخطوط العربية مريحة للعين، وتصميم البانتو يعطي انطباعاً راقياً يوازي كبرى البراندات العالمية ورفع معدل النقر بنسبة 45%.",
-    badge: "تجارة إلكترونية",
+    quote:
+      "«أفضل تجربة RTL على الإطلاق. الخطوط العربية مريحة للعين، وتصميم البانتو يعطي انطباعاً فائق الفخامة لعلامتي الشخصية أمام الشركاء والعملاء.»",
   },
   {
-    name: "م. طارق العسيري",
-    role: "بودكاستر وصانع محتوى تقني",
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    name: "طارق الدوسري",
+    role: "كاتب ومدرب تجارة رقمية • 88k متابع",
+    avatarUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuA7Ve0qepnRYSX9CgXi15HbtLRQp_bmSrGqNcLu3Y7QX-XI81vQswMkizB_PtZmdLk_vl4_F9-sB0ym6JRB-Yl8b0fjos138P69385kZa8kiJHz1QZujfn9fiI51DuiByhIA3obbnzKKzDRRsKl1zvuIDb3wkuuwKhd82hrSvV_Oktz37n-mTY7U78lC5ntl4IWAeN8FdJ9Lw0CBWxi5q8k38IGBw-Pyhr_JT42iree",
     rating: 5,
-    quote: "سهولة إضافة وبيع المنتجات الرقمية مباشرة من صفحة البايو ضاعفت دخلي الشهري بنسبة 35% في أول شهر فقط دون الحاجة لمنصة متجر منفصلة.",
-    badge: "بودكاست +500K",
+    quote:
+      "«بعت أكثر من 400 نسخة من كتابي الإلكتروني مباشرة عبر زر الدفع السريع داخل روابط دون الحاجة لبرمجة متجر كامل أو دفع عمولات معقدة.»",
   },
 ];
 
 export interface LandingFaq {
+  id: string;
   question: string;
   answer: string;
 }
 
 export const LANDING_FAQS: LandingFaq[] = [
   {
-    question: "كيف يختلف «روابط» عن Linktree والبدائل الأجنبية؟",
-    answer: "تم بناء المنصة من الصفر لتكون عربية 100% بنظام RTL أصيل، مع فاحص ذكي للروابط (Link Sentinel) يكتشف الروابط المعطلة تلقائياً، وإمكانية بيع المنتجات الرقمية واستقبال المدفوعات المحلية (مدى، Apple Pay).",
+    id: "faq-1",
+    question: "هل الخدمة مجانية فعلاً أم لفترة تجريبية محدودة؟",
+    answer:
+      "نعم، الخطة المجانية متاحة مدى الحياة بدون أي التزامات وبدون الحاجة لإدخال بطاقتك الائتمانية. يمكنك إضافة روابط غير محدودة ومتابعة الإحصائيات الأساسية ومشاركة صفحتك في أي وقت.",
   },
   {
-    question: "هل يمكنني ربط دومين خاص باسم علامتي التجارية؟",
-    answer: "نعم، في خطة المحترف يمكنك ربط نطاقك المخصص بالكامل (مثل links.yourbrand.com) مع شهادة أمان SSL مجانية وتلقائية.",
+    id: "faq-2",
+    question: "هل يمكنني ربط دوميني الخاص بي (مثل: me.com)؟",
+    answer:
+      "بالتأكيد! في باقة المحترفين وباقة الشركات يمكنك ربط نطاقك الشخصي الخاص بضغطة زر مع شهادة أمان SSL مشفرة ومجانية تلقائياً، ليظهر موقعك بهويتك الرسمية الخالصة.",
   },
   {
-    question: "كيف تعمل ميزة فاحص الروابط التلقائي؟",
-    answer: "يقوم نظامنا بفحص كافة روابطك بشكل دوري للتأكد من استجابتها وسرعتها، وفي حال تعطل أي صفحة أو فيديو يصلك تنبيه مباشر لتعديله فوراً.",
+    id: "faq-3",
+    question: "كيف تعمل ميزة فحص الروابط المعطلة وتنبيهات واتساب؟",
+    answer:
+      "يقوم نظامنا الآلي بإجراء فحص صحة (Health-check) دوري لكافة الروابط الخارجية في صفحتك للتأكد من أنها تفتح وتعمل. إذا توقف رابط أو أصابه عطل 404، يرسل لك النظام تنبيهاً فورياً على رقم واتساب الخاص بك ويخفي الرابط مؤقتاً لتفادي إحباط الزوار.",
   },
   {
-    question: "هل أحتاج إلى بطاقة ائتمانية لإنشاء حسابي؟",
-    answer: "إطلاقاً. يمكنك البدء بالخطة المجانية مدى الحياة فوراً دون الحاجة لإدخال أي بيانات بنكية.",
+    id: "faq-4",
+    question: "كيف أستلم أرباح مبيعات المنتجات والاستشارات الرقمية؟",
+    answer:
+      "نوفر تكاملاً سهلاً مع بوابات الدفع المعتمدة (مثل Stripe و Tap وبوابات الدفع المحلية مثل مدى و Apple Pay). يتم إيداع أموال مبيعاتك مباشرة في حسابك البنكي بدون تأخير أو وسطاء معقدين.",
   },
 ];
-

@@ -8,10 +8,10 @@ import {
 describe("Stitch _9 Landing Page Data & Components", () => {
   it("should provide templates across 4 creator categories", () => {
     expect(LANDING_TEMPLATES.length).toBeGreaterThanOrEqual(4);
-    const author = LANDING_TEMPLATES.find((t) => t.category === "author");
-    const designer = LANDING_TEMPLATES.find((t) => t.category === "designer");
-    expect(author).toBeDefined();
-    expect(designer).toBeDefined();
+    const creator = LANDING_TEMPLATES.find((t) => t.category === "creator");
+    const writer = LANDING_TEMPLATES.find((t) => t.category === "writer");
+    expect(creator).toBeDefined();
+    expect(writer).toBeDefined();
   });
 
   it("should provide authentic creator testimonials with Arabic copy", () => {
@@ -22,7 +22,6 @@ describe("Stitch _9 Landing Page Data & Components", () => {
   });
 
   it("should provide comprehensive landing FAQs matching Stitch _9", () => {
-    expect(LANDING_FAQS.length).toBeGreaterThanOrEqual(4);
+    expect(LANDING_FAQS).toHaveLength(4);
   });
 });
-

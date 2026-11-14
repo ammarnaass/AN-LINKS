@@ -1,81 +1,144 @@
-import React from "react";
-import Link from "next/link";
-import { Check, ArrowLeft, Sparkles } from "lucide-react";
+"use client";
 
-export function PricingBannerSection() {
+import React, { useState } from "react";
+import { LANDING_PRICING_PLANS } from "../constants/landing-pricing";
+import { LandingPricingTier, PricingBannerSectionProps } from "../types/landing.types";
+
+function PricingBannerHeader() {
   return (
-    <section id="pricing" className="py-20 sm:py-28 bg-surface-container-lowest border-y border-outline-variant/20 text-on-surface">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="text-center space-y-4 max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>خطط واضحة بدون مفاجآت</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-on-surface tracking-tight">
-            استثمر في حضورك الرقمي دون أي تكاليف خفية
-          </h2>
-          <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed">
-            ابدأ مجاناً مدى الحياة، وقم بالترقية عندما تحتاج أدوات ذكية ومتقدمة لتسريع نموك وأرباحك.
-          </p>
+    <div className="flex flex-col items-center text-center gap-3 mb-10">
+      <span className="text-xs uppercase tracking-widest text-primary font-bold">
+        باقات واضحة ومدروسة
+      </span>
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface">
+        استثمر في حضورك الرقمي دون أي تكاليف خفية
+      </h2>
+      <p className="text-sm text-on-surface-variant max-w-lg">
+        ابدأ مجاناً مدى الحياة، وقم بالترقية عندما تحتاج أدوات ذكية ومتقدمة لتسريع نموك التجاري.
+      </p>
+    </div>
+  );
+}
+
+function BillingToggle({
+  isYearly,
+  onToggle,
+}: {
+  isYearly: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-4 bg-surface-container px-4 py-2 rounded-xl mb-12 border border-white/5">
+      <span className={`text-xs font-semibold ${!isYearly ? "text-on-surface" : "text-on-surface-variant"}`}>
+        فاتورة شهرية
+      </span>
+      <button
+        aria-label="تبديل نوع الفاتورة"
+        onClick={onToggle}
+        className="w-12 h-7 bg-primary-container rounded-full relative p-1 transition-colors flex items-center cursor-pointer"
+        type="button"
+      >
+        <span
+          className={`w-5 h-5 rounded-full bg-on-primary-container shadow-md transition-transform transform ${
+            isYearly ? "-translate-x-5" : "translate-x-0"
+          }`}
+        />
+      </button>
+      <div className="flex items-center gap-2">
+        <span className={`text-xs font-semibold ${isYearly ? "text-on-surface" : "text-on-surface-variant"}`}>
+          فاتورة سنوية
+        </span>
+        <span className="px-2 py-0.5 rounded-full bg-primary-container/20 text-primary text-xs font-bold">
+          وفر 20%
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function PricingTierCard({
+  tier,
+  isYearly,
+  onOpenAuth,
+}: {
+  tier: LandingPricingTier;
+  isYearly: boolean;
+  onOpenAuth?: (mode: "login" | "signup" | "claim") => void;
+}) {
+  const price = isYearly ? tier.priceYearlyMonthlyEquiv : tier.priceMonthly;
+  const period = isYearly ? tier.periodYearly : tier.periodMonthly;
+
+  return (
+    <div
+      className={`flex flex-col justify-between p-8 rounded-xl shadow-md border ${
+        tier.isPopular
+          ? "bg-surface-container border-primary/50 shadow-[0_0_40px_rgba(16,185,129,0.25)] relative lg:-translate-y-2"
+          : "bg-surface-container-lowest border-white/5"
+      }`}
+    >
+      {tier.popularBadge && (
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-bold shadow-md">
+          {tier.popularBadge}
         </div>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
-          {/* Free Tier Preview */}
-          <div className="p-8 rounded-3xl bg-surface-container/60 border border-white/5 flex flex-col justify-between space-y-6 shadow-xl">
-            <div className="space-y-4">
-              <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">الخطة المجانية</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-on-surface">مجاناً</span>
-                <span className="text-xs text-on-surface-variant">مدى الحياة</span>
-              </div>
-              <p className="text-xs text-on-surface-variant leading-relaxed">
-                مثالية للبدايات وصناع المحتوى الناشئين لتنظيم حضورهم الرقمي.
-              </p>
-              <ul className="space-y-2.5 text-xs text-on-surface pt-2">
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> روابط وشبكات غير محدودة</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> قوالب بينتو الأساسية</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> إحصاءات الزيارات لآخر 7 أيام</li>
-              </ul>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <h3 className="text-xl font-bold text-on-surface">{tier.name}</h3>
+          <p className="text-xs text-on-surface-variant">{tier.subtitle}</p>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className={`text-4xl font-bold font-mono ${tier.isPopular ? "text-primary" : "text-on-surface"}`}>
+            {price}
+          </span>
+          <span className="text-xs text-on-surface-variant">{period}</span>
+        </div>
+        <div className="flex flex-col gap-3.5 pt-4">
+          {tier.features.map((feat, i) => (
+            <div key={i} className={`flex items-center gap-3 text-xs ${feat.included ? "text-on-surface" : "text-outline"}`}>
+              <span className={`material-symbols-outlined text-[20px] ${feat.included ? "text-primary" : "text-outline"}`}>
+                {feat.included ? "check_circle" : "block"}
+              </span>
+              <span className={feat.bold ? "font-bold text-primary" : ""}>{feat.text}</span>
             </div>
-            <Link
-              href="/register"
-              className="w-full py-3 rounded-xl bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-bold text-xs text-center border border-white/5 transition"
-            >
-              ابدأ مجاناً الآن
-            </Link>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          {/* Pro Tier Preview */}
-          <div className="p-8 rounded-3xl bg-surface-container-high/90 border-2 border-primary/50 flex flex-col justify-between space-y-6 shadow-2xl relative">
-            <span className="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-primary text-on-primary text-[10px] font-bold">
-              الأكثر طلباً
-            </span>
-            <div className="space-y-4">
-              <span className="text-xs font-bold text-primary uppercase tracking-wider">باقة المحترف Pro</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-on-surface">$19</span>
-                <span className="text-xs text-on-surface-variant">/ شهرياً (تدفع سنوياً)</span>
-              </div>
-              <p className="text-xs text-on-surface-variant leading-relaxed">
-                لصناع المحتوى المحترفين الباحثين عن أعلى معدل تحويل وحماية للروابط.
-              </p>
-              <ul className="space-y-2.5 text-xs text-on-surface pt-2">
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> فاحص الروابط الذكي (Link Sentinel)</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> بيع المنتجات الرقمية والاستشارات</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> ربط دومين مخصص وإزالة شعار المنصة</li>
-              </ul>
-            </div>
-            <Link
-              href="/pricing"
-              className="w-full py-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs text-center shadow-[0_0_20px_rgba(78,222,163,0.3)] transition flex items-center justify-center gap-2"
-            >
-              <span>استكشف كافة تفاصيل الخطط</span>
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-          </div>
+      <button
+        type="button"
+        onClick={() => onOpenAuth?.("signup")}
+        className={`mt-8 w-full py-3.5 px-4 rounded-lg font-bold text-xs text-center transition-all cursor-pointer ${
+          tier.isPopular
+            ? "bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+            : "bg-surface-container-high hover:bg-surface-container-highest text-on-surface"
+        }`}
+      >
+        {tier.ctaText}
+      </button>
+    </div>
+  );
+}
+
+export function PricingBannerSection({ onOpenAuth }: PricingBannerSectionProps) {
+  const [isYearly, setIsYearly] = useState(false);
+
+  return (
+    <section id="pricing" className="w-full py-24 px-6 lg:px-12 bg-surface-container-low">
+      <div className="max-w-7xl mx-auto flex flex-col items-center">
+        <PricingBannerHeader />
+        <BillingToggle isYearly={isYearly} onToggle={() => setIsYearly(!isYearly)} />
+        <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+          {LANDING_PRICING_PLANS.map((tier) => (
+            <PricingTierCard
+              key={tier.id}
+              tier={tier}
+              isYearly={isYearly}
+              onOpenAuth={onOpenAuth}
+            />
+          ))}
         </div>
       </div>
     </section>
   );
 }
-

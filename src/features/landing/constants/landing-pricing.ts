@@ -1,0 +1,61 @@
+import { LandingPricingTier } from "../types/landing.types";
+
+export const LANDING_PRICING_PLANS: LandingPricingTier[] = [
+  {
+    id: "free",
+    name: "الخطة المجانية",
+    subtitle: "مثالية للبدايات وصناع المحتوى الناشئين.",
+    priceMonthly: 0,
+    priceYearlyMonthlyEquiv: 0,
+    periodMonthly: "ر.س / مجاناً دائماً",
+    periodYearly: "ر.س / مجاناً دائماً",
+    features: [
+      { text: "روابط غير محدودة للمحتوى", included: true },
+      { text: "إحصائيات الزيارات لآخر 7 أيام", included: true },
+      { text: "قوالب تصميم أساسية سريعة", included: true },
+      { text: "رمز QR قياسي قابل للمشاركة", included: true },
+      { text: "فحص الروابط المعطلة (غير مشمول)", included: false },
+    ],
+    ctaText: "ابدأ مجاناً الآن",
+    ctaPath: "/register",
+  },
+  {
+    id: "pro",
+    name: "خطة المحترفين (Pro)",
+    subtitle: "لكل من يعتمد على صفحته للنمو وتوليد الدخل.",
+    priceMonthly: 29,
+    priceYearlyMonthlyEquiv: 23,
+    periodMonthly: "ر.س / شهرياً",
+    periodYearly: "ر.س / شهرياً (تدفع سنوياً)",
+    isPopular: true,
+    popularBadge: "الخيار الأكثر طلباً",
+    features: [
+      { text: "فحص الروابط الذاتي المستمر وتنبيه واتساب", included: true, bold: true },
+      { text: "إزالة شعار منصة روابط بالكامل", included: true },
+      { text: "ربط دومين مخصص (yourbrand.com)", included: true },
+      { text: "بيع المنتجات الرقمية والاشتراكات", included: true },
+      { text: "تحليلات متقدمة وربط بيكسل الإعلانات", included: true },
+    ],
+    ctaText: "ترقية إلى باقة المحترفين",
+    ctaPath: "/register?plan=pro",
+  },
+  {
+    id: "business",
+    name: "خطة الشركات والفرق",
+    subtitle: "للماركات والوكالات التي تدير حسابات متعددة.",
+    priceMonthly: 79,
+    priceYearlyMonthlyEquiv: 63,
+    periodMonthly: "ر.س / شهرياً",
+    periodYearly: "ر.س / شهرياً (تدفع سنوياً)",
+    features: [
+      { text: "كل مميزات باقة المحترفين بلا حدود", included: true },
+      { text: "إدارة حتى 10 حسابات بايو مستقلة", included: true },
+      { text: "صلاحيات الفريق وأدوار المشرفين", included: true },
+      { text: "تصدير تقارير UTM بصيغة PDF و Excel", included: true },
+      { text: "دعم فني خاص VIP ومدير حساب مباشر", included: true },
+    ],
+    ctaText: "اختر باقة الشركات",
+    ctaPath: "/register?plan=business",
+  },
+];
+

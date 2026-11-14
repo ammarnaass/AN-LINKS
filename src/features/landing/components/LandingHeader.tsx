@@ -1,58 +1,70 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Link2, ArrowLeft } from "lucide-react";
 import { ThemeToggle } from "@/shared/ui";
+import { LandingHeaderProps } from "../types/landing.types";
 
-export function LandingHeader() {
+export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-surface-container-lowest/80 border-b border-outline-variant/20 text-on-surface">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
+    <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-outline-variant/15 text-on-surface">
+      <div className="h-20 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-on-primary-container shadow-md transition-all">
-              <Link2 className="w-5 h-5 rotate-45" />
+            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-all">
+              <span className="material-symbols-outlined text-[24px]">link</span>
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-lg text-on-surface tracking-tight leading-none">
-                  روابط | Rawabet
-                </span>
-                <span className="px-1.5 py-0.2 rounded-full bg-surface-container-high text-primary text-[10px] border border-outline-variant/40">
-                  جديد
-                </span>
-              </div>
-              <span className="text-[10px] text-on-surface-variant font-medium tracking-wider mt-0.5">
-                منصة الـ Bio الذكية والتفاعلية
-              </span>
+              <span className="text-xl font-bold text-on-surface tracking-tight leading-tight">روابط</span>
+              <span className="text-[11px] text-primary uppercase tracking-widest font-semibold font-mono">Rawabet</span>
             </div>
           </Link>
 
-          {/* Nav links */}
-          <nav className="hidden md:flex items-center gap-1 text-xs font-semibold text-on-surface-variant">
-            <Link href="/features" className="px-3.5 py-1.5 rounded-lg hover:text-on-surface hover:bg-surface-container transition">
+          <nav className="hidden lg:flex items-center gap-1">
+            <a className="text-sm px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-medium" href="#features">
               المميزات
-            </Link>
-            <Link href="/pricing" className="px-3.5 py-1.5 rounded-lg hover:text-on-surface hover:bg-surface-container transition">
-              الأسعار والخطط
-            </Link>
+            </a>
+            <a className="text-sm px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-medium" href="#live-demos">
+              نماذج حية
+            </a>
+            <a className="text-sm px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-medium" href="#pricing">
+              الأسعار
+            </a>
+            <a className="text-sm px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-medium" href="#testimonials">
+              آراء العملاء
+            </a>
+            <a className="text-sm px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-medium" href="#faq">
+              الأسئلة الشائعة
+            </a>
           </nav>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          <Link
-            href="/login"
-            className="text-xs sm:text-sm font-medium text-on-surface-variant hover:text-on-surface px-3 py-2 rounded-lg hover:bg-surface-container transition"
+          <button
+            onClick={() => onOpenAuth?.("login")}
+            className="hidden sm:inline-flex items-center justify-center text-sm font-medium text-on-surface px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer"
+            type="button"
           >
             تسجيل الدخول
-          </Link>
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all active:scale-95"
+          </button>
+
+          <button
+            onClick={() => onOpenAuth?.("signup")}
+            className="inline-flex items-center justify-center gap-2 text-sm font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
+            type="button"
           >
+            <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
             <span>ابدأ مجاناً</span>
-            <ArrowLeft className="w-4 h-4" />
+          </button>
+
+          <Link
+            href="/dashboard"
+            title="حسابي"
+            className="w-8 h-8 rounded-full bg-primary flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+          >
+            <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
           </Link>
         </div>
       </div>

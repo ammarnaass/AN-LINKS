@@ -1,53 +1,65 @@
-import React from "react";
-import Link from "next/link";
-import { ArrowLeft, Check, Sparkles } from "lucide-react";
+"use client";
 
-export function GiantCtaSection() {
+import React, { useState } from "react";
+import { GiantCtaSectionProps } from "../types/landing.types";
+
+export function GiantCtaSection({ onOpenAuth }: GiantCtaSectionProps) {
+  const [handle, setHandle] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = handle.trim() ? handle.toLowerCase().replace(/[^a-z0-9_-]/g, "") : "newuser";
+    onOpenAuth?.("claim", val);
+  };
+
   return (
-    <section className="py-20 sm:py-28 px-4 sm:px-8 bg-surface-container-lowest text-on-surface">
-      <div className="max-w-6xl mx-auto relative overflow-hidden rounded-[36px] bg-gradient-to-r from-surface-container-high via-surface-container to-surface-container-high border border-primary/30 p-8 sm:p-16 text-center space-y-8 shadow-2xl">
-        {/* Glow halos */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
+    <section className="w-full py-20 px-6 lg:px-12 bg-surface-container-lowest">
+      <div className="max-w-6xl mx-auto relative rounded-3xl overflow-hidden p-8 sm:p-16 bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-low shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] flex flex-col items-center text-center border border-white/5">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary-container/20 rounded-full blur-[90px] pointer-events-none" />
 
-        <div className="relative z-10 max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>انضم لأكثر من 50,000 مبدع</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-5xl font-black text-on-surface tracking-tight leading-tight">
-            جاهز لتوحيد حضورك الرقمي في <span className="text-primary">رابط واحد استثنائي؟</span>
-          </h2>
-
-          <p className="text-sm sm:text-base text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
-            ابدأ الآن مجاناً، اختر قالبك المفضل، وانطلق في بناء علامتك الشخصية ومضاعفة وصولك ومبيعاتك في دقائق.
-          </p>
-
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-bold text-sm shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all active:scale-95"
-            >
-              <span>أنشئ صفحتك الآن مجاناً</span>
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-on-surface-variant">
-            <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-primary" /> بدون بطاقة ائتمانية
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-primary" /> إعداد سهل في 60 ثانية
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-primary" /> دعم فني عربي على مدار الساعة
-            </span>
-          </div>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-container/20 text-primary text-xs font-bold mb-6">
+          <span className="material-symbols-outlined text-[16px]">stars</span>
+          <span>انضم لأكثر من 50 ألف مبدع عربي اليوم</span>
         </div>
+
+        <h2 className="text-2xl sm:text-4xl lg:text-[44px] font-bold text-on-surface max-w-2xl mb-4 leading-tight">
+          جاهز لتوحيد حضورك الرقمي في <span className="text-primary">رابط واحد استثنائي؟</span>
+        </h2>
+
+        <p className="text-sm sm:text-base text-on-surface-variant max-w-xl mb-10 leading-relaxed">
+          ابدأ الآن مجاناً، اختر قالبك المفضل، وانطلق في بناء علامتك الشخصية ومضاعفة وصولك بكل فخر وإتقان.
+        </p>
+
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-lg p-2.5 bg-surface-container-lowest/90 backdrop-blur-md rounded-xl shadow-2xl flex flex-col sm:flex-row items-center gap-2 border border-white/5"
+        >
+          <div className="flex items-center w-full px-4 py-2.5 bg-surface-container-low rounded-lg flex-1">
+            <span className="text-outline text-xs sm:text-sm font-mono" dir="ltr">
+              rawabet.me/
+            </span>
+            <input
+              className="w-full bg-transparent text-on-surface text-sm sm:text-base placeholder:text-outline focus:outline-none px-2 text-left"
+              dir="ltr"
+              placeholder="اسمك_الجديد"
+              type="text"
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+            />
+          </div>
+          <button
+            className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-container text-on-primary-container text-xs font-bold rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-primary hover:text-on-primary transition-all duration-300 cursor-pointer"
+            type="submit"
+          >
+            <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
+            <span>ابدأ الآن مجاناً</span>
+          </button>
+        </form>
+
+        <p className="text-xs text-outline mt-4">
+          لا يتطلب بطاقة ائتمانية • إعداد سهل في 60 ثانية • دعم فني عربي على مدار الساعة
+        </p>
       </div>
     </section>
   );
 }
-
