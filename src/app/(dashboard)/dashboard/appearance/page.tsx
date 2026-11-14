@@ -1,127 +1,193 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ThemeCustomizer } from "@/features/appearance";
-import { MobilePreview, LinkData, SocialItem } from "@/features/links";
-import { ProfileData } from "@/components/public/BioPageContent";
-import { Check, Save } from "lucide-react";
+import { usePreview } from "@/features/dashboard";
+import { PhoneMockup } from "@/shared/ui/phone/PhoneMockup";
+import { AppButton, AppBadge } from "@/shared/ui";
+import { Check, Save, Smartphone, ExternalLink, Sparkles } from "lucide-react";
+import { ProfileData } from "@/features/appearance/types/appearance.types";
 
 export default function AppearancePage() {
-  const [username] = useState("tariq");
+  const { preview, updateProfile } = usePreview();
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [lastAutoSaved, setLastAutoSaved] = useState<string | null>(null);
+  const isFirstRender = useRef(true);
 
-  const [profile, setProfile] = useState<ProfileData>({
-    displayName: "طارق المنصور",
-    bio: "مؤسس ومستشار في بناء المنتجات الرقمية الحديثة. أشارك تجاربي حول التقنية والتصميم.",
-    avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDPcdTZmgJVmMd-w_D2QoUK_eqjdr2WN2K5TzsaY8YEilfbFKEdjg_yIk7T5d3_YrljgRBANuUk8ALwqqVIotKKCn2fmH48VPr4ej0k2dsnxIIxuomeyxb7SmJE99aCk84EOUuTjNMRI0WOno6N5T53fQRNicYVHgjlv6JTPV3t-bDlJTXJfMmeZ2X6MfdH4K7kBkRCrhHsKO7Jnmn9uwrp-EKXD1XJq3_B2xlIt7s-",
-    themeKey: "layanDark",
-    accentColor: "#4edea3",
-    buttonStyle: "filled",
-    borderRadius: "rounded-xl",
-    font: "Cairo",
-  });
+  // Auto-save logic debounced 600ms
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-  const [links] = useState<LinkData[]>([
-    {
-      id: "1",
-      title: "متجري الإلكتروني - عطور حصرية وعينات فاخرة",
-      url: "https://store.tariq.sa",
-      isActive: true,
-      position: 0,
-      category: "store",
-      clicks: 1420,
-    },
-    {
-      id: "2",
-      title: "قناتي على يوتيوب - أحدث حلقة بودكاست عن الذكاء الاصطناعي",
-      url: "https://youtube.com/@tariq",
-      isActive: true,
-      position: 1,
-      category: "video",
-      clicks: 890,
-    },
-    {
-      id: "3",
-      title: "حجز استشارة خاصة عبر واتساب (٣٠ دقيقة)",
-      url: "https://wa.me/966500000000",
-      isActive: true,
-      position: 2,
-      category: "chat",
-      clicks: 340,
-    },
+    const timer = setTimeout(async () => {
+      try {
+        setIsSaving(true);
+        const res = await fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            displayName: preview.displayName,
+            bio: preview.bio,
+            avatarUrl: preview.avatarUrl,
+            themeKey: preview.themeKey,
+            accentColor: preview.accentColor,
+            buttonStyle: preview.buttonStyle,
+            borderRadius: preview.borderRadius,
+            font: preview.font,
+          }),
+        });
+        if (res.ok) {
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
+          setLastAutoSaved(`محفوظ تلقائياً ${timeStr}`);
+        }
+      } catch (err) {
+        console.error("Auto-save failed", err);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [
+    preview.themeKey,
+    preview.accentColor,
+    preview.buttonStyle,
+    preview.borderRadius,
+    preview.font,
+    preview.displayName,
+    preview.bio,
+    preview.avatarUrl,
   ]);
 
-  const [socials] = useState<SocialItem[]>([
-    { id: "s1", network: "instagram", url: "https://instagram.com/tariq" },
-    { id: "s2", network: "x", url: "https://x.com/tariq" },
-    { id: "s3", network: "youtube", url: "https://youtube.com/@tariq" },
-    { id: "s4", network: "whatsapp", url: "https://wa.me/966500000000" },
-  ]);
-
-  const handleSave = () => {
+  const handleManualSave = async () => {
     setIsSaving(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: preview.displayName,
+          bio: preview.bio,
+          avatarUrl: preview.avatarUrl,
+          themeKey: preview.themeKey,
+          accentColor: preview.accentColor,
+          buttonStyle: preview.buttonStyle,
+          borderRadius: preview.borderRadius,
+          font: preview.font,
+        }),
+      });
+      if (res.ok) {
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 2500);
+      }
+    } finally {
       setIsSaving(false);
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 2500);
-    }, 500);
+    }
+  };
+
+  const handleProfileChange = (newProfile: ProfileData) => {
+    updateProfile({
+      displayName: newProfile.displayName,
+      bio: newProfile.bio || "",
+      avatarUrl: newProfile.avatarUrl || undefined,
+      themeKey: newProfile.themeKey || "layanDark",
+      accentColor: newProfile.accentColor || "#4edea3",
+      buttonStyle: (newProfile.buttonStyle as any) || "filled",
+      borderRadius: (newProfile.borderRadius as any) || "rounded-xl",
+      font: newProfile.font || "Cairo",
+    });
   };
 
   return (
     <div className="space-y-6">
-      {/* Top Action Context Bar */}
+      {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-primary text-xs">
-            <span className="material-symbols-outlined text-[16px]">palette</span>
-            <span>استوديو التخصيص والمظهر الحي</span>
-            <span className="mx-1 text-outline">/</span>
-            <span className="text-on-surface-variant font-mono">@{username}</span>
+          <div className="flex items-center gap-2 text-xs">
+            <AppBadge variant="primary" dot size="sm">
+              استوديو المظهر الحي
+            </AppBadge>
+            <span className="text-outline">/</span>
+            <span className="text-on-surface-variant font-mono">@{preview.username}</span>
+            {lastAutoSaved && (
+              <span className="text-[11px] text-primary/80 mr-2">{lastAutoSaved}</span>
+            )}
           </div>
-          <h1 className="text-2xl font-bold text-on-surface tracking-tight">تخصيص المظهر والهوية</h1>
+          <h1 className="text-2xl font-black text-on-surface tracking-tight">تخصيص المظهر والهوية</h1>
           <p className="text-xs text-on-surface-variant">
-            تحكم بكافة التفاصيل البصرية لصفحتك الشخصية وشاهد انعكاسها الفوري في نافذة المحاكاة الذكية.
+            تحكم بكافة التفاصيل البصرية لصفحتك الشخصية وشاهد انعكاسها الفوري في مجسم الهاتف الذكي.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start md:self-auto">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold shadow-[0_0_20px_rgba(78,222,163,0.35)] hover:bg-primary-fixed transition disabled:opacity-50"
+        <div className="flex items-center gap-2">
+          <AppButton
+            variant="primary"
+            size="md"
+            isLoading={isSaving}
+            onClick={handleManualSave}
+            rightIcon={savedSuccess ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
           >
-            {savedSuccess ? (
-              <>
-                <Check className="w-4 h-4" />
-                <span>تم الحفظ بنجاح!</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                <span>{isSaving ? "جاري الحفظ..." : "حفظ المظهر ونشره"}</span>
-              </>
-            )}
-          </button>
+            {savedSuccess ? "تم الحفظ بنجاح!" : isSaving ? "جاري الحفظ..." : "حفظ المظهر ونشره"}
+          </AppButton>
         </div>
       </div>
 
-      {/* Main Asymmetric Workspace Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Controls Column (7 Cols on desktop) */}
+      {/* Grid Layout: Customizer + Live Phone Mockup */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-7">
-          <ThemeCustomizer profile={profile} onProfileChange={setProfile} />
+          <ThemeCustomizer
+            profile={{
+              displayName: preview.displayName,
+              bio: preview.bio,
+              avatarUrl: preview.avatarUrl,
+              themeKey: preview.themeKey,
+              accentColor: preview.accentColor,
+              buttonStyle: preview.buttonStyle,
+              borderRadius: preview.borderRadius,
+              font: preview.font,
+            }}
+            onProfileChange={handleProfileChange}
+          />
         </div>
 
-        {/* Live Preview Column (5 Cols on desktop) */}
-        <div className="lg:col-span-5 flex justify-center">
-          <MobilePreview
-            profile={profile}
-            username={username}
-            links={links}
-            socials={socials}
-          />
+        <div className="lg:col-span-5 flex justify-center sticky top-24">
+          <div className="flex flex-col items-center">
+            <div className="w-full max-w-[340px] mb-3 flex items-center justify-between px-2 text-xs">
+              <div className="flex items-center gap-1.5 font-medium text-on-surface-variant">
+                <Smartphone className="w-4 h-4 text-primary" />
+                <span>المعاينة المباشرة</span>
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              </div>
+              <a
+                href={`/${preview.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-primary hover:underline font-semibold transition"
+              >
+                <span>زيارة الصفحة</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            <PhoneMockup
+              showFloatingCards={false}
+              username={preview.username}
+              displayName={preview.displayName}
+              bio={preview.bio}
+              avatarUrl={preview.avatarUrl}
+              themeKey={preview.themeKey}
+              accentColor={preview.accentColor}
+              buttonStyle={preview.buttonStyle}
+              borderRadius={preview.borderRadius}
+              font={preview.font}
+              links={preview.links}
+              socials={preview.socials}
+            />
+          </div>
         </div>
       </div>
     </div>

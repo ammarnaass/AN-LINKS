@@ -1,48 +1,54 @@
 import React from "react";
 import { DETAILED_FEATURES } from "../constants/features-data";
-import { CheckCircle2 } from "lucide-react";
+import { BentoTile, AppBadge } from "@/shared/ui";
+import { ShieldCheck, ShoppingBag, BarChart3, Palette, Clock, QrCode, Globe, Zap, ArrowLeft } from "lucide-react";
+
+const FEATURE_ICONS: Record<string, React.ReactNode> = {
+  "link-sentinel": <ShieldCheck className="w-6 h-6 text-amber-400" />,
+  "digital-commerce": <ShoppingBag className="w-6 h-6 text-primary" />,
+  "utm-analytics": <BarChart3 className="w-6 h-6 text-tertiary" />,
+  "bento-customization": <Palette className="w-6 h-6 text-secondary" />,
+  "smart-scheduling": <Clock className="w-6 h-6 text-emerald-400" />,
+  "dynamic-qr": <QrCode className="w-6 h-6 text-cyan-400" />,
+  "custom-domain": <Globe className="w-6 h-6 text-primary" />,
+  "sub-accounts": <Zap className="w-6 h-6 text-secondary" />,
+};
 
 export function FeaturesDetailGrid() {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-        {DETAILED_FEATURES.map((item) => (
-          <div
-            key={item.id}
-            className="rounded-3xl p-7 bg-surface-container/60 hover:bg-surface-container-high/80 border border-white/5 hover:border-primary/30 transition-all duration-300 shadow-xl flex flex-col justify-between group space-y-6"
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${item.colorClass}`}>
-                  {item.badge}
-                </span>
-                <span className="text-[11px] font-bold text-on-surface-variant font-mono">
+    <section className="max-w-7xl mx-auto px-4 sm:px-8 py-8" dir="rtl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {DETAILED_FEATURES.map((item, idx) => {
+          const glow =
+            item.id === "link-sentinel"
+              ? "tertiary"
+              : item.id === "bento-customization" || item.id === "sub-accounts"
+              ? "secondary"
+              : "primary";
+
+          return (
+            <BentoTile
+              key={item.id}
+              colSpan={1}
+              glowColor={glow}
+              icon={FEATURE_ICONS[item.id] || <Zap className="w-6 h-6 text-primary" />}
+              title={item.title}
+              description={item.description}
+              badge={item.badge}
+            >
+              <div className="flex items-center justify-between text-xs pt-1">
+                <span className="text-on-surface-variant font-mono font-bold">
                   {item.metrics}
                 </span>
+                <span className="text-primary font-semibold flex items-center gap-1 group-hover:translate-x-[-2px] transition-transform">
+                  <span>اكتشف المزيد</span>
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                </span>
               </div>
-
-              <div>
-                <h3 className="text-lg font-bold text-on-surface group-hover:text-primary transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-primary/80 font-medium mt-1">
-                  {item.subtitle}
-                </p>
-              </div>
-
-              <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
-                {item.description}
-              </p>
-            </div>
-
-            <div className="pt-2 border-t border-white/5 flex items-center gap-1.5 text-xs text-primary font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>جاهز للاستخدام الفوري</span>
-            </div>
-          </div>
-        ))}
+            </BentoTile>
+          );
+        })}
       </div>
     </section>
   );
 }
-

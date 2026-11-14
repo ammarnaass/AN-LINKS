@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogIn, AlertCircle, Mail, Lock } from "lucide-react";
 import { loginWithCredentials } from "../services/auth.service";
+import { AppButton, AppInput } from "@/shared/ui";
 
 export function LoginForm() {
   const router = useRouter();
@@ -68,45 +69,33 @@ export function LoginForm() {
       )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-on-surface-variant">
-            البريد الإلكتروني
-          </label>
-          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-            <Mail className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              dir="ltr"
-              className="w-full bg-transparent py-3 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
-              placeholder="sara@example.com"
-            />
-          </div>
-        </div>
+        <AppInput
+          label="البريد الإلكتروني"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="sara@example.com"
+          dir="ltr"
+          startAdornment={<Mail className="w-4 h-4" />}
+        />
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-semibold text-on-surface-variant">
-              كلمة المرور
-            </label>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between px-0.5">
+            <span className="text-xs font-semibold text-on-surface-variant">كلمة المرور</span>
             <span className="text-[11px] text-primary hover:underline cursor-pointer">
               نسيت كلمة المرور؟
             </span>
           </div>
-          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-            <Lock className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              dir="ltr"
-              className="w-full bg-transparent py-3 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
-              placeholder="••••••••"
-            />
-          </div>
+          <AppInput
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            dir="ltr"
+            startAdornment={<Lock className="w-4 h-4" />}
+          />
         </div>
 
         <div className="flex items-center gap-2 pt-1">
@@ -122,14 +111,16 @@ export function LoginForm() {
           </label>
         </div>
 
-        <button
+        <AppButton
           type="submit"
-          disabled={isLoading}
-          className="w-full py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary shadow-[0_0_24px_rgba(16,185,129,0.35)] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+          variant="primary"
+          size="lg"
+          fullWidth
+          isLoading={isLoading}
+          rightIcon={<LogIn className="w-4 h-4" />}
         >
-          <LogIn className="w-4 h-4" />
-          <span>{isLoading ? "جاري التحقق..." : "تسجيل الدخول"}</span>
-        </button>
+          {isLoading ? "جاري التحقق..." : "تسجيل الدخول"}
+        </AppButton>
       </form>
     </div>
   );

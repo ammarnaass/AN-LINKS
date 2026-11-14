@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { BioPageContent, ProfileData } from "@/components/public/BioPageContent";
+import { ProfileData } from "@/components/public/BioPageContent";
 import { LinkData, SocialItem } from "../types/links.types";
 import { ExternalLink, Smartphone } from "lucide-react";
+import { PhoneMockup } from "@/shared/ui/phone/PhoneMockup";
 
 interface MobilePreviewProps {
   profile: ProfileData;
@@ -36,29 +37,30 @@ export function MobilePreview({ profile, username, links, socials }: MobilePrevi
         </a>
       </div>
 
-      {/* Obsidian Phone Chassis */}
-      <div className="relative w-[340px] h-[680px] bg-surface-container-lowest rounded-[46px] p-3 shadow-2xl shadow-black/80 border-[5px] border-surface-container-highest ring-1 ring-white/10">
-        {/* Dynamic Island Notch */}
-        <div className="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-20 flex items-center justify-center pointer-events-none">
-          <div className="w-2.5 h-2.5 rounded-full bg-surface-container-lowest mr-3" />
-          <div className="w-2 h-2 rounded-full bg-primary/40" />
-        </div>
-
-        {/* Screen Viewport */}
-        <div className="w-full h-full bg-surface rounded-[36px] overflow-y-auto overflow-x-hidden relative scrollbar-none select-none">
-          <BioPageContent
-            profile={profile}
-            username={username}
-            links={links}
-            socials={socials}
-            isPreview={true}
-          />
-        </div>
-
-        {/* Home Indicator bar */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 rounded-full z-20 pointer-events-none" />
-      </div>
+      <PhoneMockup
+        showFloatingCards={false}
+        username={username}
+        displayName={profile.displayName}
+        bio={profile.bio}
+        avatarUrl={profile.avatarUrl}
+        themeKey={profile.themeKey}
+        accentColor={profile.accentColor}
+        buttonStyle={(profile.buttonStyle as any) || "filled"}
+        borderRadius={(profile.borderRadius as any) || "rounded-xl"}
+        font={profile.font || "Cairo"}
+        links={links.map((l) => ({
+          id: l.id,
+          title: l.title,
+          url: l.url,
+          isActive: l.isActive,
+          position: l.position,
+        }))}
+        socials={socials.map((s, idx) => ({
+          network: s.network,
+          url: s.url,
+          position: idx,
+        }))}
+      />
     </div>
   );
 }
-

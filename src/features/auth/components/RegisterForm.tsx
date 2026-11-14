@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, AlertCircle, CheckCircle2, User, Mail, Lock, AtSign } from "lucide-react";
+import { Sparkles, AlertCircle, User, Mail, Lock, AtSign } from "lucide-react";
 import { validateUsernameFormat } from "../validators/auth.validator";
 import { registerAccount, loginWithCredentials } from "../services/auth.service";
+import { AppButton, AppInput } from "@/shared/ui";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -94,94 +95,71 @@ export function RegisterForm() {
       )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="space-y-1">
-          <label className="block text-xs font-semibold text-on-surface-variant">
-            الاسم الظاهر
-          </label>
-          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-            <User className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
-            <input
-              type="text"
-              name="displayName"
-              required
-              value={formData.displayName}
-              onChange={handleChange}
-              className="w-full bg-transparent py-2.5 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
-              placeholder="مثال: سارة العتيبي"
-            />
-          </div>
-        </div>
+        <AppInput
+          label="الاسم الظاهر"
+          type="text"
+          name="displayName"
+          required
+          value={formData.displayName}
+          onChange={handleChange}
+          placeholder="مثال: سارة العتيبي"
+          startAdornment={<User className="w-4 h-4" />}
+        />
 
-        <div className="space-y-1">
-          <label className="block text-xs font-semibold text-on-surface-variant">
-            اسم المستخدم الفريد (الرابط)
-          </label>
-          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-            <AtSign className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
-            <input
-              type="text"
-              name="username"
-              required
-              value={formData.username}
-              onChange={handleChange}
-              dir="ltr"
-              className="w-full bg-transparent py-2.5 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
-              placeholder="sara"
-            />
-          </div>
-          {formData.username && !usernameError && (
-            <p className="text-[11px] text-primary flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> رابطك سيكون: rawabet.me/{formData.username}
-            </p>
-          )}
-        </div>
+        <AppInput
+          label="اسم المستخدم الفريد (الرابط)"
+          type="text"
+          name="username"
+          required
+          value={formData.username}
+          onChange={handleChange}
+          dir="ltr"
+          placeholder="sara"
+          error={formData.username ? usernameError || undefined : undefined}
+          helperText={
+            formData.username && !usernameError
+              ? `رابطك سيكون: rawabet.me/${formData.username}`
+              : undefined
+          }
+          startAdornment={<AtSign className="w-4 h-4" />}
+        />
 
-        <div className="space-y-1">
-          <label className="block text-xs font-semibold text-on-surface-variant">
-            البريد الإلكتروني
-          </label>
-          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-            <Mail className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
-            <input
-              type="email"
-              name="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              dir="ltr"
-              className="w-full bg-transparent py-2.5 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
-              placeholder="sara@example.com"
-            />
-          </div>
-        </div>
+        <AppInput
+          label="البريد الإلكتروني"
+          type="email"
+          name="email"
+          required
+          value={formData.email}
+          onChange={handleChange}
+          dir="ltr"
+          placeholder="sara@example.com"
+          startAdornment={<Mail className="w-4 h-4" />}
+        />
 
-        <div className="space-y-1">
-          <label className="block text-xs font-semibold text-on-surface-variant">
-            كلمة المرور
-          </label>
-          <div className="relative flex items-center rounded-xl bg-surface-container-lowest border border-white/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-            <Lock className="w-4 h-4 text-on-surface-variant mr-3 shrink-0" />
-            <input
-              type="password"
-              name="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              dir="ltr"
-              className="w-full bg-transparent py-2.5 px-3 text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-outline/40"
-              placeholder="8 أحرف على الأقل"
-            />
-          </div>
-        </div>
+        <AppInput
+          label="كلمة المرور"
+          type="password"
+          name="password"
+          required
+          value={formData.password}
+          onChange={handleChange}
+          dir="ltr"
+          placeholder="8 أحرف على الأقل"
+          startAdornment={<Lock className="w-4 h-4" />}
+        />
 
-        <button
+        <AppButton
           type="submit"
+          variant="primary"
+          size="lg"
+          fullWidth
+          isLoading={isLoading}
           disabled={isLoading || !!usernameError}
-          className="w-full py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary shadow-[0_0_24px_rgba(16,185,129,0.35)] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+          rightIcon={<Sparkles className="w-4 h-4" />}
+          className="mt-2"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>{isLoading ? "جاري إنشاء الحساب..." : "إنشاء الحساب مجاناً"}</span>
-        </button>
+          {isLoading ? "جاري إنشاء الحساب..." : "إنشاء الحساب مجاناً"}
+        </AppButton>
       </form>
     </div>
   );

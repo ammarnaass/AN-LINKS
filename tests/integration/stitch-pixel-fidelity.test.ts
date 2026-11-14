@@ -36,7 +36,9 @@ describe("Stitch Pixel Fidelity Verification", () => {
       title: "متجري الإلكتروني",
       url: "https://store.tariq.sa",
       active: true,
+      isActive: true,
       order: 0,
+      position: 0,
       clicks: 140,
     };
     const html = renderToString(

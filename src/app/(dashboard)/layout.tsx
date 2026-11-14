@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { Link2, Palette, BarChart3, Settings, ExternalLink, LogOut } from "lucide-react";
+import { Link2, Palette, BarChart3, Settings, LogOut } from "lucide-react";
+import { PreviewProvider } from "@/features/dashboard";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -69,9 +70,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      {/* Main Workspace */}
+      {/* Main Workspace with Live Preview Context */}
       <main className="flex-1 w-full max-w-[1560px] mx-auto px-4 sm:px-8 py-6">
-        {children}
+        <PreviewProvider>
+          {children}
+        </PreviewProvider>
       </main>
     </div>
   );

@@ -5,10 +5,15 @@ import { SocialIcons } from "../SocialIcons";
 export interface PhoneScreenContentProps {
   displayName?: string;
   username?: string;
-  bio?: string;
-  avatarUrl?: string;
+  bio?: string | null;
+  avatarUrl?: string | null;
   links?: Array<{ id: string; title: string; url: string; isActive?: boolean }>;
-  themeKey?: string;
+  socials?: Array<{ network: string; url: string; position?: number }>;
+  themeKey?: string | null;
+  accentColor?: string | null;
+  buttonStyle?: string | null;
+  borderRadius?: string | null;
+  font?: string | null;
 }
 
 const DEFAULT_LINKS = [
@@ -17,12 +22,21 @@ const DEFAULT_LINKS = [
   { id: "3", title: "حجز استشارة خاصة عبر واتساب", url: "https://wa.me", isActive: true },
 ];
 
+const DEFAULT_SOCIALS = [
+  { network: "x", url: "https://x.com" },
+  { network: "youtube", url: "https://youtube.com" },
+  { network: "github", url: "https://github.com" },
+  { network: "instagram", url: "https://instagram.com" },
+];
+
 export function PhoneScreenContent({
   displayName = "فيصل الشمري",
   username = "faisal_client",
   bio = "صانع محتوى تقني وتجارة رقمية 🚀 | روابطي ومتاجري الرسمية",
   avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
   links = DEFAULT_LINKS,
+  socials = DEFAULT_SOCIALS,
+  borderRadius = "rounded-xl",
 }: PhoneScreenContentProps) {
   const activeLinks = links.filter((l) => l.isActive !== false);
 
@@ -33,8 +47,8 @@ export function PhoneScreenContent({
         <div className="relative mb-3">
           <div className="w-20 h-20 rounded-full ring-2 ring-primary/40 p-1 bg-surface-container-high overflow-hidden shadow-lg">
             <img
-              src={avatarUrl}
-              alt={displayName}
+              src={avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"}
+              alt={displayName || "المستخدم"}
               className="w-full h-full object-cover rounded-full"
               loading="lazy"
             />
@@ -45,21 +59,22 @@ export function PhoneScreenContent({
         </div>
 
         <h3 className="font-bold text-base text-on-surface flex items-center gap-1.5 mb-0.5">
-          <span>{displayName}</span>
+          <span>{displayName || "مستخدم منصة روابط"}</span>
         </h3>
         <p className="text-xs text-primary font-semibold mb-2" dir="ltr">
-          @{username}
+          @{username || "user"}
         </p>
-        <p className="text-xs text-on-surface-variant max-w-[240px] leading-relaxed mb-4">
-          {bio}
-        </p>
+        {bio && (
+          <p className="text-xs text-on-surface-variant max-w-[240px] leading-relaxed mb-4">
+            {bio}
+          </p>
+        )}
 
         {/* Social Icons Bar */}
         <div className="flex items-center justify-center gap-2 mb-4 p-2 bg-surface-container/70 rounded-full border border-white/5">
-          <SocialIcons network="x" className="w-3.5 h-3.5 text-on-surface-variant" />
-          <SocialIcons network="youtube" className="w-3.5 h-3.5 text-on-surface-variant" />
-          <SocialIcons network="github" className="w-3.5 h-3.5 text-on-surface-variant" />
-          <SocialIcons network="instagram" className="w-3.5 h-3.5 text-on-surface-variant" />
+          {socials.map((s, idx) => (
+            <SocialIcons key={idx} network={s.network} className="w-3.5 h-3.5 text-on-surface-variant" />
+          ))}
         </div>
       </div>
 
@@ -68,7 +83,7 @@ export function PhoneScreenContent({
         {activeLinks.map((link) => (
           <div
             key={link.id}
-            className="w-full p-3 rounded-xl bg-surface-container border border-outline-variant/30 text-on-surface flex items-center justify-between transition-all hover:border-primary/40 hover:bg-surface-container-high text-xs font-semibold shadow-xs"
+            className={`w-full p-3 ${borderRadius || "rounded-xl"} bg-surface-container border border-outline-variant/30 text-on-surface flex items-center justify-between transition-all hover:border-primary/40 hover:bg-surface-container-high text-xs font-semibold shadow-xs`}
           >
             <span className="truncate pr-1">{link.title}</span>
             <ExternalLink className="w-3.5 h-3.5 text-outline shrink-0" />
@@ -84,4 +99,3 @@ export function PhoneScreenContent({
     </div>
   );
 }
-
