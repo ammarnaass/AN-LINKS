@@ -1,8 +1,13 @@
 export * from "./types/admin.types";
 export * from "./server/admin.guard";
+export * from "./services/admin.defaults";
 export * from "./services/admin.service";
 export * from "./components/AdminStatCards";
 export * from "./components/AdminUsersTable";
 export * from "./components/AdminReportsTable";
-
-
+export * from "./components/AdminNavTabs";
+export * from "./components/AdminAnalyticsTab";
+export * from "./components/AdminUsersTab";
+export * from "./components/AdminPaymentsTab";
+export * from "./components/AdminSettingsTab";
+export * from "./components/AdminReportsTab";

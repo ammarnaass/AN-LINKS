@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Users, UserCheck, UserX, AlertTriangle } from "lucide-react";
 import { AppCard } from "@/shared/ui";

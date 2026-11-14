@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdminSession, toggleUserSuspension } from "@/features/admin";
+import { requireAdminSession } from "@/features/admin/server/admin.guard";
+import { toggleUserSuspension } from "@/features/admin/services/admin.service";
 
 interface RouteParams {
   params: Promise<{ id: string }>;

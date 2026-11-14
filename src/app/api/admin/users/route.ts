@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdminSession, getAdminUsersList } from "@/features/admin";
+import { requireAdminSession } from "@/features/admin/server/admin.guard";
+import { getAdminUsersList } from "@/features/admin/services/admin.service";
 
 export async function GET(request: NextRequest) {
   const guard = await requireAdminSession();

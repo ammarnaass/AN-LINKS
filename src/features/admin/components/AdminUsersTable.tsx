@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { AdminUserItem } from "../types/admin.types";
 import { AppBadge, AppButton } from "@/shared/ui";

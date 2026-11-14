@@ -1,0 +1,89 @@
+"use client";
+
+import React from "react";
+import { BarChart3, Users, CreditCard, Settings, AlertTriangle } from "lucide-react";
+
+export type AdminTabKey = "analytics" | "users" | "payments" | "settings" | "reports";
+
+export interface AdminNavTabsProps {
+  activeTab: AdminTabKey;
+  onTabChange: (tab: AdminTabKey) => void;
+  usersCount?: number;
+  pendingReportsCount?: number;
+}
+
+export function AdminNavTabs({
+  activeTab,
+  onTabChange,
+  usersCount = 0,
+  pendingReportsCount = 0,
+}: AdminNavTabsProps) {
+  const tabs: Array<{
+    key: AdminTabKey;
+    label: string;
+    icon: React.ReactNode;
+    badge?: number | string;
+    badgeColor?: string;
+  }> = [
+    {
+      key: "analytics",
+      label: "الإحصائيات والنمو",
+      icon: <BarChart3 className="w-4 h-4 shrink-0" />,
+    },
+    {
+      key: "users",
+      label: "المستخدمين",
+      icon: <Users className="w-4 h-4 shrink-0" />,
+      badge: usersCount > 0 ? usersCount : undefined,
+    },
+    {
+      key: "payments",
+      label: "طرق الدفع والاشتراكات",
+      icon: <CreditCard className="w-4 h-4 shrink-0" />,
+    },
+    {
+      key: "settings",
+      label: "إعدادات المنصة",
+      icon: <Settings className="w-4 h-4 shrink-0" />,
+    },
+    {
+      key: "reports",
+      label: "البلاغات والاعتدال",
+      icon: <AlertTriangle className="w-4 h-4 shrink-0" />,
+      badge: pendingReportsCount > 0 ? pendingReportsCount : undefined,
+      badgeColor: "bg-error text-white",
+    },
+  ];
+
+  return (
+    <div className="w-full flex items-center gap-1.5 p-1.5 rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-x-auto no-scrollbar font-cairo" dir="rtl">
+      {tabs.map((t) => {
+        const isActive = activeTab === t.key;
+        return (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => onTabChange(t.key)}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              isActive
+                ? "bg-primary-container text-on-primary-container shadow-md"
+                : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+            }`}
+          >
+            {t.icon}
+            <span>{t.label}</span>
+            {t.badge !== undefined && (
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                  t.badgeColor || (isActive ? "bg-primary text-on-primary" : "bg-surface-container-high text-on-surface-variant")
+                }`}
+              >
+                {t.badge}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
