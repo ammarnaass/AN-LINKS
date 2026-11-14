@@ -48,4 +48,10 @@ describe("Database Schema & Prisma Client Singleton", () => {
     expect(schemaContent).toContain("@@unique([linkId, date])");
     expect(schemaContent).toContain("@@unique([username, date])");
   });
+
+  it("should verify role field with default USER in User model", () => {
+    const schemaPath = path.resolve(__dirname, "../../prisma/schema.prisma");
+    const schemaContent = fs.readFileSync(schemaPath, "utf-8");
+    expect(schemaContent).toContain('role          String       @default("USER")');
+  });
 });
