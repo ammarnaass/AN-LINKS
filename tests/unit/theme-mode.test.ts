@@ -14,3 +14,4 @@ describe("Theme Mode Tokens & Resolution", () => {
     expect(resolveThemeClasses("light")).toBe("light");
   });
 });
+

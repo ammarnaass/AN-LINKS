@@ -4,7 +4,12 @@ import {
   HeroSection,
   PhoneMockup,
   FeaturesSection,
+  TemplateGallerySection,
   HowItWorksSection,
+  PricingBannerSection,
+  TestimonialsSection,
+  FaqSection,
+  GiantCtaSection,
   LandingFooter,
 } from "@/features/landing";
 
@@ -33,21 +38,36 @@ export default function LandingPage() {
 
       {/* Main Content Area */}
       <main className="flex-1">
-        {/* Hero Section */}
+        {/* 1. Hero Section */}
         <HeroSection />
 
-        {/* Live Phone Mockup Showcase */}
+        {/* 2. Live Phone Mockup Showcase */}
         <section className="relative px-4 sm:px-6 pb-20 sm:pb-28">
           <div className="max-w-4xl mx-auto">
             <PhoneMockup />
           </div>
         </section>
 
-        {/* Features Grid */}
+        {/* 3. Core Features Grid */}
         <FeaturesSection />
 
-        {/* 3-Step Timeline & Final CTA */}
+        {/* 4. Template Gallery Showcase */}
+        <TemplateGallerySection />
+
+        {/* 5. 3-Step Setup Timeline */}
         <HowItWorksSection />
+
+        {/* 6. Pricing Banner Preview */}
+        <PricingBannerSection />
+
+        {/* 7. Creator Testimonials */}
+        <TestimonialsSection />
+
+        {/* 8. Frequently Asked Questions */}
+        <FaqSection />
+
+        {/* 9. Giant Closing CTA */}
+        <GiantCtaSection />
       </main>
 
       {/* Footer */}

@@ -58,3 +58,4 @@ export function PricingHeader({ isYearly, onToggleYearly }: PricingHeaderProps) 
     </div>
   );
 }
+

@@ -122,3 +122,4 @@ export const GLOBAL_ALTERNATIVES_COMPARISON: AlternativeComparisonRow[] = [
     beacons: "بطيء بسبب السكريبتات الثقيلة",
   },
 ];
+

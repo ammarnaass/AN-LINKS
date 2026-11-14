@@ -15,3 +15,4 @@ describe("Features Deep Dive Page", () => {
     expect(GLOBAL_ALTERNATIVES_COMPARISON[0]).toHaveProperty("linktree");
   });
 });
+

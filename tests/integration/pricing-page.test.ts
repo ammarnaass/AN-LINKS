@@ -20,3 +20,4 @@ describe("Pricing Page Data & Logic", () => {
     expect(COMPARISON_FEATURES.length).toBeGreaterThan(8);
   });
 });
+
