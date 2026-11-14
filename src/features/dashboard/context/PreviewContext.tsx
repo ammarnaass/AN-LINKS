@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 export interface PreviewLinkItem {
   id: string;
@@ -38,26 +38,17 @@ export interface PreviewContextValue {
 }
 
 const DEFAULT_PREVIEW: PreviewState = {
-  username: "faisal_client",
-  displayName: "فيصل الشمري",
-  bio: "صانع محتوى تقني وتجارة رقمية 🚀 | روابطي ومتاجري الرسمية",
-  avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
-  themeKey: "layanDark",
+  username: "creator",
+  displayName: "صانع محتوى",
+  bio: "أهلاً بكم في صفحتي الشخصية على منصة روابط",
+  avatarUrl: undefined,
+  themeKey: "default",
   accentColor: "#4edea3",
   buttonStyle: "filled",
   borderRadius: "rounded-xl",
   font: "Cairo",
-  links: [
-    { id: "1", title: "متجري الرقمي - قوالب وتطبيقات", url: "https://store.anlinks.dev", isActive: true, position: 0 },
-    { id: "2", title: "قناتي على يوتيوب", url: "https://youtube.com/@faisal_demo", isActive: true, position: 1 },
-    { id: "3", title: "حجز استشارة خاصة عبر واتساب", url: "https://wa.me/966501234567", isActive: true, position: 2 },
-  ],
-  socials: [
-    { network: "x", url: "https://x.com/faisal_client", position: 0 },
-    { network: "youtube", url: "https://youtube.com/@faisal_client", position: 1 },
-    { network: "github", url: "https://github.com/faisal_client", position: 2 },
-    { network: "instagram", url: "https://instagram.com/faisal_client", position: 3 },
-  ],
+  links: [],
+  socials: [],
 };
 
 const PreviewContext = createContext<PreviewContextValue | undefined>(undefined);
@@ -73,6 +64,33 @@ export function PreviewProvider({
     ...DEFAULT_PREVIEW,
     ...initialData,
   });
+
+  useEffect(() => {
+    if (initialData) return;
+    Promise.all([
+      fetch("/api/profile").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/links").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([p, l]) => {
+        if (p?.profile) {
+          setPreview((prev) => ({
+            ...prev,
+            username: p.profile.username || prev.username,
+            displayName: p.profile.displayName || prev.displayName,
+            bio: p.profile.bio ?? prev.bio,
+            avatarUrl: p.profile.avatarUrl ?? prev.avatarUrl,
+            themeKey: p.profile.themeKey || prev.themeKey,
+            accentColor: p.profile.accentColor || prev.accentColor,
+            buttonStyle: p.profile.buttonStyle || prev.buttonStyle,
+            borderRadius: p.profile.borderRadius || prev.borderRadius,
+            font: p.profile.font || prev.font,
+            links: l?.links || [],
+            socials: l?.socials || [],
+          }));
+        }
+      })
+      .catch(() => {});
+  }, [initialData]);
 
   const updateProfile = useCallback((partial: Partial<PreviewState>) => {
     setPreview((prev) => ({ ...prev, ...partial }));
@@ -100,4 +118,3 @@ export function usePreview() {
   }
   return context;
 }
-

@@ -11,3 +11,4 @@ export * from "./components/AdminUsersTab";
 export * from "./components/AdminPaymentsTab";
 export * from "./components/AdminSettingsTab";
 export * from "./components/AdminReportsTab";
+export * from "./components/AdminSessionsTab";

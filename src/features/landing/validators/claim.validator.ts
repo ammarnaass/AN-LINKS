@@ -25,8 +25,8 @@ export function sanitizeClaimUsername(rawInput: string): ClaimResult {
     };
   }
 
-  // Username must be 3-30 chars, latin letters, numbers, hyphens
-  if (!/^[a-z0-9-]+$/.test(cleaned)) {
+  // Username must be 3-30 chars, latin letters, numbers, hyphens, underscores
+  if (!/^[a-z0-9_-]+$/.test(cleaned)) {
     return {
       username: cleaned,
       isValid: false,

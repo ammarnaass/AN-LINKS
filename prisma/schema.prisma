@@ -20,6 +20,7 @@ model User {
   profile       Profile?
   links         Link[]
   socials       SocialLink[]
+  sessions      UserSession[]
 }
 
 model Profile {
@@ -29,6 +30,8 @@ model Profile {
   displayName  String
   bio          String?
   avatarUrl    String?
+  phone        String?
+  seoIndexing  Boolean  @default(true)
   themeKey     String   @default("default")
   accentColor  String   @default("#000000")
   buttonStyle  String   @default("filled")
@@ -90,4 +93,22 @@ model Report {
   reporterIp  String?
   status      String   @default("PENDING")
   createdAt   DateTime @default(now())
+}
+
+model UserSession {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken String   @unique
+  ipAddress    String?
+  userAgent    String?
+  deviceType   String   @default("desktop")
+  browser      String?
+  os           String?
+  isActive     Boolean  @default(true)
+  lastActive   DateTime @default(now())
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId, isActive])
 }

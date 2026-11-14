@@ -18,7 +18,6 @@ export * from "./components/TestimonialsSection";
 export * from "./components/FaqSection";
 export * from "./components/GiantCtaSection";
 export * from "./components/LandingFooter";
-export * from "./components/AuthModal";
 export * from "./components/LandingPageClient";
 export * from "./components/PricingHeader";
 export * from "./components/PricingCard";

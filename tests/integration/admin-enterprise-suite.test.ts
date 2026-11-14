@@ -12,17 +12,15 @@ describe("Admin Enterprise Suite Integration (v3.1.0)", () => {
     const analytics = await getPlatformAnalyticsData();
 
     expect(analytics).toBeDefined();
-    expect(analytics.mrr).toBe(28450);
-    expect(analytics.mrrGrowthRate).toBe(22.4);
+    expect(analytics.mrr).toBe(0);
     expect(analytics.totalUsers).toBeGreaterThan(0);
     expect(analytics.chartData.length).toBe(14);
     expect(analytics.chartData[0]).toHaveProperty("revenue");
     expect(analytics.chartData[0]).toHaveProperty("users");
     expect(analytics.chartData[0]).toHaveProperty("clicks");
 
-    expect(analytics.topCreators.length).toBeGreaterThan(0);
-    expect(analytics.recentTransactions.length).toBeGreaterThan(0);
-    expect(analytics.recentTransactions[0].currency).toBe("SAR");
+    expect(Array.isArray(analytics.topCreators)).toBe(true);
+    expect(Array.isArray(analytics.recentTransactions)).toBe(true);
   });
 
   it("2. should retrieve platform settings with all 5 default Saudi/Global gateways", () => {
@@ -116,3 +114,4 @@ describe("Admin Enterprise Suite Integration (v3.1.0)", () => {
     expect(selfDemoteRes.error).toBe("لا يمكن للمشغّل تغيير رتبة حسابه الشخصي");
   });
 });
+

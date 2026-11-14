@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { Lock, Check, AlertTriangle, Laptop, Smartphone } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { signOut } from "next-auth/react";
+import { Lock, Check, AlertTriangle, Laptop, Smartphone, Tablet, LogOut } from "lucide-react";
 import { validatePasswordChange } from "../validators/settings.validator";
+import { UserSessionDTO } from "@/features/auth/types/session.types";
 
 export function SecurityTab() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -22,6 +24,42 @@ export function SecurityTab() {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+  };
+
+  const [sessions, setSessions] = useState<UserSessionDTO[]>([]);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/auth/sessions")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.sessions) setSessions(data.sessions);
+      })
+      .catch((err) => console.error("Fetch sessions error:", err))
+      .finally(() => setIsLoadingSessions(false));
+  }, []);
+
+  const handleRevokeSession = async (s: UserSessionDTO) => {
+    if (s.isCurrent) {
+      if (confirm("هل تريد تسجيل الخروج من جلستك الحالية؟")) {
+        signOut({ callbackUrl: "/login" });
+      }
+      return;
+    }
+    try {
+      const res = await fetch(`/api/auth/sessions/${s.id}`, { method: "DELETE" });
+      if (res.ok) {
+        setSessions((prev) => prev.filter((item) => item.id !== s.id));
+      }
+    } catch (err) {
+      console.error("Revoke session error:", err);
+    }
+  };
+
+  const getDeviceIcon = (deviceType: string) => {
+    if (deviceType === "mobile") return <Smartphone className="w-5 h-5 text-tertiary" />;
+    if (deviceType === "tablet") return <Tablet className="w-5 h-5 text-secondary" />;
+    return <Laptop className="w-5 h-5 text-primary" />;
   };
 
   return (
@@ -126,32 +164,54 @@ export function SecurityTab() {
 
       {/* Active Sessions */}
       <div className="bg-surface-container-low rounded-2xl p-6 shadow-xl border border-outline-variant/30 space-y-4">
-        <h3 className="font-bold text-on-surface text-base">الجلسات النشطة والأجهزة المتصلة</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="p-3.5 rounded-xl bg-surface-container flex items-center justify-between border border-outline-variant/20">
-            <div className="flex items-center gap-3">
-              <Laptop className="w-5 h-5 text-primary" />
-              <div>
-                <h4 className="font-bold text-xs text-on-surface">متصفح Chrome على Linux / Desktop</h4>
-                <p className="text-[11px] text-on-surface-variant font-mono">الرياض، السعودية • نشط الآن</p>
-              </div>
-            </div>
-            <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
-              الجلسة الحالية
-            </span>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-surface-container flex items-center justify-between border border-outline-variant/20">
-            <div className="flex items-center gap-3">
-              <Smartphone className="w-5 h-5 text-tertiary" />
-              <div>
-                <h4 className="font-bold text-xs text-on-surface">متصفح Safari على iPhone 15 Pro</h4>
-                <p className="text-[11px] text-on-surface-variant font-mono">الرياض، السعودية • قبل ساعتين</p>
-              </div>
-            </div>
-            <span className="text-[11px] text-on-surface-variant font-semibold">متصل</span>
-          </div>
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-on-surface text-base">الجلسات النشطة والأجهزة المتصلة</h3>
+          <span className="text-xs text-on-surface-variant font-mono">
+            {sessions.length} {sessions.length === 1 ? "جلسة نشطة" : "جلسات نشطة"}
+          </span>
         </div>
+
+        {isLoadingSessions ? (
+          <div className="h-20 bg-surface-container rounded-xl animate-pulse" />
+        ) : sessions.length === 0 ? (
+          <p className="text-xs text-on-surface-variant py-4 text-center">لا توجد جلسات أخرى مسجلة حالياً.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {sessions.map((s) => (
+              <div key={s.id} className="p-3.5 rounded-xl bg-surface-container flex items-center justify-between border border-outline-variant/20">
+                <div className="flex items-center gap-3">
+                  {getDeviceIcon(s.deviceType)}
+                  <div>
+                    <h4 className="font-bold text-xs text-on-surface">
+                      {s.browser} على {s.os}
+                    </h4>
+                    <p className="text-[11px] text-on-surface-variant font-mono">
+                      {s.ipAddress ? `IP: ${s.ipAddress}` : "جلسة محلية"} • {new Date(s.lastActive).toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {s.isCurrent ? (
+                    <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                      الجلسة الحالية
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleRevokeSession(s)}
+                      className="px-2.5 py-1 rounded-lg bg-surface-container-high hover:bg-error-container/30 hover:text-error text-[11px] font-semibold text-on-surface-variant transition flex items-center gap-1 cursor-pointer"
+                      title="إنهاء الجلسة"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>إنهاء</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

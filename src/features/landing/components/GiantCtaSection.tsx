@@ -1,15 +1,30 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { GiantCtaSectionProps } from "../types/landing.types";
 
-export function GiantCtaSection({ onOpenAuth }: GiantCtaSectionProps) {
+export function GiantCtaSection({ onOpenAuth }: GiantCtaSectionProps = {}) {
+  let router: ReturnType<typeof useRouter> | null = null;
+  try {
+    router = useRouter();
+  } catch {
+    router = null;
+  }
   const [handle, setHandle] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const val = handle.trim() ? handle.toLowerCase().replace(/[^a-z0-9_-]/g, "") : "newuser";
-    onOpenAuth?.("claim", val);
+    const val = handle.trim() ? handle.toLowerCase().replace(/[^a-z0-9_-]/g, "") : "";
+    if (onOpenAuth && val) {
+      onOpenAuth("claim", val);
+    }
+    const target = val ? `/register?username=${encodeURIComponent(val)}` : "/register";
+    if (router) {
+      router.push(target);
+    } else if (typeof window !== "undefined") {
+      window.location.href = target;
+    }
   };
 
   return (

@@ -1,14 +1,15 @@
 "use client";
 
 import React from "react";
-import { BarChart3, Users, CreditCard, Settings, AlertTriangle } from "lucide-react";
+import { BarChart3, Users, CreditCard, Settings, AlertTriangle, ShieldCheck } from "lucide-react";
 
-export type AdminTabKey = "analytics" | "users" | "payments" | "settings" | "reports";
+export type AdminTabKey = "analytics" | "users" | "sessions" | "payments" | "settings" | "reports";
 
 export interface AdminNavTabsProps {
   activeTab: AdminTabKey;
   onTabChange: (tab: AdminTabKey) => void;
   usersCount?: number;
+  sessionsCount?: number;
   pendingReportsCount?: number;
 }
 
@@ -16,6 +17,7 @@ export function AdminNavTabs({
   activeTab,
   onTabChange,
   usersCount = 0,
+  sessionsCount = 0,
   pendingReportsCount = 0,
 }: AdminNavTabsProps) {
   const tabs: Array<{
@@ -35,6 +37,12 @@ export function AdminNavTabs({
       label: "المستخدمين",
       icon: <Users className="w-4 h-4 shrink-0" />,
       badge: usersCount > 0 ? usersCount : undefined,
+    },
+    {
+      key: "sessions",
+      label: "الجلسات النشطة",
+      icon: <ShieldCheck className="w-4 h-4 shrink-0" />,
+      badge: sessionsCount > 0 ? sessionsCount : undefined,
     },
     {
       key: "payments",

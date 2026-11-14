@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, AlertCircle, User, Mail, Lock, AtSign } from "lucide-react";
 import { validateUsernameFormat } from "../validators/auth.validator";
 import { registerAccount, loginWithCredentials } from "../services/auth.service";
@@ -10,14 +10,24 @@ import { AppButton, AppInput } from "@/shared/ui";
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialUsername = searchParams?.get("username") || "";
+
   const [formData, setFormData] = useState({
     displayName: "",
-    username: "",
+    username: initialUsername,
     email: "",
     password: "",
   });
   const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const qUsername = searchParams?.get("username");
+    if (qUsername && !formData.username) {
+      setFormData((prev) => ({ ...prev, username: qUsername }));
+    }
+  }, [searchParams]);
 
   const usernameError = validateUsernameFormat(formData.username);
 

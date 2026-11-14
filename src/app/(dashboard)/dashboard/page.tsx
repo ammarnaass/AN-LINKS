@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LinkEditor,
   SocialLinksEditor,
@@ -10,85 +10,101 @@ import {
   LinkData,
   SocialItem,
 } from "@/features/links";
+import { fetchUserLinks, batchReorderLinksClient } from "@/features/links/services/links.client";
 import { ProfileData } from "@/components/public/BioPageContent";
 
 export default function DashboardPage() {
   const [filter, setFilter] = useState<"all" | "active" | "draft">("all");
   const [isPageActive, setIsPageActive] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Profile data
-  const [username] = useState("tariq");
-  const [profile] = useState<ProfileData>({
-    displayName: "طارق المنصور",
-    bio: "مؤسس تقني ومهتم بتطوير الويب الحديث ومنتجات الذكاء الاصطناعي 🚀",
-    avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDna7yVuEnXkE1ufPbKTp2yol4T9COdyZll2lcYKRlNeUzJpMpnEBfnD3M68XcXc8kEgQaVCYlHheSZI6i4BArwW46uUwLiL0AUijGuUxlmZR8saKYCi5J0Y-RjvTxSCSM5PwCJNQcVVv-bZj7JqwMhBNpi9xJQexqUMFhyEW0SVdCDWQJXovdAuGZewp1Gpg3d1h7FUPw83mrxOoCEcWMJn1ZuvBEZUQoD0El4ED6E",
-    themeKey: "layanDark",
+  const [username, setUsername] = useState("");
+  const [profile, setProfile] = useState<ProfileData>({
+    displayName: "صانع محتوى",
+    bio: "",
+    themeKey: "default",
     accentColor: "#4edea3",
     buttonStyle: "filled",
     borderRadius: "rounded-xl",
     font: "Cairo",
   });
 
-  const [links, setLinks] = useState<LinkData[]>([
-    {
-      id: "1",
-      title: "متجري الإلكتروني - عطور حصرية وعينات فاخرة",
-      url: "https://store.tariq.sa",
-      isActive: true,
-      position: 0,
-      category: "store",
-      clicks: 1420,
-    },
-    {
-      id: "2",
-      title: "قناتي على يوتيوب - أحدث حلقة بودكاست عن الذكاء الاصطناعي",
-      url: "https://youtube.com/@tariq",
-      isActive: true,
-      position: 1,
-      category: "video",
-      clicks: 890,
-    },
-    {
-      id: "3",
-      title: "حجز استشارة خاصة عبر واتساب (٣٠ دقيقة)",
-      url: "https://wa.me/966500000000",
-      isActive: true,
-      position: 2,
-      category: "chat",
-      clicks: 340,
-    },
-    {
-      id: "4",
-      title: "مدونتي التقنية - مقالات متخصصة في البرمجة والتصميم",
-      url: "https://blog.tariq.dev",
-      isActive: true,
-      position: 3,
-      category: "blog",
-      clicks: 215,
-    },
-    {
-      id: "5",
-      title: "عرض الجمعة البيضاء - خصم ٥٠٪ على كافة الدورات التدريبية",
-      url: "https://courses.tariq.sa/bf2024",
-      isActive: false,
-      position: 4,
-      category: "link",
-      clicks: 0,
-    },
-  ]);
+  const [links, setLinks] = useState<LinkData[]>([]);
+  const [socials, setSocials] = useState<SocialItem[]>([]);
 
-  const [socials, setSocials] = useState<SocialItem[]>([
-    { id: "s1", network: "instagram", url: "https://instagram.com/tariq" },
-    { id: "s2", network: "x", url: "https://x.com/tariq" },
-    { id: "s3", network: "youtube", url: "https://youtube.com/@tariq" },
-    { id: "s4", network: "tiktok", url: "https://tiktok.com/@tariq" },
-    { id: "s5", network: "whatsapp", url: "https://wa.me/966500000000" },
-    { id: "s6", network: "telegram", url: "https://t.me/tariq" },
-    { id: "s7", network: "linkedin", url: "https://linkedin.com/in/tariq" },
-  ]);
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      fetch("/api/profile").then((r) => (r.ok ? r.json() : null)),
+      fetchUserLinks().catch(() => ({ links: [], socials: [] })),
+    ])
+      .then(([pData, lData]) => {
+        if (!isMounted) return;
+        if (pData?.success && pData.profile) {
+          setProfile({
+            displayName: pData.profile.displayName || pData.profile.username,
+            bio: pData.profile.bio || "",
+            avatarUrl: pData.profile.avatarUrl || undefined,
+            themeKey: pData.profile.themeKey || "default",
+            accentColor: pData.profile.accentColor || "#4edea3",
+            buttonStyle: pData.profile.buttonStyle || "filled",
+            borderRadius: pData.profile.borderRadius || "rounded-xl",
+            font: pData.profile.font || "Cairo",
+          });
+          setUsername(pData.profile.username || "");
+          setIsPageActive(pData.profile.isPublished !== false);
+        }
+        if (lData) {
+          setLinks(lData.links || []);
+          setSocials(lData.socials || []);
+        }
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleLinksChange = async (newLinks: LinkData[]) => {
+    setLinks(newLinks);
+    try {
+      await batchReorderLinksClient({
+        links: newLinks.map((l, idx) => ({ id: l.id, position: idx, isActive: l.isActive })),
+      });
+    } catch (err) {
+      console.error("Save links failed:", err);
+    }
+  };
+
+  const handleSocialsChange = async (newSocials: SocialItem[]) => {
+    setSocials(newSocials);
+    try {
+      await batchReorderLinksClient({
+        links: [],
+        socials: newSocials,
+      });
+    } catch (err) {
+      console.error("Save socials failed:", err);
+    }
+  };
 
   const activeCount = links.filter((l) => l.isActive).length;
   const draftCount = links.filter((l) => !l.isActive).length;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-20 bg-surface-container-high rounded-2xl" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-7 h-96 bg-surface-container-low rounded-2xl" />
+          <div className="lg:col-span-5 h-96 bg-surface-container-low rounded-2xl hidden lg:block" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -111,13 +127,13 @@ export default function DashboardPage() {
 
           <LinkEditor
             links={links}
-            onLinksChange={setLinks}
+            onLinksChange={handleLinksChange}
             filter={filter}
           />
 
           <SocialLinksEditor
             socials={socials}
-            onSocialsChange={setSocials}
+            onSocialsChange={handleSocialsChange}
           />
         </section>
 

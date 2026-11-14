@@ -1,9 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  generateDateRange,
-  calculateCTR,
   AnalyticsHeader,
   AnalyticsKpiCards,
   AnalyticsChart,
@@ -14,117 +12,84 @@ import {
   TrafficSourceItem,
   CountryItem,
 } from "@/features/analytics";
-
-const TOP_LINKS_DATA: TopLinkPerformance[] = [
-  {
-    id: "1",
-    rank: 1,
-    title: "متجري الإلكتروني على سلة",
-    badge: "متجر إلكتروني",
-    badgeColor: "bg-secondary/10 text-secondary",
-    icon: "shopping_bag",
-    iconColor: "bg-secondary/15 text-secondary",
-    url: "salla.sa/tariq-store",
-    clicks: 8920,
-    ctr: "45.0%",
-    barWidth: "45%",
-    barColor: "bg-primary",
-    bounceRate: "22.4%",
-    avgStay: "1m 45s",
-    tag: "الأعلى إيراداً",
-    tagColor: "text-primary",
-  },
-  {
-    id: "2",
-    rank: 2,
-    title: "قناة اليوتيوب الرسمية",
-    badge: "فيديو يوتيوب",
-    badgeColor: "bg-error/10 text-error",
-    icon: "smart_display",
-    iconColor: "bg-error/15 text-error",
-    url: "youtube.com/@tariq_creative",
-    clicks: 5430,
-    ctr: "27.4%",
-    barWidth: "27.4%",
-    barColor: "bg-primary-container",
-    bounceRate: "18.1%",
-    avgStay: "4m 12s",
-    tag: "مشاهدات مرتفعة",
-    tagColor: "text-tertiary",
-  },
-  {
-    id: "3",
-    rank: 3,
-    title: "حجز استشارة خاصة واتساب",
-    badge: "محادثة فورية",
-    badgeColor: "bg-primary/10 text-primary",
-    icon: "chat",
-    iconColor: "bg-primary/15 text-primary",
-    url: "wa.me/966500000000",
-    clicks: 3720,
-    ctr: "18.7%",
-    barWidth: "18.7%",
-    barColor: "bg-tertiary",
-    bounceRate: "9.8%",
-    avgStay: "--",
-    tag: "تحويل مباشر 82%",
-    tagColor: "text-primary",
-  },
-  {
-    id: "4",
-    rank: 4,
-    title: "مقالات ونشرات المدونة",
-    badge: "مقال وتدوينة",
-    badgeColor: "bg-surface-container-high text-on-surface-variant",
-    icon: "auto_stories",
-    iconColor: "bg-tertiary/15 text-tertiary",
-    url: "tariq.me/articles",
-    clicks: 1750,
-    ctr: "8.9%",
-    barWidth: "8.9%",
-    barColor: "bg-outline-variant",
-    bounceRate: "38.2%",
-    avgStay: "2m 10s",
-    tag: "قراءة متأنية",
-    tagColor: "text-on-surface-variant",
-  },
-];
+import { UserAnalyticsSummary } from "@/features/analytics/types/analytics.types";
+import { BarChart3 } from "lucide-react";
 
 const TRAFFIC_SOURCES_DATA: TrafficSourceItem[] = [
-  { name: "إنستغرام (Instagram)", percentage: 54, color: "bg-secondary", text: "text-secondary" },
-  { name: "تيك توك (TikTok)", percentage: 28, color: "bg-tertiary", text: "text-tertiary" },
-  { name: "منصة إكس (Twitter)", percentage: 12, color: "bg-primary", text: "text-primary" },
-  { name: "زيارات مباشرة (Direct)", percentage: 6, color: "bg-outline-variant", text: "text-on-surface-variant" },
+  { name: "زيارات مباشرة (Direct)", percentage: 65, color: "bg-primary", text: "text-primary" },
+  { name: "إنستغرام (Instagram)", percentage: 20, color: "bg-secondary", text: "text-secondary" },
+  { name: "تويتر / إكس (X)", percentage: 15, color: "bg-tertiary", text: "text-tertiary" },
 ];
 
 const COUNTRIES_DATA: CountryItem[] = [
-  { name: "المملكة العربية السعودية", percentage: "68%", flag: "🇸🇦" },
-  { name: "الإمارات العربية المتحدة", percentage: "15%", flag: "🇦🇪" },
-  { name: "دولة الكويت", percentage: "9%", flag: "🇰🇼" },
-  { name: "مصر", percentage: "8%", flag: "🇪🇬" },
+  { name: "المملكة العربية السعودية", percentage: "78%", flag: "🇸🇦" },
+  { name: "الإمارات العربية المتحدة", percentage: "12%", flag: "🇦🇪" },
+  { name: "الكويت", percentage: "6%", flag: "🇰🇼" },
+  { name: "أخرى", percentage: "4%", flag: "🌍" },
 ];
 
 export default function AnalyticsPage() {
   const [range, setRange] = useState<7 | 30>(7);
+  const [analytics, setAnalytics] = useState<UserAnalyticsSummary | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const dates = generateDateRange(range);
-  const sampleViews = dates.map((d, i) => ({
-    date: d,
-    count: Math.floor(4500 + Math.sin(i * 0.8) * 1800 + (i % 3) * 600),
+  useEffect(() => {
+    fetch("/api/analytics")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.success && data.analytics) {
+          setAnalytics(data.analytics);
+        }
+      })
+      .catch((err) => console.error("Analytics fetch error:", err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const totalViews = analytics?.totalViews ?? 0;
+  const totalClicks = analytics?.totalClicks ?? 0;
+  const ctr = analytics?.averageCtr ?? 0;
+
+  const viewsSeries = analytics?.chartData.map((d) => ({ date: d.date, count: d.views })) || [];
+  const clicksSeries = analytics?.chartData.map((d) => ({ date: d.date, count: d.clicks })) || [];
+
+  const topLinks: TopLinkPerformance[] = (analytics?.topLinks || []).map((l, idx) => ({
+    id: l.id,
+    rank: idx + 1,
+    title: l.title,
+    badge: "رابط مخصص",
+    badgeColor: "bg-primary/10 text-primary",
+    icon: "link",
+    iconColor: "bg-primary/15 text-primary",
+    url: l.url,
+    clicks: l.clicks,
+    ctr: `${l.ctr}%`,
+    barWidth: `${Math.min(100, Math.max(10, l.ctr))}%`,
+    barColor: "bg-primary",
+    bounceRate: "--",
+    avgStay: "--",
+    tag: idx === 0 ? "الأعلى نقراً" : "نشط",
+    tagColor: "text-primary",
   }));
-
-  const sampleClicks = dates.map((d, i) => ({
-    date: d,
-    count: Math.floor(1800 + Math.sin(i * 0.8) * 800 + (i % 2) * 300),
-  }));
-
-  const totalViews = sampleViews.reduce((acc, c) => acc + c.count, 0);
-  const totalClicks = sampleClicks.reduce((acc, c) => acc + c.count, 0);
-  const ctr = calculateCTR(totalViews, totalClicks);
 
   const handleExportCsv = () => {
     window.open("/api/analytics/export?type=csv", "_blank");
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-16 bg-surface-container-high rounded-2xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="h-28 bg-surface-container-low rounded-2xl" />
+          <div className="h-28 bg-surface-container-low rounded-2xl" />
+          <div className="h-28 bg-surface-container-low rounded-2xl" />
+        </div>
+        <div className="h-72 bg-surface-container-low rounded-2xl" />
+      </div>
+    );
+  }
+
+  const isEmpty = totalViews === 0 && totalClicks === 0 && topLinks.length === 0;
 
   return (
     <div className="space-y-8">
@@ -138,17 +103,29 @@ export default function AnalyticsPage() {
         totalViews={totalViews}
         totalClicks={totalClicks}
         ctr={ctr}
-        topLinkTitle={TOP_LINKS_DATA[0].title}
+        topLinkTitle={topLinks[0]?.title || "لا توجد روابط نشطة"}
       />
 
+      {isEmpty && (
+        <div className="p-8 rounded-2xl bg-surface-container-low border border-outline-variant/30 text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-primary-container/20 text-primary mx-auto flex items-center justify-center">
+            <BarChart3 className="w-6 h-6" />
+          </div>
+          <h3 className="font-bold text-on-surface text-base">لا توجد زيارات مسجلة بعد لصفحتك</h3>
+          <p className="text-xs text-on-surface-variant max-w-md mx-auto">
+            قم بنسخ رابط صفحتك الشخصية ومشاركته في حساباتك على وسائل التواصل الاجتماعي لبدء جمع الزيارات ورصد تفاعل جمهورك.
+          </p>
+        </div>
+      )}
+
       <AnalyticsChart
-        viewsSeries={sampleViews}
-        clicksSeries={sampleClicks}
+        viewsSeries={viewsSeries}
+        clicksSeries={clicksSeries}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-7">
-          <TopLinksTable topLinks={TOP_LINKS_DATA} />
+          <TopLinksTable topLinks={topLinks} />
         </div>
 
         <div className="lg:col-span-5 space-y-6">

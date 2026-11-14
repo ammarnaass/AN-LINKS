@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { LANDING_PRICING_PLANS } from "../constants/landing-pricing";
 import { LandingPricingTier, PricingBannerSectionProps } from "../types/landing.types";
 
@@ -105,17 +106,16 @@ function PricingTierCard({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => onOpenAuth?.("signup")}
-        className={`mt-8 w-full py-3.5 px-4 rounded-lg font-bold text-xs text-center transition-all cursor-pointer ${
+      <Link
+        href="/register"
+        className={`mt-8 block w-full py-3.5 px-4 rounded-lg font-bold text-xs text-center transition-all cursor-pointer ${
           tier.isPopular
             ? "bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary shadow-[0_0_20px_rgba(16,185,129,0.4)]"
             : "bg-surface-container-high hover:bg-surface-container-highest text-on-surface"
         }`}
       >
         {tier.ctaText}
-      </button>
+      </Link>
     </div>
   );
 }

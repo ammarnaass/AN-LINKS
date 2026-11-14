@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SettingsTab,
   validateSettingsProfile,
@@ -16,20 +16,34 @@ import {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
 
-  const [displayName, setDisplayName] = useState("فيصل عبد العزيز المنصور");
-  const [username, setUsername] = useState("faisal");
-  const [email, setEmail] = useState("faisal@almansour.sa");
-  const [phone, setPhone] = useState("+966 54 889 1234");
-  const [bio, setBio] = useState(
-    "صانع محتوى في التقنية وريادة الأعمال، مؤسس بودكاست «أبعاد رقمية». أشارككم مصادري الحصرية واستشاراتي الاستثمارية الأسبوعية."
-  );
+  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
   const [seoIndexing, setSeoIndexing] = useState(true);
 
   // Save states
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  const handleSaveProfile = () => {
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.success && data.profile) {
+          setDisplayName(data.profile.displayName || "");
+          setUsername(data.profile.username || "");
+          setEmail(data.profile.email || "");
+          setPhone(data.profile.phone || "");
+          setBio(data.profile.bio || "");
+          setSeoIndexing(data.profile.seoIndexing !== false);
+        }
+      })
+      .catch((err) => console.error("Settings profile fetch error:", err));
+  }, []);
+
+  const handleSaveProfile = async () => {
     setIsSaving(true);
     const validation = validateSettingsProfile({
       displayName,
@@ -45,11 +59,29 @@ export default function SettingsPage() {
       return;
     }
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName,
+          bio,
+          phone,
+          seoIndexing,
+        }),
+      });
+
+      if (res.ok) {
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      } else {
+        alert("فشل حفظ التعديلات في قاعدة البيانات");
+      }
+    } catch {
+      alert("حدث خطأ في الاتصال بالخادم");
+    } finally {
       setIsSaving(false);
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 3000);
-    }, 600);
+    }
   };
 
   return (
@@ -60,35 +92,31 @@ export default function SettingsPage() {
         savedSuccess={savedSuccess}
       />
 
-      <SettingsTabsNav
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-      />
+      <SettingsTabsNav activeTab={activeTab} onSelectTab={setActiveTab} />
 
-      {activeTab === "profile" && (
-        <ProfileTab
-          displayName={displayName}
-          setDisplayName={setDisplayName}
-          username={username}
-          setUsername={setUsername}
-          email={email}
-          setEmail={setEmail}
-          phone={phone}
-          setPhone={setPhone}
-          bio={bio}
-          setBio={setBio}
-          seoIndexing={seoIndexing}
-          setSeoIndexing={setSeoIndexing}
-        />
-      )}
+      <main>
+        {activeTab === "profile" && (
+          <ProfileTab
+            displayName={displayName}
+            setDisplayName={setDisplayName}
+            username={username}
+            setUsername={setUsername}
+            email={email}
+            setEmail={setEmail}
+            phone={phone}
+            setPhone={setPhone}
+            bio={bio}
+            setBio={setBio}
+            seoIndexing={seoIndexing}
+            setSeoIndexing={setSeoIndexing}
+          />
+        )}
 
-      {activeTab === "subscription" && <SubscriptionTab />}
-
-      {activeTab === "payouts" && <PayoutsTab />}
-
-      {activeTab === "security" && <SecurityTab />}
-
-      {activeTab === "danger" && <DangerZoneTab />}
+        {activeTab === "subscription" && <SubscriptionTab />}
+        {activeTab === "payouts" && <PayoutsTab />}
+        {activeTab === "security" && <SecurityTab />}
+        {activeTab === "danger" && <DangerZoneTab />}
+      </main>
     </div>
   );
 }

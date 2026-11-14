@@ -59,41 +59,19 @@ export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
             </div>
           ) : (
             <>
-              {onOpenAuth ? (
-                <button
-                  onClick={() => onOpenAuth("login")}
-                  className="hidden sm:inline-flex items-center justify-center text-sm font-medium text-on-surface px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer"
-                  type="button"
-                >
-                  تسجيل الدخول
-                </button>
-              ) : (
-                <Link
-                  href="/login"
-                  className="hidden sm:inline-flex items-center justify-center text-sm font-medium text-on-surface px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer"
-                >
-                  تسجيل الدخول
-                </Link>
-              )}
-
-              {onOpenAuth ? (
-                <button
-                  onClick={() => onOpenAuth("signup")}
-                  className="inline-flex items-center justify-center gap-2 text-sm font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
-                  type="button"
-                >
-                  <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
-                  <span>ابدأ مجاناً</span>
-                </button>
-              ) : (
-                <Link
-                  href="/register"
-                  className="inline-flex items-center justify-center gap-2 text-sm font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
-                  <span>ابدأ مجاناً</span>
-                </Link>
-              )}
+              <Link
+                href="/login"
+                className="hidden sm:inline-flex items-center justify-center text-sm font-medium text-on-surface px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer"
+              >
+                تسجيل الدخول
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center gap-2 text-sm font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
+                <span>ابدأ مجاناً</span>
+              </Link>
             </>
           )}
         </div>

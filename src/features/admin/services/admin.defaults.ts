@@ -80,56 +80,7 @@ export const DEFAULT_PLATFORM_SETTINGS: AdminPlatformSettings = {
   gateways: DEFAULT_GATEWAYS,
 };
 
-export const INITIAL_TRANSACTIONS: AdminTransaction[] = [
-  {
-    id: "tx-1",
-    transactionNumber: "TX-2026-9901",
-    customerName: "سارة العتيبي",
-    customerEmail: "sara@design.sa",
-    amount: 349,
-    currency: "SAR",
-    gateway: "apple_pay",
-    plan: "PRO_YEARLY",
-    status: "COMPLETED",
-    createdAt: "2026-11-14T10:30:00Z",
-  },
-  {
-    id: "tx-2",
-    transactionNumber: "TX-2026-9902",
-    customerName: "فيصل الشمري",
-    customerEmail: "client@anlinks.dev",
-    amount: 39,
-    currency: "SAR",
-    gateway: "mada",
-    plan: "PRO_MONTHLY",
-    status: "COMPLETED",
-    createdAt: "2026-11-14T08:15:00Z",
-  },
-  {
-    id: "tx-3",
-    transactionNumber: "TX-2026-9903",
-    customerName: "محمد الدوسري",
-    customerEmail: "mohammed@tech.sa",
-    amount: 39,
-    currency: "SAR",
-    gateway: "stc_pay",
-    plan: "PRO_MONTHLY",
-    status: "COMPLETED",
-    createdAt: "2026-11-13T16:45:00Z",
-  },
-  {
-    id: "tx-4",
-    transactionNumber: "TX-2026-9904",
-    customerName: "أروى القحطاني",
-    customerEmail: "arwa@creative.sa",
-    amount: 349,
-    currency: "SAR",
-    gateway: "visa_mastercard",
-    plan: "PRO_YEARLY",
-    status: "COMPLETED",
-    createdAt: "2026-11-12T12:00:00Z",
-  },
-];
+export const INITIAL_TRANSACTIONS: AdminTransaction[] = [];
 
 // Stateful module store (in-memory persistent across requests in runtime)
 export let statefulSettings: AdminPlatformSettings = JSON.parse(
@@ -159,3 +110,4 @@ export function updateStatefulSettings(
   };
   return statefulSettings;
 }
+

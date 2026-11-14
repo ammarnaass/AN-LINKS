@@ -26,7 +26,9 @@ export default function RegisterPage() {
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-8 flex items-center justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-16 w-full items-center">
           <div className="flex justify-center lg:justify-end">
-            <RegisterForm />
+            <React.Suspense fallback={<div className="w-full max-w-md p-8 rounded-3xl bg-surface-container-high/60 animate-pulse" />}>
+              <RegisterForm />
+            </React.Suspense>
           </div>
           <AuthSideBanner />
         </div>

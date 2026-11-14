@@ -151,20 +151,28 @@ export function AdminPaymentsTab({ settings, transactions, onUpdateSettings }: A
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/20">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-surface-container/30">
-                  <td className="py-2.5 px-3 font-mono text-primary">{tx.transactionNumber}</td>
-                  <td className="py-2.5 px-3">{tx.customerName}</td>
-                  <td className="py-2.5 px-3 font-bold">{tx.amount} {tx.currency}</td>
-                  <td className="py-2.5 px-3 font-mono text-on-surface-variant">{tx.gateway}</td>
-                  <td className="py-2.5 px-3">{tx.plan}</td>
-                  <td className="py-2.5 px-3">
-                    <AppBadge variant={tx.status === "COMPLETED" ? "success" : "neutral"} size="sm">
-                      {tx.status === "COMPLETED" ? "مكتملة" : "قيد المعالجة"}
-                    </AppBadge>
+              {transactions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-on-surface-variant text-xs">
+                    لا توجد عمليات دفع مسجلة بعد. عند اشتراك صناع المحتوى في الباقات المدفوعة، ستظهر العمليات هنا فوراً.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                transactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-surface-container/30">
+                    <td className="py-2.5 px-3 font-mono text-primary">{tx.transactionNumber}</td>
+                    <td className="py-2.5 px-3">{tx.customerName}</td>
+                    <td className="py-2.5 px-3 font-bold">{tx.amount} {tx.currency}</td>
+                    <td className="py-2.5 px-3 font-mono text-on-surface-variant">{tx.gateway}</td>
+                    <td className="py-2.5 px-3">{tx.plan}</td>
+                    <td className="py-2.5 px-3">
+                      <AppBadge variant={tx.status === "COMPLETED" ? "success" : "neutral"} size="sm">
+                        {tx.status === "COMPLETED" ? "مكتملة" : "قيد المعالجة"}
+                      </AppBadge>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

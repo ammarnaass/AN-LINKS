@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { sanitizeClaimUsername } from "../validators/claim.validator";
 import { HeroSectionProps } from "../types/landing.types";
 
@@ -93,17 +94,29 @@ function HeroProofRow({ displayHandle }: { displayHandle: string }) {
   );
 }
 
-export function HeroSection({ onOpenAuth }: HeroSectionProps) {
-  const [handle, setHandle] = useState("faisal");
+export function HeroSection({ onOpenAuth }: HeroSectionProps = {}) {
+  let router: ReturnType<typeof useRouter> | null = null;
+  try {
+    router = useRouter();
+  } catch {
+    router = null;
+  }
+  const [handle, setHandle] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const result = sanitizeClaimUsername(handle);
-    const validHandle = result.isValid ? result.username : "faisal";
-    onOpenAuth?.("claim", validHandle);
+    if (onOpenAuth && result.isValid) {
+      onOpenAuth("claim", result.username);
+    }
+    if (router) {
+      router.push(result.targetUrl);
+    } else if (typeof window !== "undefined") {
+      window.location.href = result.targetUrl;
+    }
   };
 
-  const displayHandle = handle.trim() ? handle.toLowerCase().replace(/[^a-z0-9_-]/g, "") : "faisal";
+  const displayHandle = handle.trim() ? handle.toLowerCase().replace(/[^a-z0-9_-]/g, "") : "yourname";
 
   return (
     <section className="relative w-full pt-10 pb-16 lg:pt-16 lg:pb-24 px-6 lg:px-12 flex flex-col items-center justify-center text-on-surface">

@@ -45,3 +45,21 @@ export interface CountryItem {
   flag: string;
 }
 
+export interface UserAnalyticsSummary {
+  totalViews: number;
+  totalClicks: number;
+  averageCtr: number;
+  chartData: {
+    date: string;
+    views: number;
+    clicks: number;
+  }[];
+  topLinks: {
+    id: string;
+    title: string;
+    url: string;
+    clicks: number;
+    ctr: number;
+  }[];
+}
+

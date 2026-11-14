@@ -114,53 +114,85 @@ export function updatePlatformSettings(
 }
 
 export async function getPlatformAnalyticsData(): Promise<AdminAnalyticsData> {
-  const [totalUsers, activeUsers, totalLinks] = await Promise.all([
+  const [totalUsers, activeUsers, totalLinks, clickAgg, viewAgg] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { isSuspended: false } }),
     prisma.link.count(),
+    prisma.dailyLinkStat.aggregate({ _sum: { clicks: true } }),
+    prisma.dailyProfileStat.aggregate({ _sum: { views: true } }),
   ]);
 
-  // Generate 14-day sample points for Pure SVG charts
-  const dates = Array.from({ length: 14 }).map((_, i) => {
+  const totalPlatformClicks = clickAgg._sum.clicks || 0;
+  const totalPlatformViews = viewAgg._sum.views || 0;
+
+  // Generate 14-day date buckets with real Prisma activity
+  const rangeDays = 14;
+  const sinceDate = new Date();
+  sinceDate.setDate(sinceDate.getDate() - rangeDays);
+
+  const [recentViews, recentClicks] = await Promise.all([
+    prisma.dailyProfileStat.findMany({
+      where: { date: { gte: sinceDate } },
+    }),
+    prisma.dailyLinkStat.findMany({
+      where: { date: { gte: sinceDate } },
+    }),
+  ]);
+
+  const dates = Array.from({ length: rangeDays }).map((_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() - (13 - i));
-    return d.toLocaleDateString("ar-SA", { month: "short", day: "numeric" });
+    d.setDate(d.getDate() - (rangeDays - 1 - i));
+    return {
+      iso: d.toISOString().split("T")[0],
+      label: d.toLocaleDateString("ar-SA", { month: "short", day: "numeric" }),
+    };
   });
 
-  const chartData = dates.map((date, idx) => ({
-    date,
-    revenue: 1800 + Math.floor(Math.sin(idx * 0.7) * 600 + idx * 80),
-    users: 12 + Math.floor(Math.cos(idx * 0.5) * 5 + (idx % 3)),
-    clicks: 1400 + Math.floor(Math.sin(idx * 0.9) * 400 + idx * 50),
-  }));
+  const chartData = dates.map((d) => {
+    const viewsForDay = recentViews
+      .filter((v) => v.date.toISOString().startsWith(d.iso))
+      .reduce((sum, curr) => sum + curr.views, 0);
+    const clicksForDay = recentClicks
+      .filter((c) => c.date.toISOString().startsWith(d.iso))
+      .reduce((sum, curr) => sum + curr.clicks, 0);
+
+    return {
+      date: d.label,
+      revenue: 0,
+      users: 0,
+      clicks: clicksForDay,
+    };
+  });
 
   const creators = await prisma.user.findMany({
     take: 5,
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" },
     include: {
       profile: true,
       _count: { select: { links: true } },
     },
   });
 
-  const topCreators: AdminCreatorLeaderboardItem[] = creators.map((c, i) => ({
+  const topCreators: AdminCreatorLeaderboardItem[] = creators.map((c) => ({
     id: c.id,
     username: c.username,
     displayName: c.profile?.displayName ?? c.username,
     avatarUrl: c.profile?.avatarUrl ?? undefined,
     linksCount: c._count.links,
-    viewsCount: 3200 - i * 450,
-    revenue: 4200 - i * 650,
+    viewsCount: 0,
+    revenue: 0,
   }));
 
+  const mrr = statefulTransactions.reduce((acc, curr) => acc + curr.amount, 0);
+
   return {
-    mrr: 28450,
-    mrrGrowthRate: 22.4,
+    mrr,
+    mrrGrowthRate: 0,
     totalUsers,
     activeUsers,
-    proSubscribersCount: Math.max(1, Math.floor(activeUsers * 0.45)),
-    totalPlatformClicks: totalLinks * 340,
-    totalPlatformViews: totalLinks * 820,
+    proSubscribersCount: 0,
+    totalPlatformClicks,
+    totalPlatformViews,
     chartData,
     topCreators,
     recentTransactions: statefulTransactions,

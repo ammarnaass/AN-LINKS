@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/shared/db";
+import { recordSession } from "./session.service";
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10);
@@ -67,14 +68,36 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = (user as unknown as { username: string }).username;
         token.role = (user as unknown as { role: string }).role;
+        token.sessionToken = (token.jti as string) || `${user.id}_${Date.now()}`;
+        try {
+          await recordSession(user.id, token.sessionToken as string);
+        } catch (err) {
+          console.error("Session recording error in jwt callback:", err);
+        }
       }
+
+      if (token.sessionToken) {
+        try {
+          const dbSession = await prisma.userSession.findUnique({
+            where: { sessionToken: token.sessionToken as string },
+            select: { isActive: true },
+          });
+          if (dbSession && !dbSession.isActive) {
+            return {};
+          }
+        } catch {
+          // ignore db errors on session check
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user && token.id) {
         (session.user as unknown as { id: string }).id = token.id as string;
         (session.user as unknown as { username: string }).username = token.username as string;
         (session.user as unknown as { role: string }).role = token.role as string;
+        (session.user as unknown as { sessionToken: string }).sessionToken = token.sessionToken as string;
       }
       return session;
     },
