@@ -28,3 +28,4 @@
 ## Task 5: Integration Tests & Verification
 - File: `tests/integration/persistent-nav-auth.test.ts`
 - Run Vitest suite & Next.js production build.
+

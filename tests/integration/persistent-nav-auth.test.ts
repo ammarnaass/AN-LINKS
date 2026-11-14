@@ -134,3 +134,4 @@ describe("Persistent Navigation Auth & User Dropdown Resilience", () => {
     expect(html).not.toContain("ابدأ مجاناً");
   });
 });
+
