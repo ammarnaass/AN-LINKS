@@ -36,3 +36,11 @@ export function validatePasswordChange(
   return { valid: true };
 }
 
+export function validateSaudiIban(iban: string): { valid: boolean; error?: string } {
+  const clean = iban.replace(/\s+/g, "").toUpperCase();
+  if (!/^SA\d{22}$/.test(clean)) {
+    return { valid: false, error: "رقم الآيبان السعودي يجب أن يبدأ بـ SA متبوعاً بـ 22 رقماً" };
+  }
+  return { valid: true };
+}
+

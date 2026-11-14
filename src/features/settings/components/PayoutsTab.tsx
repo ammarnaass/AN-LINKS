@@ -61,6 +61,33 @@ export function PayoutsTab() {
           </div>
         </div>
       </div>
+
+      {/* Local Saudi Bank Account (IBAN) */}
+      <div className="bg-surface-container-low rounded-2xl p-6 lg:p-8 space-y-4 shadow-xl border border-outline-variant/30">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-on-surface text-base">الحساب البنكي المحلي لتحويل الأرباح</h3>
+            <p className="text-xs text-on-surface-variant mt-0.5">التحويل يتم تلقائياً إلى حسابك البنكي السعودي المعتمد</p>
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-primary/20 text-primary text-xs font-mono font-bold">
+            IBAN Verified ✓
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div>
+            <label className="block text-xs font-semibold text-on-surface-variant mb-1">اسم البنك المعتمد</label>
+            <div className="p-3 rounded-xl bg-surface-container border border-outline-variant/30 text-on-surface text-xs font-medium">
+              مصرف الراجحي (Al Rajhi Bank)
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-on-surface-variant mb-1">رقم الآيبان الدولي (IBAN)</label>
+            <div className="p-3 rounded-xl bg-surface-container border border-outline-variant/30 text-on-surface font-mono text-xs text-right" dir="ltr">
+              SA82 8000 0456 6080 1012 3456
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
