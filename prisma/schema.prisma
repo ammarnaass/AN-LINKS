@@ -21,6 +21,9 @@ model User {
   links         Link[]
   socials       SocialLink[]
   sessions      UserSession[]
+  subscriptions UserSubscription[]
+  invoices      FinancialInvoice[]
+  auditLogs     FinancialAuditLog[]
 }
 
 model Profile {
@@ -112,3 +115,152 @@ model UserSession {
 
   @@index([userId, isActive])
 }
+
+// ==========================================
+// Financial & Subscription Management Models
+// ==========================================
+
+model PaymentGateway {
+  id                  String   @id @default(cuid())
+  code                String   @unique // mada, apple_pay, stc_pay, tamara, tabby, stripe, paypal, fawry
+  nameAr              String
+  nameEn              String
+  category            String   // NATIONAL | INTERNATIONAL | BNPL | WALLET
+  isEnabled           Boolean  @default(false)
+  isTestMode          Boolean  @default(true)
+  publishableKey      String?
+  secretKeyEncrypted  String?  // مشفر في قاعدة البيانات
+  webhookSecret       String?
+  feePercentage       Float    @default(0.0) // عمولة البوابة المقتطعة
+  feeFixed            Float    @default(0.0) // رسوم ثابتة لكل عملية
+  supportedCurrencies String[] // ["SAR", "AED", "USD", ...]
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model SubscriptionPlan {
+  id             String              @id @default(cuid())
+  slug           String              @unique // free, creator, pro, agency
+  nameAr         String
+  nameEn         String
+  descriptionAr  String?
+  badgeAr        String?             // "الأكثر شعبية", "عرض خاص"
+  isActive       Boolean             @default(true)
+  sortOrder      Int                 @default(0)
+  prices         PlanPrice[]
+  quotas         PlanQuota?
+  subscriptions  UserSubscription[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+}
+
+model PlanPrice {
+  id              String           @id @default(cuid())
+  planId          String
+  plan            SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  currency        String           // SAR, AED, USD, EGP, KWD
+  billingCycle    String           // MONTHLY, YEARLY, LIFETIME
+  amount          Float            // المبلغ الفعلي للدفع
+  originalAmount  Float?           // المبلغ قبل الخصم (لإظهار الشطب والتوفير)
+  isActive        Boolean          @default(true)
+  externalPriceId String?          // المعرف المرتبط في Stripe أو Moyasar
+  
+  @@unique([planId, currency, billingCycle])
+}
+
+model PlanQuota {
+  id                     String           @id @default(cuid())
+  planId                 String           @unique
+  plan                   SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  maxLinks               Int              @default(10) // عدد الروابط المسموحة
+  allowCustomDomain      Boolean          @default(false) // ربط دومين خاص
+  allowRemoveBranding    Boolean          @default(false) // إخفاء شعار المنصة
+  allowAdvancedThemes    Boolean          @default(false) // قوالب CSS وخلفيات الفيديو
+  allowDetailedAnalytics Boolean          @default(false) // إحصائيات دقيقة ومصادر الزيارات
+  allowPrioritySupport   Boolean          @default(false) // دعم فني مخصص
+  customCssAllowed       Boolean          @default(false)
+  storeCommissionRate    Float            @default(5.0) // نسبة عمولة المنصة من مبيعات المتجر الرقمي للمستخدم
+}
+
+model CurrencyConfig {
+  code                String   @id // SAR, AED, USD, KWD, EGP, EUR
+  nameAr              String
+  symbol              String   // ر.س, د.إ, $, ج.م
+  exchangeRateToUSD   Float    // سعر الصرف مقابل الدولار
+  isBaseCurrency      Boolean  @default(false)
+  isActive            Boolean  @default(true)
+  autoDetectCountries String[] // ["SA"], ["AE"], ["EG", "SD"]
+  updatedAt           DateTime @updatedAt
+}
+
+model PromotionCoupon {
+  id                  String    @id @default(cuid())
+  code                String    @unique // مثلاً: SAUDI94, LAUNCH50
+  descriptionAr       String?
+  discountType        String    // PERCENTAGE | FIXED_AMOUNT
+  discountValue       Float     // قيمة الخصم (مثلاً 20 لـ 20%، أو 50 ريال)
+  maxUses             Int?      // أقصى عدد لاستخدام الكوبون إجمالاً
+  usedCount           Int       @default(0)
+  maxUsesPerUser      Int       @default(1)
+  validFrom           DateTime  @default(now())
+  validUntil          DateTime?
+  isActive            Boolean   @default(true)
+  applicablePlanSlugs String[]  // الباقات المسموح تطبيق الخصم عليها
+  createdAt           DateTime  @default(now())
+}
+
+model UserSubscription {
+  id                    String           @id @default(cuid())
+  userId                String
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId                String
+  plan                  SubscriptionPlan @relation(fields: [planId], references: [id])
+  status                String           @default("ACTIVE") // ACTIVE, PAST_DUE, CANCELED, EXPIRED
+  billingCycle          String           // MONTHLY, YEARLY, LIFETIME
+  currency              String
+  amountPaid            Float
+  couponCode            String?
+  gatewayCode           String           // mada, stripe, tamara
+  gatewaySubscriptionId String?
+  currentPeriodStart    DateTime         @default(now())
+  currentPeriodEnd      DateTime
+  cancelAtPeriodEnd     Boolean          @default(false)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@index([userId, status])
+}
+
+model FinancialInvoice {
+  id             String   @id @default(cuid())
+  invoiceNumber  String   @unique // INV-2026-0001
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amountSubtotal Float
+  discountAmount Float    @default(0.0)
+  taxAmount      Float    @default(0.0) // ضريبة القيمة المضافة 15% (KSA)
+  amountTotal    Float
+  currency       String
+  gatewayCode    String
+  gatewayTxId    String?
+  status         String   // PAID, FAILED, REFUNDED
+  pdfUrl         String?
+  createdAt      DateTime @default(now())
+}
+
+model FinancialAuditLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([entity, entityId])
+}
+
