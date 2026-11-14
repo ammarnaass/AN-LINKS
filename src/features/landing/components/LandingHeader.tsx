@@ -4,8 +4,12 @@ import React from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/shared/ui";
 import { LandingHeaderProps } from "../types/landing.types";
+import { useCurrentUser, UserNavDropdown } from "@/features/auth";
+import { LayoutDashboard } from "lucide-react";
 
 export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
+  const { isAuthenticated } = useCurrentUser();
+
   return (
     <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-outline-variant/15 text-on-surface">
       <div className="h-20 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
@@ -42,30 +46,56 @@ export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          <button
-            onClick={() => onOpenAuth?.("login")}
-            className="hidden sm:inline-flex items-center justify-center text-sm font-medium text-on-surface px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer"
-            type="button"
-          >
-            تسجيل الدخول
-          </button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/dashboard"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.25)] transition-all"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span>لوحة التحكم</span>
+              </Link>
+              <UserNavDropdown />
+            </div>
+          ) : (
+            <>
+              {onOpenAuth ? (
+                <button
+                  onClick={() => onOpenAuth("login")}
+                  className="hidden sm:inline-flex items-center justify-center text-sm font-medium text-on-surface px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer"
+                  type="button"
+                >
+                  تسجيل الدخول
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden sm:inline-flex items-center justify-center text-sm font-medium text-on-surface px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer"
+                >
+                  تسجيل الدخول
+                </Link>
+              )}
 
-          <button
-            onClick={() => onOpenAuth?.("signup")}
-            className="inline-flex items-center justify-center gap-2 text-sm font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
-            <span>ابدأ مجاناً</span>
-          </button>
-
-          <Link
-            href="/dashboard"
-            title="حسابي"
-            className="w-8 h-8 rounded-full bg-primary flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shrink-0"
-          >
-            <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
-          </Link>
+              {onOpenAuth ? (
+                <button
+                  onClick={() => onOpenAuth("signup")}
+                  className="inline-flex items-center justify-center gap-2 text-sm font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
+                  <span>ابدأ مجاناً</span>
+                </button>
+              ) : (
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center gap-2 text-sm font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
+                  <span>ابدأ مجاناً</span>
+                </Link>
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>

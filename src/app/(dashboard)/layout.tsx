@@ -1,7 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { Link2, Palette, BarChart3, Settings, LogOut } from "lucide-react";
+import { Link2, Palette, BarChart3, Settings } from "lucide-react";
 import { PreviewProvider } from "@/features/dashboard";
+import { UserNavDropdown } from "@/features/auth";
+import { ThemeToggle } from "@/shared/ui";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -56,16 +58,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
           </nav>
 
-          {/* Right Action Tools */}
+          {/* Right Action Tools: ThemeToggle and UserNavDropdown */}
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-xs text-outline hover:text-red-400 flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-surface-container transition"
-              title="تسجيل الخروج"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">خروج</span>
-            </Link>
+            <ThemeToggle />
+            <UserNavDropdown />
           </div>
         </div>
       </header>

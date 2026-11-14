@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/features/auth";
 
 export const metadata: Metadata = {
   title: "AN LINKS | أسرع منصة لروابط الـ Bio بالعربية",
@@ -44,7 +45,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-plex antialiased min-h-screen bg-surface-container-lowest text-on-surface selection:bg-primary-container selection:text-on-primary-container">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

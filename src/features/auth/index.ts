@@ -4,4 +4,6 @@ export * from "./services/auth.service";
 export * from "./components/LoginForm";
 export * from "./components/RegisterForm";
 export * from "./components/AuthSideBanner";
-
+export * from "./components/AuthProvider";
+export * from "./components/UserNavDropdown";
+export * from "./hooks/useCurrentUser";

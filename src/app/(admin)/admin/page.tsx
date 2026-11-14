@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Link2, Shield, Search, RefreshCw, AlertCircle } from "lucide-react";
 import { ThemeToggle, AppCard, AppInput, AppButton } from "@/shared/ui";
+import { UserNavDropdown } from "@/features/auth";
 import {
   AdminUserItem,
   AdminReportItem,
@@ -117,10 +118,11 @@ export default function AdminConsolePage() {
           </Link>
         </div>
         <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Link href="/dashboard" className="text-xs text-primary hover:underline">
+          <Link href="/dashboard" className="text-xs text-primary hover:underline hidden sm:inline">
             العودة للوحة العميل
           </Link>
+          <ThemeToggle />
+          <UserNavDropdown />
         </div>
       </header>
 
