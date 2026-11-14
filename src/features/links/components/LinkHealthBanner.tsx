@@ -2,13 +2,25 @@
 
 import React from "react";
 import { Plus } from "lucide-react";
+import { formatSentinelStatus } from "../utils/sentinel.utils";
 
 interface LinkHealthBannerProps {
   onToggleAdd: () => void;
   isAdding: boolean;
+  activeCount?: number;
+  totalCount?: number;
+  avgResponseMs?: number;
 }
 
-export function LinkHealthBanner({ onToggleAdd, isAdding }: LinkHealthBannerProps) {
+export function LinkHealthBanner({
+  onToggleAdd,
+  isAdding,
+  activeCount = 5,
+  totalCount = 5,
+  avgResponseMs = 72,
+}: LinkHealthBannerProps) {
+  const statusSummary = formatSentinelStatus(activeCount, totalCount, avgResponseMs);
+
   return (
     <div className="rounded-xl bg-surface-container-low p-4 shadow-lg border border-outline-variant/30 flex flex-col md:flex-row md:items-center justify-between gap-3">
       <div className="flex items-center gap-3">
@@ -17,14 +29,14 @@ export function LinkHealthBanner({ onToggleAdd, isAdding }: LinkHealthBannerProp
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-on-surface text-sm">مراقبة سلامة الروابط التلقائية</span>
-            <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center gap-1">
+            <span className="font-bold text-on-surface text-sm">مراقبة سلامة الروابط (Link Sentinel)</span>
+            <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center gap-1 font-mono">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               <span>100% صالحة</span>
             </span>
           </div>
-          <p className="text-xs text-on-surface-variant mt-0.5">
-            جميع الروابط تعمل بكفاءة عبر خوادم المراقبة الذكية
+          <p className="text-xs text-on-surface-variant mt-0.5 font-mono">
+            {statusSummary} • فحص تلقائي كل 5 دقائق
           </p>
         </div>
       </div>

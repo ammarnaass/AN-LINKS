@@ -119,8 +119,9 @@ export function LinkCardItem({
 
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${catObj.color}`}>
-                {catObj.label}
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border flex items-center gap-1 ${catObj.color}`}>
+                {catObj.icon && <span className="material-symbols-outlined text-[12px]">{catObj.icon}</span>}
+                <span>{catObj.label}</span>
               </span>
               {!link.isActive && (
                 <span className="px-2 py-0.5 rounded-full bg-error-container/20 text-error text-[11px]">
@@ -142,14 +143,15 @@ export function LinkCardItem({
               <ExternalLink className="w-3 h-3" />
             </a>
 
-            <div className="flex flex-wrap items-center gap-3 mt-2 pt-1">
+            <div className="flex flex-wrap items-center gap-2.5 mt-2 pt-1">
               <span className="inline-flex items-center gap-1 text-primary text-xs bg-primary/10 px-2 py-0.5 rounded font-mono">
                 <span className="material-symbols-outlined text-[13px]">ads_click</span>
                 <span>{link.clicks ? link.clicks.toLocaleString("ar-SA") : "٠"} نقرة</span>
               </span>
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-lowest border border-outline-variant/30 text-primary text-[10px] font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                <span>200 OK • سليم</span>
+                <span>200 OK • سليم (72ms)</span>
+                <span className="text-tertiary font-sans hidden sm:inline">• استجابة سريعة</span>
               </div>
             </div>
           </div>

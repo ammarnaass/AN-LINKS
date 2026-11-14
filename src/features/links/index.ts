@@ -1,6 +1,7 @@
 export * from "./types/links.types";
 export * from "./constants/categories";
 export * from "./validators/link.validator";
+export * from "./utils/sentinel.utils";
 export * from "./components/LinkHealthBanner";
 export * from "./components/AddLinkForm";
 export * from "./components/LinkCardItem";

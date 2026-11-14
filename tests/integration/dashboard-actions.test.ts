@@ -4,6 +4,7 @@ import {
   reorderLinkItems,
   filterLinks,
   calculateQuickMetrics,
+  formatSentinelStatus,
 } from "@/lib/dashboard-actions";
 
 describe("Dashboard Actions & Link Management Logic", () => {
@@ -79,6 +80,11 @@ describe("Dashboard Actions & Link Management Logic", () => {
     expect(metrics.totalViews).toBe(28450);
     expect(metrics.totalClicks).toBe(9120);
     expect(metrics.ctrPercentage).toBe("32.1%");
+  });
+
+  it("should format Link Sentinel health status accurately matching Stitch _7", () => {
+    const statusText = formatSentinelStatus(5, 5, 72);
+    expect(statusText).toBe("5/5 روابط تعمل بسرعة استجابة 72ms");
   });
 });
 
