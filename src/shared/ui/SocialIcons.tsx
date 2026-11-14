@@ -121,3 +121,14 @@ export const SOCIAL_ICON_MAP: Record<string, React.ComponentType<{ className?: s
   tiktok: TikTokIcon,
 };
 
+export function SocialIcons({
+  network,
+  className = "w-4 h-4",
+}: {
+  network: string;
+  className?: string;
+}) {
+  const IconComponent = SOCIAL_ICON_MAP[network.toLowerCase()] || GenericLinkIcon;
+  return <IconComponent className={className} />;
+}
+
