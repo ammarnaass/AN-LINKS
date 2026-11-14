@@ -19,21 +19,21 @@ export function DevicesAndGeoBreakdown({ countries }: DevicesAndGeoBreakdownProp
               <span className="w-2 h-2 rounded-full bg-primary" />
               هواتف ذكية
             </span>
-            <span className="font-bold text-on-surface">82%</span>
+            <span className="font-bold text-on-surface font-mono">84%</span>
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className="text-on-surface-variant flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-secondary" />
               أجهزة مكتبية
             </span>
-            <span className="font-bold text-on-surface">14%</span>
+            <span className="font-bold text-on-surface font-mono">13%</span>
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className="text-on-surface-variant flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-tertiary" />
               أجهزة لوحية
             </span>
-            <span className="font-bold text-on-surface">4%</span>
+            <span className="font-bold text-on-surface font-mono">3%</span>
           </div>
         </div>
       </div>
