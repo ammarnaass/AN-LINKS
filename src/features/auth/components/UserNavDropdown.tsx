@@ -8,11 +8,13 @@ import {
   Shield,
   LayoutDashboard,
   Palette,
+  BarChart3,
   Settings,
   ExternalLink,
   LogOut,
   ChevronDown,
   Sparkles,
+  Globe,
 } from "lucide-react";
 import { useCurrentUser, clearAuthCache } from "../hooks/useCurrentUser";
 
@@ -183,12 +185,30 @@ export function UserNavDropdown() {
             </Link>
 
             <Link
+              href="/dashboard/analytics"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2.5 p-2 rounded-xl text-on-surface hover:bg-surface-container hover:text-primary text-xs font-semibold transition-all"
+            >
+              <BarChart3 className="w-4 h-4 text-on-surface-variant group-hover:text-primary shrink-0" />
+              <span>التحليلات والإحصائيات</span>
+            </Link>
+
+            <Link
               href="/dashboard/settings"
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-2.5 p-2 rounded-xl text-on-surface hover:bg-surface-container hover:text-primary text-xs font-semibold transition-all"
             >
               <Settings className="w-4 h-4 text-on-surface-variant group-hover:text-primary shrink-0" />
               <span>إعدادات الحساب</span>
+            </Link>
+
+            <Link
+              href="/"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2.5 p-2 rounded-xl text-on-surface hover:bg-surface-container hover:text-primary text-xs font-semibold transition-all"
+            >
+              <Globe className="w-4 h-4 text-on-surface-variant group-hover:text-primary shrink-0" />
+              <span>الصفحة الرئيسية للموقع</span>
             </Link>
 
             {user.username && (

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, AlertCircle, User, Mail, Lock, AtSign } from "lucide-react";
 import { validateUsernameFormat } from "../validators/auth.validator";
 import { registerAccount, loginWithCredentials } from "../services/auth.service";
+import { setAuthCache } from "../hooks/useCurrentUser";
 import { AppButton, AppInput } from "@/shared/ui";
 
 export function RegisterForm() {
@@ -59,6 +60,12 @@ export function RegisterForm() {
       }
 
       await loginWithCredentials(formData.email, formData.password);
+      setAuthCache({
+        email: formData.email,
+        username: formData.username,
+        role: "USER",
+        name: formData.displayName,
+      });
       router.push("/dashboard");
       router.refresh();
     } catch {
