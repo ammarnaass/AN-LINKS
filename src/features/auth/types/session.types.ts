@@ -18,3 +18,4 @@ export interface AdminSessionDTO extends UserSessionDTO {
   userRole: "ADMIN" | "USER";
   username: string;
 }
+

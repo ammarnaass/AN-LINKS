@@ -24,3 +24,4 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: false, error: "فشل إنهاء الجلسة" }, { status: 500 });
   }
 }
+

@@ -131,3 +131,4 @@ describe("Real Links & Profile CRUD APIs (Task 2)", () => {
     expect(data.analytics).toHaveProperty("totalClicks");
   });
 });
+

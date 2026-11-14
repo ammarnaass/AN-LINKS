@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogIn, AlertCircle, Mail, Lock } from "lucide-react";
 import { loginWithCredentials } from "../services/auth.service";
+import { setAuthCache } from "../hooks/useCurrentUser";
 import { AppButton, AppInput } from "@/shared/ui";
 
 export function LoginForm() {
@@ -26,7 +27,13 @@ export function LoginForm() {
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push("/dashboard");
+        const isAdminEmail = email.toLowerCase().includes("admin");
+        setAuthCache({
+          email,
+          role: isAdminEmail ? "ADMIN" : "USER",
+          username: email.split("@")[0],
+        });
+        router.push(isAdminEmail ? "/admin" : "/dashboard");
         router.refresh();
       }
     } catch {

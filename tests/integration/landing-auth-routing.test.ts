@@ -40,3 +40,4 @@ describe("Landing Auth Routing & Direct Navigation (Task 1)", () => {
     expect(validation.errors.length).toBeGreaterThan(0);
   });
 });
+

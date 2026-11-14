@@ -69,3 +69,4 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: false, error: "فشل حذف الرابط" }, { status: 500 });
   }
 }
+

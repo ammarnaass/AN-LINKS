@@ -14,10 +14,10 @@ import {
   ChevronDown,
   Sparkles,
 } from "lucide-react";
-import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useCurrentUser, clearAuthCache } from "../hooks/useCurrentUser";
 
 export function UserNavDropdown() {
-  const { user, isAuthenticated, isAdmin, isLoading } = useCurrentUser();
+  const { user, isAdmin } = useCurrentUser();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +43,7 @@ export function UserNavDropdown() {
     };
   }, [isOpen]);
 
-  if (isLoading || !isAuthenticated || !user) {
+  if (!user) {
     return null;
   }
 
@@ -148,7 +148,6 @@ export function UserNavDropdown() {
 
           {/* Menu Items */}
           <div className="py-2 space-y-1">
-            {/* Operator Console Link (Exclusive for ADMIN) */}
             {isAdmin && (
               <Link
                 href="/admin"
@@ -216,6 +215,7 @@ export function UserNavDropdown() {
             type="button"
             onClick={() => {
               setIsOpen(false);
+              clearAuthCache();
               signOut({ callbackUrl: "/login" });
             }}
             className="w-full flex items-center gap-2.5 p-2 rounded-xl text-error hover:bg-error-container/20 text-xs font-bold transition-all cursor-pointer"
@@ -228,4 +228,3 @@ export function UserNavDropdown() {
     </div>
   );
 }
-

@@ -14,3 +14,4 @@ export async function GET() {
     return NextResponse.json({ success: false, error: "فشل جلب جلسات المنصة" }, { status: 500 });
   }
 }
+

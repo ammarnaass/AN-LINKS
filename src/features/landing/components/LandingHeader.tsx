@@ -8,7 +8,7 @@ import { useCurrentUser, UserNavDropdown } from "@/features/auth";
 import { LayoutDashboard } from "lucide-react";
 
 export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
-  const { isAuthenticated } = useCurrentUser();
+  const { isAuthenticated, isLoading } = useCurrentUser();
 
   return (
     <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-outline-variant/15 text-on-surface">
@@ -56,6 +56,11 @@ export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
                 <span>لوحة التحكم</span>
               </Link>
               <UserNavDropdown />
+            </div>
+          ) : isLoading ? (
+            <div className="flex items-center gap-2 animate-pulse">
+              <div className="w-20 h-9 rounded-xl bg-surface-container-high/60 hidden sm:block" />
+              <div className="w-24 h-9 rounded-xl bg-primary-container/40" />
             </div>
           ) : (
             <>
