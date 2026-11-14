@@ -108,13 +108,13 @@ export const THEME_TOKENS: Record<"dark" | "light", ModeTokens> = {
     tertiary: "#4cd7f6",
   },
   light: {
-    surface: "#f9f9fe",
-    surfaceContainer: "#edeef4",
-    onSurface: "#191c20",
+    surface: "#faf8ff",
+    surfaceContainer: "#eaedff",
+    onSurface: "#131b2e",
     primary: "#006948",
-    primaryContainer: "#6ffbbe",
-    secondary: "#4d6356",
-    tertiary: "#3d6473",
+    primaryContainer: "#00855d",
+    secondary: "#006c49",
+    tertiary: "#00694c",
   },
 };
 

@@ -5,23 +5,93 @@
 @layer base {
   :root {
     --font-cairo: 'Cairo', sans-serif;
+    color-scheme: light;
+
+    /* Rawabet Luxury Light Tokens */
+    --surface: 250 248 255;                   /* #faf8ff */
+    --surface-dim: 210 217 244;               /* #d2d9f4 */
+    --surface-bright: 250 248 255;            /* #faf8ff */
+    --surface-container-lowest: 255 255 255;  /* #ffffff */
+    --surface-container-low: 242 243 255;     /* #f2f3ff */
+    --surface-container: 234 237 255;         /* #eaedff */
+    --surface-container-high: 226 231 255;    /* #e2e7ff */
+    --surface-container-highest: 218 226 253; /* #dae2fd */
+    --on-surface: 19 27 46;                   /* #131b2e */
+    --on-surface-variant: 61 74 66;           /* #3d4a42 */
+    --inverse-surface: 40 48 68;              /* #283044 */
+    --inverse-on-surface: 238 240 255;        /* #eef0ff */
+    --inverse-primary: 104 219 169;           /* #68dba9 */
+    --outline: 109 122 114;                   /* #6d7a72 */
+    --outline-variant: 188 202 192;           /* #bccac0 */
+    --primary: 0 105 72;                      /* #006948 */
+    --on-primary: 255 255 255;                /* #ffffff */
+    --primary-container: 0 133 93;            /* #00855d */
+    --on-primary-container: 245 255 247;      /* #f5fff7 */
+    --secondary: 0 108 73;                    /* #006c49 */
+    --secondary-container: 108 248 187;       /* #6cf8bb */
+    --on-secondary: 255 255 255;              /* #ffffff */
+    --on-secondary-container: 0 113 77;       /* #00714d */
+    --tertiary: 0 105 76;                     /* #00694c */
+    --tertiary-container: 30 132 98;          /* #1e8462 */
+    --on-tertiary: 255 255 255;               /* #ffffff */
+    --on-tertiary-container: 245 255 247;     /* #f5fff7 */
+    --error: 186 26 26;                       /* #ba1a1a */
+    --error-container: 255 218 214;           /* #ffdad6 */
+    --background: 250 248 255;                /* #faf8ff */
+    --on-background: 19 27 46;                /* #131b2e */
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    /* Layan Dark Arabic Bento Tokens */
+    --surface: 15 19 28;                      /* #0f131c */
+    --surface-dim: 15 19 28;                  /* #0f131c */
+    --surface-bright: 53 57 66;               /* #353942 */
+    --surface-container-lowest: 10 14 22;     /* #0a0e16 */
+    --surface-container-low: 24 28 36;        /* #181c24 */
+    --surface-container: 28 32 40;            /* #1c2028 */
+    --surface-container-high: 38 42 51;       /* #262a33 */
+    --surface-container-highest: 49 53 62;    /* #31353e */
+    --on-surface: 223 226 238;                /* #dfe2ee */
+    --on-surface-variant: 187 202 191;        /* #bbcabf */
+    --inverse-surface: 223 226 238;           /* #dfe2ee */
+    --inverse-on-surface: 44 48 57;           /* #2c3039 */
+    --inverse-primary: 0 108 73;              /* #006c49 */
+    --outline: 134 148 138;                   /* #86948a */
+    --outline-variant: 60 74 66;              /* #3c4a42 */
+    --primary: 78 222 163;                    /* #4edea3 */
+    --on-primary: 0 56 36;                    /* #003824 */
+    --primary-container: 16 185 129;          /* #10b981 */
+    --on-primary-container: 0 66 43;          /* #00422b */
+    --secondary: 208 188 255;                 /* #d0bcff */
+    --secondary-container: 87 27 193;         /* #571bc1 */
+    --on-secondary: 60 0 145;                 /* #3c0091 */
+    --on-secondary-container: 196 171 255;    /* #c4abff */
+    --tertiary: 76 215 246;                   /* #4cd7f6 */
+    --tertiary-container: 0 178 208;          /* #00b2d0 */
+    --on-tertiary: 0 54 64;                   /* #003640 */
+    --on-tertiary-container: 0 63 75;         /* #003f4b */
+    --error: 255 180 171;                     /* #ffb4ab */
+    --error-container: 147 0 10;              /* #93000a */
+    --background: 15 19 28;                   /* #0f131c */
+    --on-background: 223 226 238;             /* #dfe2ee */
   }
 
   html {
     font-family: 'IBM Plex Sans Arabic', 'Cairo', system-ui, -apple-system, sans-serif;
-    color-scheme: dark;
   }
 
   body {
-    background-color: #0a0e16;
-    color: #dfe2ee;
+    background-color: rgb(var(--surface-container-lowest));
+    color: rgb(var(--on-surface));
     font-family: 'IBM Plex Sans Arabic', 'Cairo', system-ui, -apple-system, sans-serif;
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
-/* Material Symbols Outlined Support with RTL Direction Override */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined' !important;
   font-weight: normal;
@@ -42,7 +112,6 @@
   user-select: none;
 }
 
-/* Hide scrollbars cleanly matching Stitch spec */
 ::-webkit-scrollbar {
   display: none;
 }
