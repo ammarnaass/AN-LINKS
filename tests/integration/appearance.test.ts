@@ -21,9 +21,11 @@ describe("Appearance & Themes Customizer Logic", () => {
     expect(FONTS).toHaveProperty("IBMPlex");
     expect(FONTS).toHaveProperty("Cairo");
     expect(FONTS).toHaveProperty("Tajawal");
+    expect(FONTS).toHaveProperty("Almarai");
 
     expect(FONTS.IBMPlex.name).toBe("IBM Plex Sans Arabic");
     expect(FONTS.Cairo.name).toBe("Cairo");
+    expect(FONTS.Almarai.name).toBe("Almarai");
   });
 
   it("should support filled, glass, and soft button styling options", () => {

@@ -154,5 +154,10 @@ export const FONTS: Record<string, { name: string; nameAr: string; className: st
     nameAr: "خط تجوال (Tajawal)",
     className: "font-sans",
   },
+  Almarai: {
+    name: "Almarai",
+    nameAr: "خط المراعي (Almarai)",
+    className: "font-sans",
+  },
 };
 
