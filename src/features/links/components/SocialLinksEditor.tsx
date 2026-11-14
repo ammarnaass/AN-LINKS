@@ -24,6 +24,7 @@ const AVAILABLE_NETWORKS = [
 export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEditorProps) {
   const [selectedNetwork, setSelectedNetwork] = useState(AVAILABLE_NETWORKS[0].id);
   const [networkUrl, setNetworkUrl] = useState("");
+  const [isReordering, setIsReordering] = useState(false);
 
   const handleSelectNetwork = (netId: string) => {
     setSelectedNetwork(netId);
@@ -76,9 +77,17 @@ export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEdito
             <span className="material-symbols-outlined text-primary text-[20px]">hub</span>
             <h3 className="font-bold text-on-surface text-base">شبكات التواصل السريعة</h3>
             <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-xs">
-              {socials.length} منصات متصلة
+              {`${socials.length} منصات متصلة`}
             </span>
           </div>
+          <button
+            type="button"
+            onClick={() => setIsReordering(!isReordering)}
+            className="flex items-center gap-1 text-on-surface-variant hover:text-primary text-xs transition-colors"
+          >
+            <span className="material-symbols-outlined text-[16px]">tune</span>
+            <span>{isReordering ? "حفظ الترتيب" : "ترتيب الأيقونات"}</span>
+          </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 pt-1">

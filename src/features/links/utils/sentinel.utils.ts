@@ -5,3 +5,4 @@ export function formatSentinelStatus(
 ): string {
   return `${activeCount}/${totalCount} روابط تعمل بسرعة استجابة ${avgResponseMs}ms`;
 }
+

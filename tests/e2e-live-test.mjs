@@ -15,7 +15,7 @@ async function runTests() {
   assert(landingHtml.includes("rawabet.me/"), "Landing page should have handle claim prefix");
   assert(landingHtml.includes("احجز رابطك"), "Landing page should contain claim CTA button");
 
-  assert(landingHtml.includes("طارق المنصور"), "Landing page should render phone mockup showcase");
+  assert(landingHtml.includes("فيصل الشمري") || landingHtml.includes("طارق المنصور"), "Landing page should render phone mockup showcase");
   console.log("   ✅ Landing Page: 200 OK, RTL verified, Hero & Mockup present.");
 
   // 2. Registration Page

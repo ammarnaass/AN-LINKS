@@ -1,142 +1,136 @@
 import React from "react";
-import {
-  InstagramIcon,
-  TwitterXIcon,
-  YoutubeIcon,
-  LinkedinIcon,
-} from "@/shared/ui";
-import {
-  TrendingUp,
-  ShoppingBag,
-  ExternalLink,
-  CheckCircle2,
-  Sparkles,
-} from "lucide-react";
 
 export function PhoneMockup() {
   return (
     <div className="relative w-full max-w-4xl mx-auto flex items-center justify-center py-6">
-      {/* Floating Card 1: Live Analytics Counter */}
-      <div className="hidden lg:flex absolute -left-4 xl:-left-8 top-12 z-20 flex-col gap-2 p-4 bg-surface-container-high/90 border border-white/10 backdrop-blur-xl rounded-2xl shadow-[0_16px_32px_rgba(0,0,0,0.6)] w-64 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
+      {/* Floating Card 1: Live Analytics Counter (Top-Left) */}
+      <div className="hidden lg:flex absolute -left-6 top-12 z-20 flex-col gap-2 p-4 bg-surface-container-high/90 backdrop-blur-xl rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.6)] w-60 transform -rotate-2 hover:rotate-0 transition-transform duration-300 border border-white/5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/20 text-primary flex items-center justify-center">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-bold text-on-surface">إحصاءات حية</span>
-          </div>
-          <span className="text-[10px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full">
-            +١٤.٢٪ ↗
+          <span className="text-xs text-on-surface-variant font-semibold">زيارات اليوم المباشرة</span>
+          <span className="inline-flex p-1 rounded-md bg-primary-container/15 text-primary">
+            <span className="material-symbols-outlined text-[18px]">trending_up</span>
           </span>
         </div>
-        <div className="flex items-baseline gap-2 mt-1">
-          <span className="text-2xl font-black text-on-surface">٢٨,٤٥٠</span>
-          <span className="text-[10px] text-on-surface-variant font-medium">زيارة حقيقية</span>
+        <div className="flex items-baseline gap-2">
+          <span className="text-xl font-bold text-on-surface font-mono">+14,280</span>
+          <span className="text-xs text-primary font-bold font-mono">▲ 34.6%</span>
         </div>
-        <div className="flex items-center gap-1 mt-1">
-          <div className="h-1.5 flex-1 bg-surface-container-lowest rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full w-4/5 animate-pulse" />
+        <svg className="w-full h-8 text-primary overflow-visible mt-1" fill="none" viewBox="0 0 100 24">
+          <path d="M0 18 Q 20 8, 35 15 T 65 5 T 100 2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2.5" />
+          <path d="M0 18 Q 20 8, 35 15 T 65 5 T 100 2 L 100 24 L 0 24 Z" fill="currentColor" fillOpacity="0.1" />
+        </svg>
+      </div>
+
+      {/* Floating Card 2: Self-Healing Link Health Monitor (Bottom-Right) */}
+      <div className="hidden lg:flex absolute -right-6 bottom-16 z-20 items-center gap-3.5 p-4 bg-surface-container-high/90 backdrop-blur-xl rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.6)] w-64 transform rotate-2 hover:rotate-0 transition-transform duration-300 border border-white/5">
+        <div className="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary shrink-0">
+          <span className="material-symbols-outlined text-[24px]">verified_user</span>
+        </div>
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-bold text-on-surface">فاحص الروابط الذكي</span>
+            <span className="w-2 h-2 rounded-full bg-primary" />
           </div>
-          <span className="text-[10px] text-outline">معدل نقر 32%</span>
+          <span className="text-xs text-primary truncate">جميع الروابط تعمل 100% بنجاح</span>
         </div>
       </div>
 
-      {/* Floating Card 2: Sales Toast */}
-      <div className="hidden lg:flex absolute -right-4 xl:-right-8 bottom-16 z-20 flex-col gap-2 p-4 bg-surface-container-high/90 border border-white/10 backdrop-blur-xl rounded-2xl shadow-[0_16px_32px_rgba(0,0,0,0.6)] w-64 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-tertiary/20 text-tertiary flex items-center justify-center">
-              <ShoppingBag className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-bold text-on-surface">مبيعات رقمية مباشرة</span>
-          </div>
-          <span className="text-[10px] text-on-surface-variant">الآن</span>
+      {/* Floating Card 3: New Sale Notification (Top-Right) */}
+      <div className="hidden lg:flex absolute -right-2 top-8 z-20 items-center gap-3 p-3.5 bg-surface-container-high/90 backdrop-blur-xl rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.6)] transform -rotate-1 hover:rotate-0 transition-transform duration-300 border border-white/5">
+        <div className="w-9 h-9 rounded-lg bg-secondary-container/30 text-secondary flex items-center justify-center">
+          <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
         </div>
-        <div className="flex items-center justify-between mt-1">
-          <span className="text-xs font-semibold text-on-surface truncate">
-            دليل التصميم الذكي v2
-          </span>
-          <span className="text-xs font-bold text-primary font-mono">$49.00</span>
+        <div className="flex flex-col">
+          <span className="text-xs text-on-surface font-bold">مبيعة كتاب إلكتروني جديدة</span>
+          <span className="text-[11px] text-on-surface-variant font-mono">149 ر.س • منذ دقيقتين</span>
         </div>
-        <span className="text-[10px] text-emerald-400 font-medium">
-          ✓ تم استلام الدفعة وتحويل المشتري تلقائياً
-        </span>
       </div>
 
-      {/* Center Phone Device Container */}
-      <div className="relative mx-auto max-w-[320px] sm:max-w-[340px]">
-        <div className="relative rounded-[48px] p-3.5 bg-gray-900 border border-white/10 shadow-2xl ring-1 ring-gray-800 shadow-primary/10">
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 w-24 h-4 bg-black rounded-full z-20 flex items-center justify-end px-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-gray-900 border border-gray-800" />
+      {/* Central Smartphone Chassis Simulator */}
+      <div className="relative w-[340px] sm:w-[375px] rounded-[44px] bg-surface-container-highest p-3 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] border border-white/10">
+        {/* Phone Speaker & Camera Notch */}
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 w-28 h-4 bg-surface-container-lowest rounded-full z-30 flex items-center justify-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-surface-variant" />
+          <div className="w-8 h-1 rounded-full bg-surface-variant" />
+        </div>
+
+        {/* Phone Display Canvas */}
+        <div className="w-full bg-surface-container-lowest rounded-[36px] overflow-hidden p-5 pt-12 flex flex-col items-center">
+          {/* Creator Avatar & Identity */}
+          <div className="relative mb-3">
+            <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-primary via-tertiary to-secondary shadow-md flex items-center justify-center overflow-hidden">
+              <div className="w-full h-full rounded-full bg-surface-container-high flex items-center justify-center text-2xl font-bold text-white">
+                ف
+              </div>
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary text-slate-900 flex items-center justify-center font-bold text-xs shadow">
+              ✓
+            </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-[38px] bg-gradient-to-b from-[#0f131c] via-[#141824] to-[#0a0e16] text-on-surface p-6 pt-10 min-h-[580px] flex flex-col items-center justify-between">
-            <div className="flex flex-col items-center text-center space-y-3 w-full">
-              <div className="relative">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-primary via-tertiary to-secondary p-0.5 shadow-lg">
-                  <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-2xl font-bold text-white uppercase overflow-hidden">
-                    ط
-                  </div>
+          <h3 className="text-base font-bold text-on-surface text-center">فيصل الشمري</h3>
+          <p className="text-xs text-on-surface-variant text-center max-w-[260px] mt-1 mb-4 leading-relaxed">
+            صانع محتوى تقني ومؤسس استوديو «ابتكار». أشارك أسرار الذكاء الاصطناعي والتجارة الرقمية.
+          </p>
+
+          {/* Social Quick Icons Row */}
+          <div className="flex items-center gap-2 mb-4">
+            {["play_circle", "chat", "podcasts", "mail"].map((icon) => (
+              <span
+                key={icon}
+                className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">{icon}</span>
+              </span>
+            ))}
+          </div>
+
+          {/* Bento Bio Tiles Stack inside Phone */}
+          <div className="w-full flex flex-col gap-2.5">
+            {/* Tile 1: Video Bento Tile */}
+            <div className="w-full bg-surface-container-low rounded-xl p-3 flex flex-col gap-2 hover:bg-surface-container transition-colors cursor-pointer border border-white/5">
+              <div className="relative w-full h-24 rounded-lg overflow-hidden bg-surface-container-high flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary text-slate-900 flex items-center justify-center shadow-lg">
+                  <span className="material-symbols-outlined text-[22px]">play_arrow</span>
                 </div>
-                <div className="absolute bottom-0 right-0 bg-primary text-slate-900 rounded-full p-0.5 shadow">
-                  <CheckCircle2 className="w-4 h-4 fill-current" />
+                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-surface-container-lowest/80 text-[10px] font-mono text-primary font-bold">
+                  جديد 18:42 دقيقة
                 </div>
               </div>
+              <span className="text-xs font-bold text-on-surface truncate">
+                دليل أدوات الذكاء الاصطناعي 2025
+              </span>
+            </div>
 
-              <div className="space-y-0.5">
-                <div className="flex items-center justify-center gap-1.5">
-                  <h3 className="font-bold text-base text-white">طارق المنصور</h3>
-                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+            {/* Tile 2: Product Bento Tile */}
+            <div className="w-full bg-surface-container-low rounded-xl p-3 flex items-center justify-between hover:bg-surface-container transition-colors cursor-pointer border border-white/5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-primary-container/20 text-primary flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[18px]">menu_book</span>
                 </div>
-                <p className="text-[11px] font-mono text-primary/80 dir-ltr" dir="ltr">
-                  @tariq
-                </p>
+                <div className="flex flex-col truncate">
+                  <span className="text-xs font-bold text-on-surface truncate">كتاب احتراف هندسة الأوامر</span>
+                  <span className="text-[10px] text-on-surface-variant">PDF + قوالب جاهزة</span>
+                </div>
               </div>
-
-              <p className="text-xs text-on-surface-variant leading-relaxed max-w-[260px]">
-                صانع محتوى تقني ورائد أعمال 🚀 أشارككم أحدث أدوات الذكاء الاصطناعي وتطوير المنتجات الرقمية.
-              </p>
-
-              <div className="flex items-center gap-2 pt-1">
-                <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:text-primary transition">
-                  <InstagramIcon className="w-3.5 h-3.5" />
-                </div>
-                <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:text-primary transition">
-                  <TwitterXIcon className="w-3 h-3" />
-                </div>
-                <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:text-primary transition">
-                  <YoutubeIcon className="w-3.5 h-3.5" />
-                </div>
-                <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:text-primary transition">
-                  <LinkedinIcon className="w-3 h-3" />
-                </div>
+              <div className="flex flex-col items-end shrink-0">
+                <span className="text-xs font-bold text-primary font-mono">149 ر.س</span>
+                <span className="text-[9px] text-amber-400 font-bold">خصم 30%</span>
               </div>
             </div>
 
-            <div className="w-full space-y-2.5 my-4">
-              <div className="w-full p-3 rounded-xl bg-surface-container-high border border-white/5 text-right flex items-center justify-between text-xs font-semibold text-white transition shadow-sm hover:border-primary/40">
-                <div className="flex items-center gap-2">
-                  <span>🛍️ متجري الإلكتروني - عتاد ذكي</span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-primary text-slate-900 text-[9px] font-bold">
-                    خصم 20%
-                  </span>
+            {/* Tile 3: Consultation Bento Tile */}
+            <div className="w-full bg-surface-container-low rounded-xl p-3 flex items-center justify-between hover:bg-surface-container transition-colors cursor-pointer border border-white/5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-secondary-container/20 text-secondary flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[18px]">calendar_today</span>
                 </div>
-                <ExternalLink className="w-3.5 h-3.5 text-primary" />
+                <div className="flex flex-col truncate">
+                  <span className="text-xs font-bold text-on-surface truncate">حجز استشارة خاصة 45 دقيقة</span>
+                  <span className="text-[10px] text-on-surface-variant">متاح 3 مقاعد فقط</span>
+                </div>
               </div>
-
-              <div className="w-full p-3 rounded-xl bg-surface-container border border-white/5 text-right flex items-center justify-between text-xs font-medium text-on-surface-variant transition shadow-sm hover:bg-surface-container-high">
-                <span>🎥 بودكاست تقنية الغد - الحلقة 42</span>
-                <ExternalLink className="w-3.5 h-3.5 opacity-60" />
-              </div>
-
-              <div className="w-full p-3 rounded-xl bg-gradient-to-l from-primary-container to-emerald-700 text-slate-950 font-bold text-right flex items-center justify-between text-xs transition shadow-md shadow-primary/20">
-                <span>💬 حجز استشارة خاصة 1:1</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </div>
-            </div>
-
-            <div className="text-[10px] text-on-surface-variant font-medium tracking-wide">
-              ⚡ صُمم بواسطة AN LINKS
+              <span className="material-symbols-outlined text-outline text-[18px]">arrow_back</span>
             </div>
           </div>
         </div>
@@ -144,4 +138,3 @@ export function PhoneMockup() {
     </div>
   );
 }
-

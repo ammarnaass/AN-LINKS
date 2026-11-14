@@ -77,3 +77,4 @@ export const LANDING_TEMPLATES: LandingTemplate[] = [
     ],
   },
 ];
+

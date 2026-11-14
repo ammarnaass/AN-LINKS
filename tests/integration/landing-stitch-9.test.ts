@@ -25,3 +25,4 @@ describe("Stitch _9 Landing Page Data & Components", () => {
     expect(LANDING_FAQS.length).toBeGreaterThanOrEqual(4);
   });
 });
+

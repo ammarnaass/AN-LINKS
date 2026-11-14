@@ -13,6 +13,7 @@ interface LinkButtonProps {
   borderRadius?: string | null;
   accentColor?: string | null;
   isPreview?: boolean;
+  highlightBadge?: string | null;
 }
 
 export function LinkButton({
@@ -22,6 +23,7 @@ export function LinkButton({
   borderRadius,
   accentColor,
   isPreview = false,
+  highlightBadge,
 }: LinkButtonProps) {
   const effectiveButtonStyle = buttonStyle || "filled";
   const effectiveBorderRadius = borderRadius || "rounded-xl";
@@ -48,9 +50,16 @@ export function LinkButton({
           <Globe className="w-5 h-5" />
         </div>
         <div className="flex flex-col text-right truncate">
-          <span className="font-semibold text-sm sm:text-base text-on-surface group-hover:text-primary transition-colors truncate">
-            {link.title}
-          </span>
+          <div className="flex items-center gap-2 truncate">
+            <span className="font-semibold text-sm sm:text-base text-on-surface group-hover:text-primary transition-colors truncate">
+              {link.title}
+            </span>
+            {highlightBadge && (
+              <span className="px-2 py-0.5 rounded-md bg-primary/15 text-primary text-[10px] font-bold border border-primary/20 shrink-0">
+                {highlightBadge}
+              </span>
+            )}
+          </div>
           <span className="text-[11px] text-on-surface-variant truncate opacity-80" dir="ltr">
             {link.url.replace(/^https?:\/\//, "")}
           </span>
