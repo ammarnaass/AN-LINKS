@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { Shield, RefreshCw } from "lucide-react";
+import React, { useState } from "react";
+import { RefreshCw, Menu } from "lucide-react";
 import { ThemeToggle } from "@/shared/ui";
 import { UserNavDropdown } from "@/features/auth";
 import {
-  AdminNavTabs,
+  AdminTabKey,
+  AdminSidebar,
   AdminAnalyticsTab,
   AdminUsersTab,
   AdminPaymentsTab,
@@ -17,7 +17,17 @@ import {
 import { useAdminConsole } from "@/features/admin/hooks/useAdminConsole";
 import { AdminSessionsTab } from "@/features/admin/components/AdminSessionsTab";
 
+const TAB_TITLES: Record<AdminTabKey, string> = {
+  analytics: "الإحصائيات والنمو والتحليلات",
+  users: "إدارة المستخدمين والمشتركين",
+  sessions: "الجلسات النشطة والأجهزة",
+  payments: "طرق الدفع وبوابات الاشتراكات",
+  settings: "إعدادات المنصة والسياسات",
+  reports: "مركز البلاغات والاعتدال",
+};
+
 export default function AdminConsolePage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const {
     activeTab,
     setActiveTab,
@@ -36,98 +46,102 @@ export default function AdminConsolePage() {
   } = useAdminConsole();
 
   const currentSettings = settings || DEFAULT_PLATFORM_SETTINGS;
+  const pendingReportsCount = reports.filter((r) => r.status === "PENDING").length;
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface flex flex-col font-cairo" dir="rtl">
-      {/* Top Bar Header */}
-      <header className="sticky top-0 z-40 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/20 px-4 sm:px-8 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-md">
-            <Shield className="w-5 h-5" />
+    <div className="min-h-screen bg-surface text-on-surface flex font-cairo" dir="rtl">
+      {/* Right Sidebar (Desktop & Mobile Drawer) */}
+      <AdminSidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        usersCount={users.length}
+        sessionsCount={sessions.length}
+        pendingReportsCount={pendingReportsCount}
+        isOpenMobile={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* Main Content Workspace */}
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
+        {/* Top Sticky Header */}
+        <header className="sticky top-0 z-20 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/20 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition cursor-pointer"
+              title="فتح القائمة الجانبية"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div>
+              <span className="text-xs text-on-surface-variant font-medium">لوحة المشغّل والمدير &gt; </span>
+              <h1 className="inline-block font-black text-sm sm:text-base text-on-surface">
+                {TAB_TITLES[activeTab]}
+              </h1>
+            </div>
           </div>
-          <div>
-            <h1 className="font-black text-sm sm:text-base leading-tight text-on-surface">
-              لوحة المشغّل والمدير | Console
-            </h1>
-            <p className="text-[11px] text-on-surface-variant font-mono">
-              إدارة المنصة، بوابات الدفع، الجلسات والرقابة
-            </p>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={reload}
+              disabled={isLoading}
+              className="p-2 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface-variant transition cursor-pointer"
+              title="تحديث البيانات"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            </button>
+            <ThemeToggle />
+            <UserNavDropdown />
           </div>
-        </div>
+        </header>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={reload}
-            disabled={isLoading}
-            className="p-2 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface-variant transition cursor-pointer"
-            title="تحديث البيانات"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-          </button>
-          <ThemeToggle />
-          <UserNavDropdown />
-          <Link
-            href="/dashboard"
-            className="hidden sm:inline-flex text-xs font-bold px-3.5 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition border border-outline-variant/30"
-          >
-            لوحة صانع المحتوى
-          </Link>
-        </div>
-      </header>
+        {/* Workspace Body */}
+        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
+          {activeTab === "analytics" && analytics && (
+            <AdminAnalyticsTab data={analytics} />
+          )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
-        <AdminNavTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          usersCount={users.length}
-          sessionsCount={sessions.length}
-          pendingReportsCount={reports.filter((r) => r.status === "PENDING").length}
-        />
+          {activeTab === "users" && (
+            <AdminUsersTab
+              users={users}
+              onToggleSuspend={handleToggleSuspend}
+              onToggleRole={handleToggleRole}
+            />
+          )}
 
-        {activeTab === "analytics" && analytics && (
-          <AdminAnalyticsTab data={analytics} />
-        )}
+          {activeTab === "sessions" && (
+            <AdminSessionsTab
+              sessions={sessions}
+              onRevokeSession={handleRevokeSession}
+              isLoading={isLoading}
+            />
+          )}
 
-        {activeTab === "users" && (
-          <AdminUsersTab
-            users={users}
-            onToggleSuspend={handleToggleSuspend}
-            onToggleRole={handleToggleRole}
-          />
-        )}
+          {activeTab === "payments" && (
+            <AdminPaymentsTab
+              settings={currentSettings}
+              transactions={analytics?.recentTransactions || []}
+              onUpdateSettings={handleSaveSettings}
+            />
+          )}
 
-        {activeTab === "sessions" && (
-          <AdminSessionsTab
-            sessions={sessions}
-            onRevokeSession={handleRevokeSession}
-            isLoading={isLoading}
-          />
-        )}
+          {activeTab === "settings" && (
+            <AdminSettingsTab
+              settings={currentSettings}
+              onUpdateSettings={handleSaveSettings}
+            />
+          )}
 
-        {activeTab === "payments" && (
-          <AdminPaymentsTab
-            settings={currentSettings}
-            transactions={analytics?.recentTransactions || []}
-            onUpdateSettings={handleSaveSettings}
-          />
-        )}
-
-        {activeTab === "settings" && (
-          <AdminSettingsTab
-            settings={currentSettings}
-            onUpdateSettings={handleSaveSettings}
-          />
-        )}
-
-        {activeTab === "reports" && (
-          <AdminReportsTab
-            reports={reports}
-            onUpdateStatus={handleUpdateReport}
-          />
-        )}
-      </main>
+          {activeTab === "reports" && (
+            <AdminReportsTab
+              reports={reports}
+              onUpdateStatus={handleUpdateReport}
+            />
+          )}
+        </main>
+      </div>
     </div>
   );
 }
