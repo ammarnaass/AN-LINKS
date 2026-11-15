@@ -268,3 +268,46 @@ export interface CreateCouponInput {
   validUntil?: string;
   applicablePlanSlugs?: string[];
 }
+
+export interface FinancialOverviewStats {
+  totalGateways: number;
+  activeGateways: number;
+  totalPlans: number;
+  totalCurrencies: number;
+  totalCoupons: number;
+  totalInvoices: number;
+  totalRevenue: number;
+}
+
+export interface AdminTransactionsQuery {
+  page?: number;
+  limit?: number;
+  status?: string;
+  gateway?: string;
+}
+
+export interface AdminTransactionItem {
+  id: string;
+  invoiceNumber: string;
+  userId: string;
+  customerName: string;
+  customerEmail: string;
+  amountSubtotal: number;
+  discountAmount: number;
+  taxAmount: number;
+  amountTotal: number;
+  currency: string;
+  gatewayCode: string;
+  gatewayTxId: string | null;
+  status: string;
+  pdfUrl: string | null;
+  createdAt: string;
+}
+
+export interface AdminTransactionsResult {
+  items: AdminTransactionItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

@@ -1,5 +1,6 @@
 export * from "./types/admin.types";
 export * from "./server/admin.guard";
+export * from "./server/admin-financials.service";
 export * from "./services/admin.defaults";
 export * from "./services/admin.service";
 export * from "./components/AdminStatCards";
