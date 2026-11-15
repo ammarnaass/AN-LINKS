@@ -43,30 +43,100 @@ model Profile {
   isPublished  Boolean  @default(true)
 }
 
+enum PlatformCategory {
+  SOCIAL
+  VIDEO
+  MESSAGING
+  COMMERCE
+  DEV
+  MUSIC
+  PROFESSIONAL
+  CUSTOM
+}
+
+model Platform {
+  id              String            @id @default(cuid())
+  slug            String            @unique // youtube, tiktok, x, instagram, salla, zid...
+  nameAr          String            // يوتيوب، تيك توك، سلة...
+  nameEn          String            // YouTube, TikTok, Salla...
+  category        PlatformCategory  @default(SOCIAL)
+  defaultIcon     String            // Lucide icon identifier (e.g. "youtube", "shopping-bag")
+  brandColor      String            // e.g. #FF0000, #000000, #E1306C, #00B4D8
+  domainPattern   String            // Pipe-separated domains: "youtube.com|youtu.be"
+  urlPlaceholder  String            // e.g. "https://youtube.com/@channel"
+  isEnabled       Boolean           @default(true) // Controls visibility in creator studio
+  isVerified      Boolean           @default(true)
+  sortOrder       Int               @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  links           Link[]
+  socialLinks     SocialLink[]
+  clicks          LinkClick[]
+
+  @@index([category, isEnabled])
+  @@index([sortOrder])
+}
+
 model Link {
-  id        String          @id @default(cuid())
-  userId    String
-  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String
-  url       String
-  icon      String?
-  position  Int             @default(0)
-  isActive  Boolean         @default(true)
-  createdAt DateTime        @default(now())
-  stats     DailyLinkStat[]
+  id          String          @id @default(cuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platformId  String?
+  platform    Platform?       @relation(fields: [platformId], references: [id], onDelete: SetNull)
+  title       String
+  url         String
+  icon        String?
+  description String?
+  position    Int             @default(0)
+  isActive    Boolean         @default(true)
+  isPinned    Boolean         @default(false)
+  isArchived  Boolean         @default(false)
+  clicksCount Int             @default(0) // عداد إجمالي تراكمي سريع للنقرات
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now()) @updatedAt
+
+  clicks      LinkClick[]
+  stats       DailyLinkStat[]
 
   @@index([userId, position])
+  @@index([platformId])
+  @@index([isActive, isArchived])
 }
 
 model SocialLink {
-  id       String @id @default(cuid())
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  network  String
-  url      String
-  position Int    @default(0)
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platformId  String?
+  platform    Platform? @relation(fields: [platformId], references: [id], onDelete: SetNull)
+  network     String
+  url         String
+  position    Int       @default(0)
 
   @@index([userId, position])
+  @@index([platformId])
+}
+
+model LinkClick {
+  id          String    @id @default(cuid())
+  linkId      String
+  link        Link      @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  platformId  String?
+  platform    Platform? @relation(fields: [platformId], references: [id], onDelete: SetNull)
+  country     String?   // SA, AE, EG, US...
+  city        String?
+  device      String?   // MOBILE, DESKTOP, TABLET, UNKNOWN
+  browser     String?   // Chrome, Safari, Firefox, Edge, Other
+  os          String?   // iOS, Android, Windows, macOS, Linux, Other
+  referer     String?
+  createdAt   DateTime  @default(now())
+
+  @@index([linkId, createdAt])
+  @@index([platformId, createdAt])
+  @@index([device])
+  @@index([country])
+  @@index([createdAt])
 }
 
 model DailyLinkStat {

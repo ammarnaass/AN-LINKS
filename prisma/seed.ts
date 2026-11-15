@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { seedFinancials } from "./seed-financials.ts";
+import { seedPlatforms } from "./seed-platforms.ts";
 
 const prisma = new PrismaClient();
 
@@ -169,6 +170,9 @@ async function main() {
 
   // 7. Seed Financial Infrastructure (Gateways, Plans, Currencies)
   await seedFinancials(prisma);
+
+  // 8. Seed Verified Platforms Catalog
+  await seedPlatforms(prisma);
 
   console.log("🎉 Seeding completed successfully!");
 }

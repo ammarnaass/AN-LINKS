@@ -17,6 +17,8 @@ describe("Database Schema & Prisma Client Singleton", () => {
     expect(prisma.dailyLinkStat).toBeDefined();
     expect(prisma.dailyProfileStat).toBeDefined();
     expect(prisma.report).toBeDefined();
+    expect(prisma.platform).toBeDefined();
+    expect(prisma.linkClick).toBeDefined();
   });
 
   it("should have a valid schema.prisma file containing all required models", () => {
@@ -32,6 +34,8 @@ describe("Database Schema & Prisma Client Singleton", () => {
       "model DailyLinkStat",
       "model DailyProfileStat",
       "model Report",
+      "model Platform",
+      "model LinkClick",
     ];
 
     for (const model of requiredModels) {
