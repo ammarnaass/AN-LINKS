@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { RefreshCw, Menu } from "lucide-react";
+import React from "react";
+import { RefreshCw, Menu, ChevronLeft, ChevronRight } from "lucide-react";
 import { ThemeToggle } from "@/shared/ui";
 import { UserNavDropdown } from "@/features/auth";
 import {
@@ -16,6 +16,8 @@ import {
 } from "@/features/admin";
 import { useAdminConsole } from "@/features/admin/hooks/useAdminConsole";
 import { AdminSessionsTab } from "@/features/admin/components/AdminSessionsTab";
+import { useAdminSidebar } from "@/features/admin/hooks/useAdminSidebar";
+import { AdminSidebarPullHandle } from "@/features/admin/components/AdminSidebarPullHandle";
 
 const TAB_TITLES: Record<AdminTabKey, string> = {
   analytics: "الإحصائيات والنمو والتحليلات",
@@ -27,7 +29,14 @@ const TAB_TITLES: Record<AdminTabKey, string> = {
 };
 
 export default function AdminConsolePage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const {
+    isCollapsed,
+    isMobileOpen,
+    toggleCollapse,
+    openMobile,
+    closeMobile,
+  } = useAdminSidebar();
+
   const {
     activeTab,
     setActiveTab,
@@ -57,8 +66,16 @@ export default function AdminConsolePage() {
         usersCount={users.length}
         sessionsCount={sessions.length}
         pendingReportsCount={pendingReportsCount}
-        isOpenMobile={isMobileMenuOpen}
-        onCloseMobile={() => setIsMobileMenuOpen(false)}
+        isOpenMobile={isMobileOpen}
+        onCloseMobile={closeMobile}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={toggleCollapse}
+      />
+
+      {/* Mobile Edge Pull Handle */}
+      <AdminSidebarPullHandle
+        isOpen={isMobileOpen}
+        onOpen={openMobile}
       />
 
       {/* Main Content Workspace */}
@@ -66,14 +83,32 @@ export default function AdminConsolePage() {
         {/* Top Sticky Header */}
         <header className="sticky top-0 z-20 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/20 px-4 sm:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {/* Mobile Sidebar Hamburger Toggle */}
             <button
               type="button"
-              onClick={() => setIsMobileMenuOpen(true)}
+              onClick={openMobile}
               className="lg:hidden p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition cursor-pointer"
               title="فتح القائمة الجانبية"
+              aria-label="فتح القائمة الجانبية"
             >
               <Menu className="w-5 h-5" />
             </button>
+
+            {/* Desktop Sidebar Collapse Toggle */}
+            <button
+              type="button"
+              onClick={toggleCollapse}
+              className="hidden lg:flex items-center justify-center p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition cursor-pointer"
+              title={isCollapsed ? "توسيع القائمة الجانبية" : "طي القائمة الجانبية"}
+              aria-label={isCollapsed ? "توسيع القائمة الجانبية" : "طي القائمة الجانبية"}
+            >
+              {isCollapsed ? (
+                <ChevronLeft className="w-5 h-5" />
+              ) : (
+                <ChevronRight className="w-5 h-5" />
+              )}
+            </button>
+
             <div>
               <span className="text-xs text-on-surface-variant font-medium">لوحة المشغّل والمدير &gt; </span>
               <h1 className="inline-block font-black text-sm sm:text-base text-on-surface">
