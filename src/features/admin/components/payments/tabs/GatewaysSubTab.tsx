@@ -24,6 +24,7 @@ export interface GatewaysSubTabProps {
   onToggleGateway: (id: string) => Promise<boolean>;
   onSaveConfig?: (input: UpdateGatewayInput) => Promise<boolean>;
   isSaving?: boolean;
+  onOpenConfig?: (gateway: AdminGatewayDetails) => void;
 }
 
 export function GatewaysSubTab({
@@ -31,6 +32,7 @@ export function GatewaysSubTab({
   onToggleGateway,
   onSaveConfig,
   isSaving = false,
+  onOpenConfig,
 }: GatewaysSubTabProps) {
   const [selectedGateway, setSelectedGateway] = useState<AdminGatewayDetails | null>(null);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -76,8 +78,12 @@ export function GatewaysSubTab({
   const internationalGateways = gateways.filter((g) => !isNational(g));
 
   const handleOpenConfig = (gw: AdminGatewayDetails) => {
-    setSelectedGateway(gw);
-    setIsConfigModalOpen(true);
+    if (onOpenConfig) {
+      onOpenConfig(gw);
+    } else {
+      setSelectedGateway(gw);
+      setIsConfigModalOpen(true);
+    }
   };
 
   const handleToggle = async (id: string) => {
@@ -257,17 +263,19 @@ export function GatewaysSubTab({
         </div>
       </div>
 
-      {/* Config Modal */}
-      <GatewayConfigModal
-        isOpen={isConfigModalOpen}
-        gateway={selectedGateway}
-        onClose={() => {
-          setIsConfigModalOpen(false);
-          setSelectedGateway(null);
-        }}
-        onSave={onSaveConfig || (async () => true)}
-        isSaving={isSaving}
-      />
+      {/* Config Modal (Fallback if not managed by container) */}
+      {!onOpenConfig && (
+        <GatewayConfigModal
+          isOpen={isConfigModalOpen}
+          gateway={selectedGateway}
+          onClose={() => {
+            setIsConfigModalOpen(false);
+            setSelectedGateway(null);
+          }}
+          onSave={onSaveConfig || (async () => true)}
+          isSaving={isSaving}
+        />
+      )}
     </div>
   );
 }

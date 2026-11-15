@@ -13,19 +13,25 @@ export interface CurrenciesSubTabProps {
   currencies: AdminCurrencyItem[];
   onSaveCurrency: (code: string, input: UpdateCurrencyInput) => Promise<boolean>;
   isSaving?: boolean;
+  onOpenEditRate?: (currency: AdminCurrencyItem) => void;
 }
 
 export function CurrenciesSubTab({
   currencies,
   onSaveCurrency,
   isSaving = false,
+  onOpenEditRate,
 }: CurrenciesSubTabProps) {
   const [selectedCurrency, setSelectedCurrency] = useState<AdminCurrencyItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleEditRate = (currency: AdminCurrencyItem) => {
-    setSelectedCurrency(currency);
-    setIsModalOpen(true);
+    if (onOpenEditRate) {
+      onOpenEditRate(currency);
+    } else {
+      setSelectedCurrency(currency);
+      setIsModalOpen(true);
+    }
   };
 
   return (
@@ -158,17 +164,19 @@ export function CurrenciesSubTab({
         </div>
       </AppCard>
 
-      {/* Currency Rate Modal */}
-      <CurrencyRateModal
-        isOpen={isModalOpen}
-        currency={selectedCurrency}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedCurrency(null);
-        }}
-        onSave={onSaveCurrency}
-        isSaving={isSaving}
-      />
+      {/* Currency Rate Modal (Fallback if not managed by container) */}
+      {!onOpenEditRate && (
+        <CurrencyRateModal
+          isOpen={isModalOpen}
+          currency={selectedCurrency}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedCurrency(null);
+          }}
+          onSave={onSaveCurrency}
+          isSaving={isSaving}
+        />
+      )}
     </div>
   );
 }

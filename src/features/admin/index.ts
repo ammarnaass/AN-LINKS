@@ -33,6 +33,7 @@ export * from "./components/AdminSettingsTab";
 export * from "./components/AdminReportsTab";
 export * from "./components/AdminSessionsTab";
 export * from "./components/AdminSidebar";
+export * from "./components/payments/AdminFinancialsContainer";
 export * from "./components/payments/tabs/GatewaysSubTab";
 export * from "./components/payments/tabs/PlansSubTab";
 export * from "./components/payments/tabs/PlanQuotasSubTab";

@@ -25,6 +25,7 @@ export interface CouponsSubTabProps {
   onToggleCoupon: (id: string) => Promise<boolean>;
   onDeleteCoupon: (id: string) => Promise<boolean>;
   isSaving?: boolean;
+  onOpenCreateCoupon?: () => void;
 }
 
 export function CouponsSubTab({
@@ -34,11 +35,20 @@ export function CouponsSubTab({
   onToggleCoupon,
   onDeleteCoupon,
   isSaving = false,
+  onOpenCreateCoupon,
 }: CouponsSubTabProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleOpenCreate = () => {
+    if (onOpenCreateCoupon) {
+      onOpenCreateCoupon();
+    } else {
+      setIsCreateModalOpen(true);
+    }
+  };
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard?.writeText(code);
@@ -95,7 +105,7 @@ export function CouponsSubTab({
         <AppButton
           variant="primary"
           size="sm"
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={handleOpenCreate}
           leftIcon={<Plus className="w-4 h-4" />}
         >
           إنشاء كود خصم جديد
@@ -257,14 +267,16 @@ export function CouponsSubTab({
         </div>
       </AppCard>
 
-      {/* Coupon Modal */}
-      <CouponEditorModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSave={onCreateCoupon}
-        availablePlanSlugs={availablePlanSlugs}
-        isSaving={isSaving}
-      />
+      {/* Coupon Modal (Fallback if not managed by container) */}
+      {!onOpenCreateCoupon && (
+        <CouponEditorModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSave={onCreateCoupon}
+          availablePlanSlugs={availablePlanSlugs}
+          isSaving={isSaving}
+        />
+      )}
     </div>
   );
 }

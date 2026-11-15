@@ -25,6 +25,8 @@ export interface PlansSubTabProps {
   onSavePlan: (input: UpsertPlanInput) => Promise<boolean>;
   onDeletePlan: (id: string) => Promise<boolean>;
   isSaving?: boolean;
+  onOpenCreatePlan?: () => void;
+  onOpenEditPlan?: (plan: AdminSubscriptionPlanItem) => void;
 }
 
 export function PlansSubTab({
@@ -32,6 +34,8 @@ export function PlansSubTab({
   onSavePlan,
   onDeletePlan,
   isSaving = false,
+  onOpenCreatePlan,
+  onOpenEditPlan,
 }: PlansSubTabProps) {
   const [cycle, setCycle] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
   const [selectedPlan, setSelectedPlan] = useState<AdminSubscriptionPlanItem | null>(null);
@@ -39,13 +43,21 @@ export function PlansSubTab({
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleCreateNew = () => {
-    setSelectedPlan(null);
-    setIsModalOpen(true);
+    if (onOpenCreatePlan) {
+      onOpenCreatePlan();
+    } else {
+      setSelectedPlan(null);
+      setIsModalOpen(true);
+    }
   };
 
   const handleEdit = (plan: AdminSubscriptionPlanItem) => {
-    setSelectedPlan(plan);
-    setIsModalOpen(true);
+    if (onOpenEditPlan) {
+      onOpenEditPlan(plan);
+    } else {
+      setSelectedPlan(plan);
+      setIsModalOpen(true);
+    }
   };
 
   const handleDelete = async (id: string, name: string) => {
@@ -265,17 +277,19 @@ export function PlansSubTab({
         })}
       </div>
 
-      {/* Plan Editor Modal */}
-      <PlanEditorModal
-        isOpen={isModalOpen}
-        plan={selectedPlan}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedPlan(null);
-        }}
-        onSave={onSavePlan}
-        isSaving={isSaving}
-      />
+      {/* Plan Editor Modal (Fallback if not managed by container) */}
+      {!onOpenCreatePlan && !onOpenEditPlan && (
+        <PlanEditorModal
+          isOpen={isModalOpen}
+          plan={selectedPlan}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedPlan(null);
+          }}
+          onSave={onSavePlan}
+          isSaving={isSaving}
+        />
+      )}
     </div>
   );
 }
