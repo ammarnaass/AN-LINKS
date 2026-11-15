@@ -1,8 +1,27 @@
 export * from "./types/admin.types";
 export * from "./server/admin.guard";
-export * from "./server/admin-financials.service";
+export {
+  getFinancialOverview,
+  getAdminGateways,
+  getAdminPlans,
+  getAdminCurrencies,
+  getAdminCoupons,
+  getAdminTransactions,
+  logFinancialAudit,
+  updateAdminGateway as serverUpdateAdminGateway,
+  upsertAdminPlan as serverUpsertAdminPlan,
+  deleteAdminPlan as serverDeleteAdminPlan,
+  updateAdminPlanQuotas as serverUpdateAdminPlanQuotas,
+  updateAdminCurrency as serverUpdateAdminCurrency,
+  createAdminCoupon as serverCreateAdminCoupon,
+  toggleAdminCoupon as serverToggleAdminCoupon,
+  deleteAdminCoupon as serverDeleteAdminCoupon,
+} from "./server/admin-financials.service";
+export * as adminFinancialsServer from "./server/admin-financials.service";
 export * from "./services/admin.defaults";
 export * from "./services/admin.service";
+export * from "./services/admin-financials.client";
+export * from "./hooks/useAdminFinancials";
 export * from "./components/AdminStatCards";
 export * from "./components/AdminUsersTable";
 export * from "./components/AdminReportsTable";
