@@ -212,7 +212,7 @@ model PromotionCoupon {
 
 model UserSubscription {
   id                    String           @id @default(cuid())
-  userId                String
+  userId                String           @unique
   user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   planId                String
   plan                  SubscriptionPlan @relation(fields: [planId], references: [id])
@@ -233,20 +233,23 @@ model UserSubscription {
 }
 
 model FinancialInvoice {
-  id             String   @id @default(cuid())
-  invoiceNumber  String   @unique // INV-2026-0001
+  id             String    @id @default(cuid())
+  invoiceNumber  String    @unique // INV-2026-0001
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId         String?
+  billingCycle   String?
   amountSubtotal Float
-  discountAmount Float    @default(0.0)
-  taxAmount      Float    @default(0.0) // ضريبة القيمة المضافة 15% (KSA)
+  discountAmount Float     @default(0.0)
+  taxAmount      Float     @default(0.0) // ضريبة القيمة المضافة 15% (KSA)
   amountTotal    Float
   currency       String
   gatewayCode    String
   gatewayTxId    String?
-  status         String   // PAID, FAILED, REFUNDED
+  status         String    // PAID, FAILED, REFUNDED, PENDING
   pdfUrl         String?
-  createdAt      DateTime @default(now())
+  paidAt         DateTime?
+  createdAt      DateTime  @default(now())
 }
 
 model FinancialAuditLog {

@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import crypto from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH_BYTES = 12; // 96-bit IV recommended for GCM
