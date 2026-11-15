@@ -2,7 +2,7 @@
 title: "خطة تنفيذ لوحة تحكم مدير النظام المتجاوبة والقائمة الجانبية القابلة للطي ومقبض السحب"
 date: "2026-11-15"
 author: "Ammar"
-status: "Ready for Execution"
+status: "Completed"
 target: "src/app/(admin)/admin/page.tsx, src/features/admin/components/AdminSidebar.tsx, src/features/admin/*"
 ---
 
