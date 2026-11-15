@@ -16,6 +16,7 @@ export async function GET() {
         where: { userId: session.user.id },
         orderBy: { position: "asc" },
         include: {
+          platform: true,
           stats: {
             select: { clicks: true },
           },
@@ -35,14 +36,40 @@ export async function GET() {
       icon: l.icon,
       position: l.position,
       isActive: l.isActive,
-      clicks: l.stats.reduce((acc, curr) => acc + curr.clicks, 0),
+      isPinned: l.isPinned,
+      isArchived: l.isArchived,
+      platformId: l.platformId,
+      platform: l.platform
+        ? {
+            id: l.platform.id,
+            slug: l.platform.slug,
+            nameAr: l.platform.nameAr,
+            nameEn: l.platform.nameEn,
+            category: l.platform.category,
+            defaultIcon: l.platform.defaultIcon,
+            brandColor: l.platform.brandColor,
+            domainPattern: l.platform.domainPattern,
+            urlPlaceholder: l.platform.urlPlaceholder,
+            isEnabled: l.platform.isEnabled,
+            isVerified: l.platform.isVerified,
+            sortOrder: l.platform.sortOrder,
+          }
+        : null,
+      clicks: l.clicksCount || l.stats.reduce((acc, curr) => acc + curr.clicks, 0),
+      clicksCount: l.clicksCount,
       createdAt: l.createdAt.toISOString(),
     }));
 
     return NextResponse.json({
       success: true,
       links: formattedLinks,
-      socials: socials.map((s) => ({ id: s.id, network: s.network, url: s.url, position: s.position })),
+      socials: socials.map((s) => ({
+        id: s.id,
+        network: s.network,
+        url: s.url,
+        position: s.position,
+        platformId: s.platformId,
+      })),
     });
   } catch (error) {
     console.error("Fetch links error:", error);
@@ -72,6 +99,12 @@ export async function POST(request: NextRequest) {
         icon: body.icon || null,
         position: count,
         isActive: true,
+        isPinned: body.isPinned ?? false,
+        isArchived: body.isArchived ?? false,
+        platformId: body.platformId || null,
+      },
+      include: {
+        platform: true,
       },
     });
 
@@ -100,6 +133,9 @@ export async function PUT(request: NextRequest) {
             data: {
               position: item.position,
               ...(typeof item.isActive === "boolean" ? { isActive: item.isActive } : {}),
+              ...(typeof item.isPinned === "boolean" ? { isPinned: item.isPinned } : {}),
+              ...(typeof item.isArchived === "boolean" ? { isArchived: item.isArchived } : {}),
+              ...(item.platformId !== undefined ? { platformId: item.platformId } : {}),
             },
           })
         );
@@ -116,6 +152,7 @@ export async function PUT(request: NextRequest) {
               network: s.network,
               url: s.url,
               position: s.position ?? idx,
+              platformId: s.platformId || null,
             })),
           })
         );
@@ -129,4 +166,3 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: false, error: "فشل تحديث الروابط" }, { status: 500 });
   }
 }
-

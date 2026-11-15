@@ -1,3 +1,24 @@
+export interface PlatformDTO {
+  id: string;
+  slug: string;
+  nameAr: string;
+  nameEn: string;
+  category: string;
+  defaultIcon: string;
+  brandColor: string;
+  domainPattern: string;
+  urlPlaceholder: string;
+  isEnabled: boolean;
+  isVerified: boolean;
+  sortOrder: number;
+  createdAt?: string;
+  updatedAt?: string;
+  _count?: {
+    links?: number;
+    clicks?: number;
+  };
+}
+
 export interface LinkData {
   id: string;
   userId?: string;
@@ -6,8 +27,13 @@ export interface LinkData {
   icon?: string | null;
   position: number;
   isActive: boolean;
+  isPinned?: boolean;
+  isArchived?: boolean;
+  platformId?: string | null;
+  platform?: PlatformDTO | null;
   category?: string;
   clicks?: number;
+  clicksCount?: number;
   createdAt?: string;
 }
 
@@ -16,6 +42,7 @@ export interface SocialItem {
   network: string;
   url: string;
   position?: number;
+  platformId?: string | null;
 }
 
 export interface LinksPayload {
@@ -28,6 +55,9 @@ export interface CreateLinkInput {
   url: string;
   icon?: string;
   category?: string;
+  platformId?: string | null;
+  isPinned?: boolean;
+  isArchived?: boolean;
 }
 
 export interface UpdateLinkInput {
@@ -35,13 +65,29 @@ export interface UpdateLinkInput {
   url?: string;
   icon?: string | null;
   isActive?: boolean;
+  isPinned?: boolean;
+  isArchived?: boolean;
+  platformId?: string | null;
   position?: number;
   category?: string;
 }
 
 export interface BatchReorderInput {
-  links: { id: string; position: number; isActive?: boolean }[];
-  socials?: { id?: string; network: string; url: string; position?: number }[];
+  links: {
+    id: string;
+    position: number;
+    isActive?: boolean;
+    isPinned?: boolean;
+    isArchived?: boolean;
+    platformId?: string | null;
+  }[];
+  socials?: {
+    id?: string;
+    network: string;
+    url: string;
+    position?: number;
+    platformId?: string | null;
+  }[];
 }
 
 export interface UserProfileDTO {

@@ -33,6 +33,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         ...(typeof body.url === "string" ? { url: body.url.trim() } : {}),
         ...(typeof body.icon !== "undefined" ? { icon: body.icon } : {}),
         ...(typeof body.isActive === "boolean" ? { isActive: body.isActive } : {}),
+        ...(typeof body.isPinned === "boolean" ? { isPinned: body.isPinned } : {}),
+        ...(typeof body.isArchived === "boolean" ? { isArchived: body.isArchived } : {}),
+        ...(typeof body.platformId !== "undefined" ? { platformId: body.platformId } : {}),
         ...(typeof body.position === "number" ? { position: body.position } : {}),
       },
     });
