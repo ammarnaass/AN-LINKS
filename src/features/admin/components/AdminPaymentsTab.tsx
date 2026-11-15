@@ -23,6 +23,10 @@ export function AdminPaymentsTab({ settings, transactions, onUpdateSettings }: A
     visa_mastercard: <CreditCard className="w-5 h-5 text-primary" />,
     stc_pay: <Wallet className="w-5 h-5 text-purple-400" />,
     tamara: <CalendarCheck className="w-5 h-5 text-amber-400" />,
+    tabby: <CalendarCheck className="w-5 h-5 text-emerald-400" />,
+    fawry: <Wallet className="w-5 h-5 text-amber-500" />,
+    stripe: <CreditCard className="w-5 h-5 text-indigo-400" />,
+    paypal: <Wallet className="w-5 h-5 text-blue-400" />,
   };
 
   const handleToggleGateway = (id: GatewayId) => {

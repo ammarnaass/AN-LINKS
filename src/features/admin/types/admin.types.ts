@@ -1,4 +1,13 @@
-export type GatewayId = "mada" | "apple_pay" | "visa_mastercard" | "stc_pay" | "tamara";
+export type GatewayId =
+  | "mada"
+  | "apple_pay"
+  | "visa_mastercard"
+  | "stc_pay"
+  | "tamara"
+  | "tabby"
+  | "fawry"
+  | "stripe"
+  | "paypal";
 
 export interface AdminGatewayConfig {
   id: GatewayId;
@@ -110,4 +119,152 @@ export interface AdminReportItem {
   reporterIp: string | null;
   status: string;
   createdAt: string;
+}
+
+/* =========================================================================
+ * Financial Gateway, Subscription & Billing Contracts
+ * ========================================================================= */
+
+export interface AdminGatewayDetails {
+  id: string;
+  code: GatewayId | string;
+  nameAr: string;
+  nameEn: string;
+  category: "NATIONAL" | "INTERNATIONAL" | "BNPL" | "WALLET";
+  isEnabled: boolean;
+  isTestMode: boolean;
+  publishableKey: string | null;
+  hasSecretKey: boolean; // secret is masked for security
+  hasWebhookSecret: boolean;
+  feePercentage: number;
+  feeFixed: number;
+  supportedCurrencies: string[];
+  sortOrder: number;
+  updatedAt: string;
+}
+
+export interface AdminPlanPriceItem {
+  id?: string;
+  currency: string;
+  billingCycle: "MONTHLY" | "YEARLY" | "LIFETIME";
+  amount: number;
+  originalAmount?: number | null;
+  isActive: boolean;
+}
+
+export interface AdminPlanQuotaConfig {
+  maxLinks: number;
+  allowCustomDomain: boolean;
+  allowRemoveBranding: boolean;
+  allowAdvancedThemes: boolean;
+  allowDetailedAnalytics: boolean;
+  allowPrioritySupport: boolean;
+  customCssAllowed: boolean;
+  storeCommissionRate: number;
+}
+
+export interface AdminSubscriptionPlanItem {
+  id: string;
+  slug: string;
+  nameAr: string;
+  nameEn: string;
+  descriptionAr?: string | null;
+  badgeAr?: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  prices: AdminPlanPriceItem[];
+  quotas: AdminPlanQuotaConfig;
+  subscribersCount?: number;
+}
+
+export interface AdminCurrencyItem {
+  code: string;
+  nameAr: string;
+  symbol: string;
+  exchangeRateToUSD: number;
+  isBaseCurrency: boolean;
+  isActive: boolean;
+  autoDetectCountries: string[];
+  updatedAt: string;
+}
+
+export interface AdminCouponItem {
+  id: string;
+  code: string;
+  descriptionAr?: string | null;
+  discountType: "PERCENTAGE" | "FIXED_AMOUNT";
+  discountValue: number;
+  maxUses?: number | null;
+  usedCount: number;
+  maxUsesPerUser: number;
+  validFrom: string;
+  validUntil?: string | null;
+  isActive: boolean;
+  applicablePlanSlugs: string[];
+  createdAt: string;
+}
+
+export interface AdminAuditLogItem {
+  id: string;
+  adminId: string;
+  adminEmail?: string;
+  action: string;
+  entity: string;
+  entityId?: string | null;
+  details?: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+/* =========================================================================
+ * Mutation DTOs
+ * ========================================================================= */
+
+export interface UpdateGatewayInput {
+  id: string;
+  isEnabled?: boolean;
+  isTestMode?: boolean;
+  publishableKey?: string;
+  secretKey?: string;
+  webhookSecret?: string;
+  feePercentage?: number;
+  feeFixed?: number;
+  supportedCurrencies?: string[];
+}
+
+export interface UpsertPlanInput {
+  id?: string;
+  slug: string;
+  nameAr: string;
+  nameEn: string;
+  descriptionAr?: string;
+  badgeAr?: string;
+  isActive?: boolean;
+  sortOrder?: number;
+  prices?: AdminPlanPriceItem[];
+  quotas?: Partial<AdminPlanQuotaConfig>;
+}
+
+export interface UpsertQuotaInput extends Partial<AdminPlanQuotaConfig> {
+  planId?: string;
+}
+
+export interface UpdateCurrencyInput {
+  code: string;
+  nameAr?: string;
+  symbol?: string;
+  exchangeRateToUSD?: number;
+  isActive?: boolean;
+  autoDetectCountries?: string[];
+}
+
+export interface CreateCouponInput {
+  code: string;
+  descriptionAr?: string;
+  discountType: "PERCENTAGE" | "FIXED_AMOUNT";
+  discountValue: number;
+  maxUses?: number;
+  maxUsesPerUser?: number;
+  validFrom?: string;
+  validUntil?: string;
+  applicablePlanSlugs?: string[];
 }
