@@ -115,7 +115,7 @@ export function CouponsSubTab({
       {/* Coupons Table */}
       <AppCard className="p-0 bg-surface-container-low border-outline-variant/30 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-xs">
+          <table className="w-full min-w-[640px] text-right text-xs">
             <thead className="bg-surface-container text-on-surface-variant border-b border-outline-variant/20">
               <tr>
                 <th className="py-3 px-4 font-bold">كود الخصم</th>

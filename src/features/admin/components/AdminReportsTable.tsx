@@ -26,7 +26,7 @@ export function AdminReportsTable({
 
   return (
     <div className="overflow-x-auto w-full font-cairo" dir="rtl">
-      <table className="w-full text-right text-xs">
+      <table className="w-full min-w-[640px] text-right text-xs">
         <thead className="bg-surface-container/60 text-on-surface-variant border-b border-outline-variant/30">
           <tr>
             <th className="py-3 px-4 font-bold">الحساب المبلغ عنه</th>
