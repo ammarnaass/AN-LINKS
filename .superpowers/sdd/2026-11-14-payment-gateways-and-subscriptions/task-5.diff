@@ -1,0 +1,3568 @@
+diff --git a/src/features/admin/components/payments/modals/CouponEditorModal.tsx b/src/features/admin/components/payments/modals/CouponEditorModal.tsx
+new file mode 100644
+index 0000000..98f5035
+--- /dev/null
++++ b/src/features/admin/components/payments/modals/CouponEditorModal.tsx
+@@ -0,0 +1,299 @@
++"use client";
++
++import React, { useState, useEffect } from "react";
++import { CreateCouponInput } from "../../../types/admin.types";
++import { AppButton, AppInput } from "@/shared/ui";
++import { X, Tag, Plus, Check, AlertCircle } from "lucide-react";
++
++export interface CouponEditorModalProps {
++  isOpen: boolean;
++  onClose: () => void;
++  onSave: (input: CreateCouponInput) => Promise<boolean>;
++  availablePlanSlugs?: Array<{ slug: string; nameAr: string }>;
++  isSaving?: boolean;
++}
++
++const DEFAULT_PLANS = [
++  { slug: "creator", nameAr: "صانع المحتوى" },
++  { slug: "pro", nameAr: "المحترف" },
++  { slug: "agency", nameAr: "الوكالات" },
++];
++
++export function CouponEditorModal({
++  isOpen,
++  onClose,
++  onSave,
++  availablePlanSlugs = DEFAULT_PLANS,
++  isSaving = false,
++}: CouponEditorModalProps) {
++  const [code, setCode] = useState("");
++  const [descriptionAr, setDescriptionAr] = useState("");
++  const [discountType, setDiscountType] = useState<"PERCENTAGE" | "FIXED_AMOUNT">("PERCENTAGE");
++  const [discountValue, setDiscountValue] = useState<number>(10);
++  const [maxUses, setMaxUses] = useState<string>("");
++  const [maxUsesPerUser, setMaxUsesPerUser] = useState<number>(1);
++  const [validFrom, setValidFrom] = useState<string>(
++    new Date().toISOString().split("T")[0]
++  );
++  const [validUntil, setValidUntil] = useState<string>("");
++  const [selectedPlanSlugs, setSelectedPlanSlugs] = useState<string[]>([]);
++  const [statusMessage, setStatusMessage] = useState<{
++    type: "success" | "error";
++    text: string;
++  } | null>(null);
++
++  useEffect(() => {
++    if (isOpen) {
++      setCode("");
++      setDescriptionAr("");
++      setDiscountType("PERCENTAGE");
++      setDiscountValue(10);
++      setMaxUses("");
++      setMaxUsesPerUser(1);
++      setValidFrom(new Date().toISOString().split("T")[0]);
++      setValidUntil("");
++      setSelectedPlanSlugs([]);
++      setStatusMessage(null);
++    }
++  }, [isOpen]);
++
++  useEffect(() => {
++    if (!isOpen) return;
++    const handleKeyDown = (e: KeyboardEvent) => {
++      if (e.key === "Escape") onClose();
++    };
++    window.addEventListener("keydown", handleKeyDown);
++    return () => window.removeEventListener("keydown", handleKeyDown);
++  }, [isOpen, onClose]);
++
++  if (!isOpen) return null;
++
++  const togglePlanSlug = (slug: string) => {
++    setSelectedPlanSlugs((prev) =>
++      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
++    );
++  };
++
++  const handleSubmit = async (e: React.FormEvent) => {
++    e.preventDefault();
++    setStatusMessage(null);
++
++    const cleanCode = code.trim().toUpperCase();
++    if (!cleanCode) {
++      setStatusMessage({ type: "error", text: "يرجى إدخال رمز كود الخصم" });
++      return;
++    }
++
++    if (discountValue <= 0) {
++      setStatusMessage({ type: "error", text: "قيمة الخصم يجب أن تكون أكبر من صفر" });
++      return;
++    }
++
++    const payload: CreateCouponInput = {
++      code: cleanCode,
++      descriptionAr: descriptionAr.trim() || undefined,
++      discountType,
++      discountValue: Number(discountValue),
++      maxUses: maxUses ? Number(maxUses) : undefined,
++      maxUsesPerUser: Number(maxUsesPerUser) || 1,
++      validFrom: validFrom ? new Date(validFrom).toISOString() : new Date().toISOString(),
++      validUntil: validUntil ? new Date(validUntil).toISOString() : undefined,
++      applicablePlanSlugs: selectedPlanSlugs.length > 0 ? selectedPlanSlugs : undefined,
++    };
++
++    const success = await onSave(payload);
++    if (success) {
++      setStatusMessage({ type: "success", text: "تم إنشاء كود الخصم بنجاح" });
++      setTimeout(() => {
++        onClose();
++      }, 1200);
++    } else {
++      setStatusMessage({ type: "error", text: "حدث خطأ أثناء إنشاء كود الخصم" });
++    }
++  };
++
++  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
++    if (e.target === e.currentTarget) {
++      onClose();
++    }
++  };
++
++  return (
++    <div
++      role="dialog"
++      aria-modal="true"
++      aria-labelledby="coupon-editor-modal-title"
++      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
++      dir="rtl"
++      onClick={handleBackdropClick}
++    >
++      <div className="bg-surface-container-low rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-outline-variant/30 space-y-5 animate-in fade-in zoom-in duration-150 font-cairo">
++        {/* Modal Header */}
++        <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
++          <div className="flex items-center gap-3">
++            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
++              <Tag className="w-5 h-5" />
++            </div>
++            <div>
++              <h3 id="coupon-editor-modal-title" className="font-bold text-on-surface text-base">
++                إنشاء كود خصم جديد
++              </h3>
++              <p className="text-xs text-on-surface-variant">
++                تحديد نسبة الخصم والمدة والقيود على الاستخدام
++              </p>
++            </div>
++          </div>
++          <button
++            type="button"
++            onClick={onClose}
++            className="text-on-surface-variant hover:text-on-surface p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
++            aria-label="إغلاق النافذة"
++          >
++            <X className="w-5 h-5" />
++          </button>
++        </div>
++
++        {/* Status Alert */}
++        {statusMessage && (
++          <div
++            className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
++              statusMessage.type === "success"
++                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                : "bg-error/15 text-error border border-error/30"
++            }`}
++          >
++            {statusMessage.type === "success" ? (
++              <Check className="w-4 h-4 flex-shrink-0" />
++            ) : (
++              <AlertCircle className="w-4 h-4 flex-shrink-0" />
++            )}
++            <span>{statusMessage.text}</span>
++          </div>
++        )}
++
++        <form onSubmit={handleSubmit} className="space-y-4">
++          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
++            <AppInput
++              label="رمز الكود (Coupon Code)"
++              placeholder="مثلاً: RAMADAN25"
++              value={code}
++              onChange={(e) => setCode(e.target.value.toUpperCase())}
++            />
++            <AppInput
++              label="الوصف بالعربية (اختياري)"
++              placeholder="خصم شهر رمضان المبارك"
++              value={descriptionAr}
++              onChange={(e) => setDescriptionAr(e.target.value)}
++            />
++          </div>
++
++          {/* Discount Type & Value */}
++          <div className="grid grid-cols-2 gap-3">
++            <div>
++              <label className="block text-xs font-semibold text-on-surface mb-1">
++                نوع الخصم
++              </label>
++              <select
++                value={discountType}
++                onChange={(e) =>
++                  setDiscountType(e.target.value as "PERCENTAGE" | "FIXED_AMOUNT")
++                }
++                className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-on-surface text-sm outline-none focus:ring-1 focus:ring-primary"
++              >
++                <option value="PERCENTAGE">نسبة مئوية (%)</option>
++                <option value="FIXED_AMOUNT">مبلغ ثابت (SAR)</option>
++              </select>
++            </div>
++            <AppInput
++              label={discountType === "PERCENTAGE" ? "نسبة الخصم (%)" : "المبلغ المخصوم (SAR)"}
++              type="number"
++              step="0.01"
++              value={discountValue}
++              onChange={(e) => setDiscountValue(Number(e.target.value))}
++            />
++          </div>
++
++          {/* Usage Limits */}
++          <div className="grid grid-cols-2 gap-3">
++            <AppInput
++              label="أقصى عدد استخدام كلي (اتركه فارغاً لغير محدود)"
++              type="number"
++              placeholder="غير محدود"
++              value={maxUses}
++              onChange={(e) => setMaxUses(e.target.value)}
++            />
++            <AppInput
++              label="أقصى استخدام لكل عميل"
++              type="number"
++              value={maxUsesPerUser}
++              onChange={(e) => setMaxUsesPerUser(Number(e.target.value))}
++            />
++          </div>
++
++          {/* Dates */}
++          <div className="grid grid-cols-2 gap-3">
++            <AppInput
++              label="صالح من تاريخ"
++              type="date"
++              value={validFrom}
++              onChange={(e) => setValidFrom(e.target.value)}
++            />
++            <AppInput
++              label="صالح حتى تاريخ (اختياري)"
++              type="date"
++              value={validUntil}
++              onChange={(e) => setValidUntil(e.target.value)}
++            />
++          </div>
++
++          {/* Applicable Plans */}
++          <div className="space-y-1.5 pt-1">
++            <label className="block text-xs font-semibold text-on-surface">
++              الباقات المشمولة بالخصم (اختياري، اتركه غير محدد لتطبيقه على كل الباقات)
++            </label>
++            <div className="flex flex-wrap gap-2 pt-1">
++              {availablePlanSlugs.map((p) => {
++                const isSelected = selectedPlanSlugs.includes(p.slug);
++                return (
++                  <button
++                    key={p.slug}
++                    type="button"
++                    onClick={() => togglePlanSlug(p.slug)}
++                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
++                      isSelected
++                        ? "bg-primary text-on-primary shadow-sm"
++                        : "bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30"
++                    }`}
++                  >
++                    {p.nameAr} ({p.slug})
++                  </button>
++                );
++              })}
++            </div>
++          </div>
++
++          {/* Form Actions */}
++          <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
++            <button
++              type="button"
++              onClick={onClose}
++              disabled={isSaving}
++              className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
++            >
++              إلغاء
++            </button>
++            <AppButton
++              type="submit"
++              variant="primary"
++              size="sm"
++              isLoading={isSaving}
++              leftIcon={<Plus className="w-4 h-4" />}
++            >
++              إنشاء كود الخصم
++            </AppButton>
++          </div>
++        </form>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/modals/CurrencyRateModal.tsx b/src/features/admin/components/payments/modals/CurrencyRateModal.tsx
+new file mode 100644
+index 0000000..94114a9
+--- /dev/null
++++ b/src/features/admin/components/payments/modals/CurrencyRateModal.tsx
+@@ -0,0 +1,231 @@
++"use client";
++
++import React, { useState, useEffect } from "react";
++import { AdminCurrencyItem, UpdateCurrencyInput } from "../../../types/admin.types";
++import { AppButton, AppInput } from "@/shared/ui";
++import { X, Coins, Save, Check, AlertCircle } from "lucide-react";
++
++export interface CurrencyRateModalProps {
++  isOpen: boolean;
++  currency: AdminCurrencyItem | null;
++  onClose: () => void;
++  onSave: (code: string, input: UpdateCurrencyInput) => Promise<boolean>;
++  isSaving?: boolean;
++}
++
++export function CurrencyRateModal({
++  isOpen,
++  currency,
++  onClose,
++  onSave,
++  isSaving = false,
++}: CurrencyRateModalProps) {
++  const [nameAr, setNameAr] = useState("");
++  const [symbol, setSymbol] = useState("");
++  const [exchangeRateToUSD, setExchangeRateToUSD] = useState<number>(1);
++  const [autoDetectCountries, setAutoDetectCountries] = useState("");
++  const [isActive, setIsActive] = useState(true);
++
++  const [statusMessage, setStatusMessage] = useState<{
++    type: "success" | "error";
++    text: string;
++  } | null>(null);
++
++  useEffect(() => {
++    if (currency) {
++      setNameAr(currency.nameAr || "");
++      setSymbol(currency.symbol || "");
++      setExchangeRateToUSD(currency.exchangeRateToUSD || 1);
++      setAutoDetectCountries(currency.autoDetectCountries?.join(", ") || "");
++      setIsActive(currency.isActive ?? true);
++      setStatusMessage(null);
++    }
++  }, [currency, isOpen]);
++
++  useEffect(() => {
++    if (!isOpen) return;
++    const handleKeyDown = (e: KeyboardEvent) => {
++      if (e.key === "Escape") onClose();
++    };
++    window.addEventListener("keydown", handleKeyDown);
++    return () => window.removeEventListener("keydown", handleKeyDown);
++  }, [isOpen, onClose]);
++
++  if (!isOpen || !currency) return null;
++
++  const handleSubmit = async (e: React.FormEvent) => {
++    e.preventDefault();
++    setStatusMessage(null);
++
++    if (exchangeRateToUSD <= 0) {
++      setStatusMessage({
++        type: "error",
++        text: "سعر الصرف مقابل الدولار يجب أن يكون أكبر من الصفر",
++      });
++      return;
++    }
++
++    const countriesArray = autoDetectCountries
++      .split(",")
++      .map((c) => c.trim().toUpperCase())
++      .filter(Boolean);
++
++    const payload: UpdateCurrencyInput = {
++      code: currency.code,
++      nameAr: nameAr.trim() || undefined,
++      symbol: symbol.trim() || undefined,
++      exchangeRateToUSD: Number(exchangeRateToUSD),
++      isActive,
++      autoDetectCountries: countriesArray,
++    };
++
++    const success = await onSave(currency.code, payload);
++    if (success) {
++      setStatusMessage({ type: "success", text: "تم تحديث إعدادات العملة بنجاح" });
++      setTimeout(() => {
++        onClose();
++      }, 1200);
++    } else {
++      setStatusMessage({ type: "error", text: "حدث خطأ أثناء تحديث إعدادات العملة" });
++    }
++  };
++
++  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
++    if (e.target === e.currentTarget) {
++      onClose();
++    }
++  };
++
++  return (
++    <div
++      role="dialog"
++      aria-modal="true"
++      aria-labelledby="currency-rate-modal-title"
++      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
++      dir="rtl"
++      onClick={handleBackdropClick}
++    >
++      <div className="bg-surface-container-low rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-outline-variant/30 space-y-5 animate-in fade-in zoom-in duration-150 font-cairo">
++        {/* Modal Header */}
++        <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
++          <div className="flex items-center gap-3">
++            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
++              <Coins className="w-5 h-5" />
++            </div>
++            <div>
++              <h3 id="currency-rate-modal-title" className="font-bold text-on-surface text-base">
++                تعديل سعر صرف {currency.nameAr}
++              </h3>
++              <p className="text-xs text-on-surface-variant font-mono">{currency.code} ({currency.symbol})</p>
++            </div>
++          </div>
++          <button
++            type="button"
++            onClick={onClose}
++            className="text-on-surface-variant hover:text-on-surface p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
++            aria-label="إغلاق النافذة"
++          >
++            <X className="w-5 h-5" />
++          </button>
++        </div>
++
++        {/* Status Alert */}
++        {statusMessage && (
++          <div
++            className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
++              statusMessage.type === "success"
++                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                : "bg-error/15 text-error border border-error/30"
++            }`}
++          >
++            {statusMessage.type === "success" ? (
++              <Check className="w-4 h-4 flex-shrink-0" />
++            ) : (
++              <AlertCircle className="w-4 h-4 flex-shrink-0" />
++            )}
++            <span>{statusMessage.text}</span>
++          </div>
++        )}
++
++        <form onSubmit={handleSubmit} className="space-y-4">
++          <div className="grid grid-cols-2 gap-3">
++            <AppInput
++              label="الاسم بالعربية"
++              value={nameAr}
++              onChange={(e) => setNameAr(e.target.value)}
++            />
++            <AppInput
++              label="رمز العرض (Symbol)"
++              value={symbol}
++              onChange={(e) => setSymbol(e.target.value)}
++            />
++          </div>
++
++          {/* Exchange Rate to USD */}
++          <div>
++            <AppInput
++              label="سعر الصرف مقابل 1 دولار أمريكي (1 USD = ?)"
++              type="number"
++              step="0.0001"
++              value={exchangeRateToUSD}
++              onChange={(e) => setExchangeRateToUSD(Number(e.target.value))}
++            />
++            <span className="block text-[11px] text-on-surface-variant mt-1">
++              مثال: 1 USD = 3.75 SAR (ريال سعودي)، أو 1 USD = 0.31 KWD (دينار كويتي)
++            </span>
++          </div>
++
++          {/* Auto-detect country codes */}
++          <div>
++            <AppInput
++              label="رموز الدول للكشف التلقائي (مفصولة بفواصل)"
++              placeholder="SA, KSA"
++              value={autoDetectCountries}
++              onChange={(e) => setAutoDetectCountries(e.target.value)}
++            />
++            <span className="block text-[11px] text-on-surface-variant mt-1">
++              سيتم عرض الأسعار بهذه العملة تلقائياً للمستخدمين القادمين من هذه الدول
++            </span>
++          </div>
++
++          {/* Active status */}
++          <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container border border-outline-variant/20">
++            <span className="text-xs font-bold text-on-surface">حالة العملة في المنصة:</span>
++            <button
++              type="button"
++              onClick={() => setIsActive(!isActive)}
++              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                isActive
++                  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                  : "bg-surface-container text-on-surface-variant border border-outline-variant/30"
++              }`}
++            >
++              {isActive ? "مفعلة في الدفع" : "معطلة"}
++            </button>
++          </div>
++
++          {/* Form Actions */}
++          <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
++            <button
++              type="button"
++              onClick={onClose}
++              disabled={isSaving}
++              className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
++            >
++              إلغاء
++            </button>
++            <AppButton
++              type="submit"
++              variant="primary"
++              size="sm"
++              isLoading={isSaving}
++              leftIcon={<Save className="w-4 h-4" />}
++            >
++              حفظ سعر الصرف
++            </AppButton>
++          </div>
++        </form>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/modals/GatewayConfigModal.tsx b/src/features/admin/components/payments/modals/GatewayConfigModal.tsx
+new file mode 100644
+index 0000000..e14e951
+--- /dev/null
++++ b/src/features/admin/components/payments/modals/GatewayConfigModal.tsx
+@@ -0,0 +1,318 @@
++"use client";
++
++import React, { useState, useEffect } from "react";
++import { AdminGatewayDetails, UpdateGatewayInput } from "../../../types/admin.types";
++import { AppButton, AppInput, AppBadge } from "@/shared/ui";
++import {
++  X,
++  CreditCard,
++  ShieldCheck,
++  Eye,
++  EyeOff,
++  Sliders,
++  Check,
++  AlertCircle,
++  Lock,
++} from "lucide-react";
++
++export interface GatewayConfigModalProps {
++  isOpen: boolean;
++  gateway: AdminGatewayDetails | null;
++  onClose: () => void;
++  onSave: (input: UpdateGatewayInput) => Promise<boolean>;
++  isSaving?: boolean;
++}
++
++export function GatewayConfigModal({
++  isOpen,
++  gateway,
++  onClose,
++  onSave,
++  isSaving = false,
++}: GatewayConfigModalProps) {
++  const [publishableKey, setPublishableKey] = useState("");
++  const [secretKey, setSecretKey] = useState("");
++  const [showSecretKey, setShowSecretKey] = useState(false);
++  const [webhookSecret, setWebhookSecret] = useState("");
++  const [showWebhookSecret, setShowWebhookSecret] = useState(false);
++  const [isTestMode, setIsTestMode] = useState(true);
++  const [feePercentage, setFeePercentage] = useState(0);
++  const [feeFixed, setFeeFixed] = useState(0);
++  const [supportedCurrencies, setSupportedCurrencies] = useState("");
++  const [statusMessage, setStatusMessage] = useState<{
++    type: "success" | "error";
++    text: string;
++  } | null>(null);
++
++  useEffect(() => {
++    if (gateway) {
++      setPublishableKey(gateway.publishableKey || "");
++      setSecretKey("");
++      setWebhookSecret("");
++      setIsTestMode(gateway.isTestMode);
++      setFeePercentage(gateway.feePercentage || 0);
++      setFeeFixed(gateway.feeFixed || 0);
++      setSupportedCurrencies(gateway.supportedCurrencies?.join(", ") || "");
++      setStatusMessage(null);
++    }
++  }, [gateway, isOpen]);
++
++  useEffect(() => {
++    if (!isOpen) return;
++    const handleKeyDown = (e: KeyboardEvent) => {
++      if (e.key === "Escape") onClose();
++    };
++    window.addEventListener("keydown", handleKeyDown);
++    return () => window.removeEventListener("keydown", handleKeyDown);
++  }, [isOpen, onClose]);
++
++  if (!isOpen || !gateway) return null;
++
++  const handleSubmit = async (e: React.FormEvent) => {
++    e.preventDefault();
++    setStatusMessage(null);
++
++    const currenciesArray = supportedCurrencies
++      .split(",")
++      .map((c) => c.trim().toUpperCase())
++      .filter(Boolean);
++
++    const payload: UpdateGatewayInput = {
++      id: gateway.id,
++      publishableKey: publishableKey.trim(),
++      isTestMode,
++      feePercentage: Number(feePercentage),
++      feeFixed: Number(feeFixed),
++      supportedCurrencies: currenciesArray,
++    };
++
++    if (secretKey.trim()) {
++      payload.secretKey = secretKey.trim();
++    }
++    if (webhookSecret.trim()) {
++      payload.webhookSecret = webhookSecret.trim();
++    }
++
++    const success = await onSave(payload);
++    if (success) {
++      setStatusMessage({ type: "success", text: "تم حفظ إعدادات البوابة بنجاح" });
++      setTimeout(() => {
++        onClose();
++      }, 1200);
++    } else {
++      setStatusMessage({ type: "error", text: "حدث خطأ أثناء حفظ الإعدادات" });
++    }
++  };
++
++  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
++    if (e.target === e.currentTarget) {
++      onClose();
++    }
++  };
++
++  return (
++    <div
++      role="dialog"
++      aria-modal="true"
++      aria-labelledby="gateway-config-modal-title"
++      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
++      dir="rtl"
++      onClick={handleBackdropClick}
++    >
++      <div className="bg-surface-container-low rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-outline-variant/30 space-y-5 animate-in fade-in zoom-in duration-150 font-cairo">
++        {/* Modal Header */}
++        <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
++          <div className="flex items-center gap-3">
++            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
++              <CreditCard className="w-5 h-5" />
++            </div>
++            <div>
++              <h3 id="gateway-config-modal-title" className="font-bold text-on-surface text-base">
++                إعدادات بوابة {gateway.nameAr}
++              </h3>
++              <p className="text-xs text-on-surface-variant font-mono">{gateway.nameEn} ({gateway.code})</p>
++            </div>
++          </div>
++          <button
++            type="button"
++            onClick={onClose}
++            className="text-on-surface-variant hover:text-on-surface p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
++            aria-label="إغلاق النافذة"
++          >
++            <X className="w-5 h-5" />
++          </button>
++        </div>
++
++        {/* Status Alert */}
++        {statusMessage && (
++          <div
++            className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
++              statusMessage.type === "success"
++                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                : "bg-error/15 text-error border border-error/30"
++            }`}
++          >
++            {statusMessage.type === "success" ? (
++              <Check className="w-4 h-4 flex-shrink-0" />
++            ) : (
++              <AlertCircle className="w-4 h-4 flex-shrink-0" />
++            )}
++            <span>{statusMessage.text}</span>
++          </div>
++        )}
++
++        <form onSubmit={handleSubmit} className="space-y-4">
++          {/* Environment Mode Switch */}
++          <div className="p-3.5 rounded-xl bg-surface-container border border-outline-variant/20 flex items-center justify-between">
++            <div>
++              <span className="block text-xs font-bold text-on-surface">بيئة التشغيل (Environment)</span>
++              <span className="text-[11px] text-on-surface-variant">
++                {isTestMode
++                  ? "وضع التجربة (Sandbox) - لن يتم خصم مبالغ حقيقية"
++                  : "الوضع الحي (Live Production) - جاهز لاستقبال دفعات العملاء الفعلية"}
++              </span>
++            </div>
++            <button
++              type="button"
++              onClick={() => setIsTestMode(!isTestMode)}
++              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                isTestMode
++                  ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
++                  : "bg-primary text-on-primary shadow-sm"
++              }`}
++            >
++              {isTestMode ? "وضع تجريبي" : "وضع حي"}
++            </button>
++          </div>
++
++          {/* Publishable / Client Key */}
++          <AppInput
++            label="المفتاح العام (Publishable / Public API Key)"
++            placeholder="pk_live_..."
++            value={publishableKey}
++            onChange={(e) => setPublishableKey(e.target.value)}
++          />
++
++          {/* Secret API Key with Mask indicator */}
++          <div className="space-y-1.5">
++            <div className="flex items-center justify-between">
++              <label className="text-xs font-semibold text-on-surface flex items-center gap-1.5">
++                <Lock className="w-3.5 h-3.5 text-primary" />
++                <span>المفتاح السري (Secret Key)</span>
++              </label>
++              {gateway.hasSecretKey && (
++                <AppBadge variant="success" size="sm">
++                  مضبوط ومشفّر
++                </AppBadge>
++              )}
++            </div>
++            <div className="relative">
++              <input
++                type={showSecretKey ? "text" : "password"}
++                placeholder={
++                  gateway.hasSecretKey
++                    ? "•••••••••••••••• (اتركه فارغاً للإبقاء على المفتاح الحالي)"
++                    : "sk_live_..."
++                }
++                value={secretKey}
++                onChange={(e) => setSecretKey(e.target.value)}
++                className="w-full px-3.5 py-2.5 pl-10 rounded-xl border border-outline-variant/40 bg-surface-container text-on-surface text-sm outline-none focus:ring-1 focus:ring-primary font-mono"
++              />
++              <button
++                type="button"
++                onClick={() => setShowSecretKey(!showSecretKey)}
++                className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface cursor-pointer p-1"
++                aria-label={showSecretKey ? "إخفاء المفتاح" : "إظهار المفتاح"}
++              >
++                {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
++              </button>
++            </div>
++          </div>
++
++          {/* Webhook Secret Key */}
++          <div className="space-y-1.5">
++            <div className="flex items-center justify-between">
++              <label className="text-xs font-semibold text-on-surface flex items-center gap-1.5">
++                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
++                <span>مفتاح التحقق من الويب هوك (Webhook Secret)</span>
++              </label>
++              {gateway.hasWebhookSecret && (
++                <AppBadge variant="neutral" size="sm">
++                  مضبوط ومشفّر
++                </AppBadge>
++              )}
++            </div>
++            <div className="relative">
++              <input
++                type={showWebhookSecret ? "text" : "password"}
++                placeholder={
++                  gateway.hasWebhookSecret
++                    ? "•••••••••••••••• (اتركه فارغاً للإبقاء على الحالي)"
++                    : "whsec_..."
++                }
++                value={webhookSecret}
++                onChange={(e) => setWebhookSecret(e.target.value)}
++                className="w-full px-3.5 py-2.5 pl-10 rounded-xl border border-outline-variant/40 bg-surface-container text-on-surface text-sm outline-none focus:ring-1 focus:ring-primary font-mono"
++              />
++              <button
++                type="button"
++                onClick={() => setShowWebhookSecret(!showWebhookSecret)}
++                className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface cursor-pointer p-1"
++                aria-label={showWebhookSecret ? "إخفاء الويب هوك" : "إظهار الويب هوك"}
++              >
++                {showWebhookSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
++              </button>
++            </div>
++          </div>
++
++          {/* Transaction Fees: Percentage & Fixed */}
++          <div className="grid grid-cols-2 gap-3">
++            <AppInput
++              label="نسبة العمولة (%)"
++              type="number"
++              step="0.01"
++              value={feePercentage}
++              onChange={(e) => setFeePercentage(Number(e.target.value))}
++            />
++            <AppInput
++              label="رسوم ثابتة (SAR)"
++              type="number"
++              step="0.01"
++              value={feeFixed}
++              onChange={(e) => setFeeFixed(Number(e.target.value))}
++            />
++          </div>
++
++          {/* Supported Currencies */}
++          <AppInput
++            label="العملات المدعومة (مفصولة بفواصل)"
++            placeholder="SAR, USD, AED, KWD, EGP"
++            value={supportedCurrencies}
++            onChange={(e) => setSupportedCurrencies(e.target.value)}
++          />
++
++          {/* Form Actions */}
++          <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
++            <button
++              type="button"
++              onClick={onClose}
++              disabled={isSaving}
++              className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
++            >
++              إلغاء
++            </button>
++            <AppButton
++              type="submit"
++              variant="primary"
++              size="sm"
++              isLoading={isSaving}
++              leftIcon={<Sliders className="w-4 h-4" />}
++            >
++              حفظ المفاتيح والإعدادات
++            </AppButton>
++          </div>
++        </form>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/modals/PlanEditorModal.tsx b/src/features/admin/components/payments/modals/PlanEditorModal.tsx
+new file mode 100644
+index 0000000..cd9bff1
+--- /dev/null
++++ b/src/features/admin/components/payments/modals/PlanEditorModal.tsx
+@@ -0,0 +1,379 @@
++"use client";
++
++import React, { useState, useEffect } from "react";
++import {
++  AdminSubscriptionPlanItem,
++  UpsertPlanInput,
++  AdminPlanPriceItem,
++} from "../../../types/admin.types";
++import { AppButton, AppInput } from "@/shared/ui";
++import { X, Layers, Save, Check, AlertCircle } from "lucide-react";
++
++export interface PlanEditorModalProps {
++  isOpen: boolean;
++  plan?: AdminSubscriptionPlanItem | null;
++  onClose: () => void;
++  onSave: (input: UpsertPlanInput) => Promise<boolean>;
++  isSaving?: boolean;
++}
++
++interface PriceState {
++  monthly: number;
++  yearly: number;
++}
++
++const SUPPORTED_PLAN_CURRENCIES = ["SAR", "USD", "AED", "EGP"] as const;
++
++export function PlanEditorModal({
++  isOpen,
++  plan,
++  onClose,
++  onSave,
++  isSaving = false,
++}: PlanEditorModalProps) {
++  const isEditing = Boolean(plan && plan.id);
++
++  const [slug, setSlug] = useState("");
++  const [nameAr, setNameAr] = useState("");
++  const [nameEn, setNameEn] = useState("");
++  const [descriptionAr, setDescriptionAr] = useState("");
++  const [badgeAr, setBadgeAr] = useState("");
++  const [sortOrder, setSortOrder] = useState(0);
++  const [isActive, setIsActive] = useState(true);
++
++  // Pricing matrix state by currency
++  const [pricesState, setPricesState] = useState<Record<string, PriceState>>({
++    SAR: { monthly: 0, yearly: 0 },
++    USD: { monthly: 0, yearly: 0 },
++    AED: { monthly: 0, yearly: 0 },
++    EGP: { monthly: 0, yearly: 0 },
++  });
++
++  const [statusMessage, setStatusMessage] = useState<{
++    type: "success" | "error";
++    text: string;
++  } | null>(null);
++
++  useEffect(() => {
++    if (plan) {
++      setSlug(plan.slug || "");
++      setNameAr(plan.nameAr || "");
++      setNameEn(plan.nameEn || "");
++      setDescriptionAr(plan.descriptionAr || "");
++      setBadgeAr(plan.badgeAr || "");
++      setSortOrder(plan.sortOrder ?? 0);
++      setIsActive(plan.isActive ?? true);
++
++      // Map prices
++      const initialPrices: Record<string, PriceState> = {
++        SAR: { monthly: 0, yearly: 0 },
++        USD: { monthly: 0, yearly: 0 },
++        AED: { monthly: 0, yearly: 0 },
++        EGP: { monthly: 0, yearly: 0 },
++      };
++
++      if (plan.prices) {
++        plan.prices.forEach((p) => {
++          const curr = p.currency.toUpperCase();
++          if (!initialPrices[curr]) {
++            initialPrices[curr] = { monthly: 0, yearly: 0 };
++          }
++          if (p.billingCycle === "MONTHLY") {
++            initialPrices[curr].monthly = p.amount;
++          } else if (p.billingCycle === "YEARLY") {
++            initialPrices[curr].yearly = p.amount;
++          }
++        });
++      }
++      setPricesState(initialPrices);
++      setStatusMessage(null);
++    } else {
++      setSlug("");
++      setNameAr("");
++      setNameEn("");
++      setDescriptionAr("");
++      setBadgeAr("");
++      setSortOrder(0);
++      setIsActive(true);
++      setPricesState({
++        SAR: { monthly: 0, yearly: 0 },
++        USD: { monthly: 0, yearly: 0 },
++        AED: { monthly: 0, yearly: 0 },
++        EGP: { monthly: 0, yearly: 0 },
++      });
++      setStatusMessage(null);
++    }
++  }, [plan, isOpen]);
++
++  useEffect(() => {
++    if (!isOpen) return;
++    const handleKeyDown = (e: KeyboardEvent) => {
++      if (e.key === "Escape") onClose();
++    };
++    window.addEventListener("keydown", handleKeyDown);
++    return () => window.removeEventListener("keydown", handleKeyDown);
++  }, [isOpen, onClose]);
++
++  if (!isOpen) return null;
++
++  const handlePriceChange = (
++    currency: string,
++    cycle: "monthly" | "yearly",
++    val: number
++  ) => {
++    setPricesState((prev) => ({
++      ...prev,
++      [currency]: {
++        ...prev[currency],
++        [cycle]: val,
++      },
++    }));
++  };
++
++  const handleSubmit = async (e: React.FormEvent) => {
++    e.preventDefault();
++    setStatusMessage(null);
++
++    if (!slug.trim() || !nameAr.trim()) {
++      setStatusMessage({
++        type: "error",
++        text: "يرجى ملء معرف الباقة والاسم العربي",
++      });
++      return;
++    }
++
++    // Convert pricesState to AdminPlanPriceItem[]
++    const formattedPrices: AdminPlanPriceItem[] = [];
++    Object.entries(pricesState).forEach(([currency, amounts]) => {
++      formattedPrices.push({
++        currency,
++        billingCycle: "MONTHLY",
++        amount: Number(amounts.monthly) || 0,
++        isActive: true,
++      });
++      formattedPrices.push({
++        currency,
++        billingCycle: "YEARLY",
++        amount: Number(amounts.yearly) || 0,
++        isActive: true,
++      });
++    });
++
++    const payload: UpsertPlanInput = {
++      id: plan?.id,
++      slug: slug.trim().toLowerCase(),
++      nameAr: nameAr.trim(),
++      nameEn: nameEn.trim() || slug.trim(),
++      descriptionAr: descriptionAr.trim(),
++      badgeAr: badgeAr.trim() || undefined,
++      sortOrder: Number(sortOrder),
++      isActive,
++      prices: formattedPrices,
++      quotas: plan?.quotas,
++    };
++
++    const success = await onSave(payload);
++    if (success) {
++      setStatusMessage({ type: "success", text: "تم حفظ الباقة بنجاح" });
++      setTimeout(() => {
++        onClose();
++      }, 1200);
++    } else {
++      setStatusMessage({ type: "error", text: "حدث خطأ أثناء حفظ الباقة" });
++    }
++  };
++
++  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
++    if (e.target === e.currentTarget) {
++      onClose();
++    }
++  };
++
++  return (
++    <div
++      role="dialog"
++      aria-modal="true"
++      aria-labelledby="plan-editor-modal-title"
++      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
++      dir="rtl"
++      onClick={handleBackdropClick}
++    >
++      <div className="bg-surface-container-low rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-outline-variant/30 space-y-5 animate-in fade-in zoom-in duration-150 font-cairo">
++        {/* Modal Header */}
++        <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
++          <div className="flex items-center gap-3">
++            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
++              <Layers className="w-5 h-5" />
++            </div>
++            <div>
++              <h3 id="plan-editor-modal-title" className="font-bold text-on-surface text-base">
++                {isEditing ? `تعديل باقة ${nameAr || plan?.nameAr}` : "إضافة باقة اشتراك جديدة"}
++              </h3>
++              <p className="text-xs text-on-surface-variant">
++                تحديد مواصفات وأسعار الباقة في مختلف العملات
++              </p>
++            </div>
++          </div>
++          <button
++            type="button"
++            onClick={onClose}
++            className="text-on-surface-variant hover:text-on-surface p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
++            aria-label="إغلاق النافذة"
++          >
++            <X className="w-5 h-5" />
++          </button>
++        </div>
++
++        {/* Status Alert */}
++        {statusMessage && (
++          <div
++            className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
++              statusMessage.type === "success"
++                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                : "bg-error/15 text-error border border-error/30"
++            }`}
++          >
++            {statusMessage.type === "success" ? (
++              <Check className="w-4 h-4 flex-shrink-0" />
++            ) : (
++              <AlertCircle className="w-4 h-4 flex-shrink-0" />
++            )}
++            <span>{statusMessage.text}</span>
++          </div>
++        )}
++
++        <form onSubmit={handleSubmit} className="space-y-4">
++          {/* Main Info */}
++          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
++            <AppInput
++              label="المعرف الفريد (Slug)"
++              placeholder="pro, creator, agency..."
++              value={slug}
++              onChange={(e) => setSlug(e.target.value)}
++              disabled={isEditing}
++            />
++            <AppInput
++              label="الاسم بالعربية"
++              placeholder="باقة المحترفين"
++              value={nameAr}
++              onChange={(e) => setNameAr(e.target.value)}
++            />
++          </div>
++
++          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
++            <AppInput
++              label="الاسم بالإنجليزية"
++              placeholder="Pro Plan"
++              value={nameEn}
++              onChange={(e) => setNameEn(e.target.value)}
++            />
++            <AppInput
++              label="شارة مميزة (Badge)"
++              placeholder="الأكثر طلباً، خصم 20%..."
++              value={badgeAr}
++              onChange={(e) => setBadgeAr(e.target.value)}
++            />
++          </div>
++
++          <div>
++            <label className="block text-xs font-semibold text-on-surface mb-1">
++              وصف مختصر للباقة
++            </label>
++            <textarea
++              rows={2}
++              placeholder="مناسبة لصناع المحتوى وأصحاب المشاريع الناشئة..."
++              value={descriptionAr}
++              onChange={(e) => setDescriptionAr(e.target.value)}
++              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-on-surface text-sm outline-none focus:ring-1 focus:ring-primary resize-none"
++            />
++          </div>
++
++          <div className="grid grid-cols-2 gap-3 items-center">
++            <AppInput
++              label="ترتيب الظهور (Sort Order)"
++              type="number"
++              value={sortOrder}
++              onChange={(e) => setSortOrder(Number(e.target.value))}
++            />
++            <div className="flex items-center gap-3 pt-4">
++              <label className="text-xs font-bold text-on-surface">حالة الباقة:</label>
++              <button
++                type="button"
++                onClick={() => setIsActive(!isActive)}
++                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                  isActive
++                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                    : "bg-surface-container text-on-surface-variant border border-outline-variant/30"
++                }`}
++              >
++                {isActive ? "نشطة ومتاحة" : "معطلة أو مسودة"}
++              </button>
++            </div>
++          </div>
++
++          {/* Pricing Matrix */}
++          <div className="pt-2 border-t border-outline-variant/20 space-y-3">
++            <h4 className="text-xs font-bold text-on-surface">مصفوفة التسعير متعددة العملات:</h4>
++            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
++              {SUPPORTED_PLAN_CURRENCIES.map((curr) => (
++                <div
++                  key={curr}
++                  className="p-3 rounded-xl bg-surface-container border border-outline-variant/20 space-y-2"
++                >
++                  <span className="font-mono font-bold text-xs text-primary">{curr}</span>
++                  <div className="grid grid-cols-2 gap-2">
++                    <div>
++                      <label className="block text-[10px] text-on-surface-variant mb-1">شهرياً</label>
++                      <input
++                        type="number"
++                        step="0.01"
++                        value={pricesState[curr]?.monthly || 0}
++                        onChange={(e) =>
++                          handlePriceChange(curr, "monthly", Number(e.target.value))
++                        }
++                        className="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface text-on-surface text-xs font-mono outline-none focus:ring-1 focus:ring-primary"
++                      />
++                    </div>
++                    <div>
++                      <label className="block text-[10px] text-on-surface-variant mb-1">سنوياً</label>
++                      <input
++                        type="number"
++                        step="0.01"
++                        value={pricesState[curr]?.yearly || 0}
++                        onChange={(e) =>
++                          handlePriceChange(curr, "yearly", Number(e.target.value))
++                        }
++                        className="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface text-on-surface text-xs font-mono outline-none focus:ring-1 focus:ring-primary"
++                      />
++                    </div>
++                  </div>
++                </div>
++              ))}
++            </div>
++          </div>
++
++          {/* Form Actions */}
++          <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
++            <button
++              type="button"
++              onClick={onClose}
++              disabled={isSaving}
++              className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
++            >
++              إلغاء
++            </button>
++            <AppButton
++              type="submit"
++              variant="primary"
++              size="sm"
++              isLoading={isSaving}
++              leftIcon={<Save className="w-4 h-4" />}
++            >
++              {isEditing ? "حفظ تعديلات الباقة" : "إضافة الباقة"}
++            </AppButton>
++          </div>
++        </form>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/tabs/CouponsSubTab.tsx b/src/features/admin/components/payments/tabs/CouponsSubTab.tsx
+new file mode 100644
+index 0000000..1eeff83
+--- /dev/null
++++ b/src/features/admin/components/payments/tabs/CouponsSubTab.tsx
+@@ -0,0 +1,270 @@
++"use client";
++
++import React, { useState } from "react";
++import {
++  AdminCouponItem,
++  CreateCouponInput,
++} from "../../../types/admin.types";
++import { AppCard, AppBadge, AppButton } from "@/shared/ui";
++import { CouponEditorModal } from "../modals/CouponEditorModal";
++import {
++  Tag,
++  Plus,
++  Trash2,
++  Calendar,
++  Users,
++  Copy,
++  Check,
++  Percent,
++} from "lucide-react";
++
++export interface CouponsSubTabProps {
++  coupons: AdminCouponItem[];
++  availablePlanSlugs?: Array<{ slug: string; nameAr: string }>;
++  onCreateCoupon: (input: CreateCouponInput) => Promise<boolean>;
++  onToggleCoupon: (id: string) => Promise<boolean>;
++  onDeleteCoupon: (id: string) => Promise<boolean>;
++  isSaving?: boolean;
++}
++
++export function CouponsSubTab({
++  coupons,
++  availablePlanSlugs,
++  onCreateCoupon,
++  onToggleCoupon,
++  onDeleteCoupon,
++  isSaving = false,
++}: CouponsSubTabProps) {
++  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
++  const [copiedCode, setCopiedCode] = useState<string | null>(null);
++  const [togglingId, setTogglingId] = useState<string | null>(null);
++  const [deletingId, setDeletingId] = useState<string | null>(null);
++
++  const handleCopyCode = (code: string) => {
++    navigator.clipboard?.writeText(code);
++    setCopiedCode(code);
++    setTimeout(() => setCopiedCode(null), 2000);
++  };
++
++  const handleToggle = async (id: string) => {
++    setTogglingId(id);
++    try {
++      await onToggleCoupon(id);
++    } finally {
++      setTogglingId(null);
++    }
++  };
++
++  const handleDelete = async (id: string, code: string) => {
++    if (confirm(`هل أنت متأكد من رغبتك في حذف كود الخصم "${code}"؟`)) {
++      setDeletingId(id);
++      try {
++        await onDeleteCoupon(id);
++      } finally {
++        setDeletingId(null);
++      }
++    }
++  };
++
++  const formatDate = (dateStr?: string | null) => {
++    if (!dateStr) return "دائم (بلا تاريخ انتهاء)";
++    try {
++      return new Date(dateStr).toLocaleDateString("ar-SA", {
++        year: "numeric",
++        month: "short",
++        day: "numeric",
++      });
++    } catch {
++      return dateStr;
++    }
++  };
++
++  return (
++    <div className="space-y-6 font-cairo" dir="rtl">
++      {/* Header */}
++      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-surface-container-low border border-outline-variant/30">
++        <div>
++          <h3 className="text-base font-bold text-on-surface">
++            إدارة أكواد الخصم والعروض الترويجية
++          </h3>
++          <p className="text-xs text-on-surface-variant">
++            إنشاء قسائم تخفيض بنسبة مئوية أو مبالغ ثابتة وضبط فترات الصلاحية وحدود الاستخدام
++          </p>
++        </div>
++
++        <AppButton
++          variant="primary"
++          size="sm"
++          onClick={() => setIsCreateModalOpen(true)}
++          leftIcon={<Plus className="w-4 h-4" />}
++        >
++          إنشاء كود خصم جديد
++        </AppButton>
++      </div>
++
++      {/* Coupons Table */}
++      <AppCard className="p-0 bg-surface-container-low border-outline-variant/30 overflow-hidden shadow-sm">
++        <div className="overflow-x-auto">
++          <table className="w-full text-right text-xs">
++            <thead className="bg-surface-container text-on-surface-variant border-b border-outline-variant/20">
++              <tr>
++                <th className="py-3 px-4 font-bold">كود الخصم</th>
++                <th className="py-3 px-4 font-bold">قيمة الخصم</th>
++                <th className="py-3 px-4 font-bold">الاستخدام</th>
++                <th className="py-3 px-4 font-bold">فترة الصلاحية</th>
++                <th className="py-3 px-4 font-bold">الباقات المشمولة</th>
++                <th className="py-3 px-4 font-bold">الحالة</th>
++                <th className="py-3 px-4 font-bold text-center">الإجراءات</th>
++              </tr>
++            </thead>
++            <tbody className="divide-y divide-outline-variant/10">
++              {coupons.map((coupon) => {
++                const isThisToggling = togglingId === coupon.id;
++                const isThisDeleting = deletingId === coupon.id;
++
++                return (
++                  <tr
++                    key={coupon.id}
++                    className="hover:bg-surface-container/50 transition-colors"
++                  >
++                    {/* Code & Copy */}
++                    <td className="py-3.5 px-4">
++                      <div className="flex items-center gap-2">
++                        <span className="font-mono font-bold text-sm text-primary tracking-wider bg-surface-container px-2 py-0.5 rounded border border-outline-variant/30">
++                          {coupon.code}
++                        </span>
++                        <button
++                          type="button"
++                          onClick={() => handleCopyCode(coupon.code)}
++                          className="text-on-surface-variant hover:text-on-surface p-1 rounded hover:bg-surface-container transition cursor-pointer"
++                          title="نسخ الكود"
++                        >
++                          {copiedCode === coupon.code ? (
++                            <Check className="w-3.5 h-3.5 text-emerald-400" />
++                          ) : (
++                            <Copy className="w-3.5 h-3.5" />
++                          )}
++                        </button>
++                      </div>
++                      {coupon.descriptionAr && (
++                        <p className="text-[11px] text-on-surface-variant mt-1">
++                          {coupon.descriptionAr}
++                        </p>
++                      )}
++                    </td>
++
++                    {/* Discount Value */}
++                    <td className="py-3.5 px-4 font-bold text-on-surface">
++                      {coupon.discountType === "PERCENTAGE" ? (
++                        <span className="text-emerald-400 font-mono text-sm">
++                          {coupon.discountValue}% خصم
++                        </span>
++                      ) : (
++                        <span className="text-primary font-mono text-sm">
++                          {coupon.discountValue} ر.س خصم
++                        </span>
++                      )}
++                    </td>
++
++                    {/* Usage Counter */}
++                    <td className="py-3.5 px-4">
++                      <div className="flex items-center gap-1.5 font-mono text-on-surface">
++                        <Users className="w-3.5 h-3.5 text-on-surface-variant" />
++                        <span>{coupon.usedCount}</span>
++                        <span className="text-on-surface-variant">/</span>
++                        <span>{coupon.maxUses ?? "∞"}</span>
++                      </div>
++                    </td>
++
++                    {/* Validity Dates */}
++                    <td className="py-3.5 px-4 text-[11px] text-on-surface-variant">
++                      <div className="flex items-center gap-1">
++                        <Calendar className="w-3 h-3 text-outline" />
++                        <span>إلى: {formatDate(coupon.validUntil)}</span>
++                      </div>
++                    </td>
++
++                    {/* Applicable Plans */}
++                    <td className="py-3.5 px-4">
++                      <div className="flex items-center gap-1 flex-wrap max-w-xs">
++                        {coupon.applicablePlanSlugs &&
++                        coupon.applicablePlanSlugs.length > 0 ? (
++                          coupon.applicablePlanSlugs.map((slug) => (
++                            <span
++                              key={slug}
++                              className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-surface-container text-on-surface-variant border border-outline-variant/30"
++                            >
++                              {slug}
++                            </span>
++                          ))
++                        ) : (
++                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-primary/10 text-primary">
++                            جميع الباقات
++                          </span>
++                        )}
++                      </div>
++                    </td>
++
++                    {/* Status */}
++                    <td className="py-3.5 px-4">
++                      <button
++                        type="button"
++                        disabled={isThisToggling}
++                        onClick={() => handleToggle(coupon.id)}
++                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                          coupon.isActive
++                            ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25"
++                            : "bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30"
++                        }`}
++                      >
++                        {isThisToggling
++                          ? "..."
++                          : coupon.isActive
++                          ? "مفعل"
++                          : "معطل"}
++                      </button>
++                    </td>
++
++                    {/* Delete Action */}
++                    <td className="py-3.5 px-4 text-center">
++                      <button
++                        type="button"
++                        disabled={isThisDeleting}
++                        onClick={() => handleDelete(coupon.id, coupon.code)}
++                        className="text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
++                        title="حذف الكوبون"
++                        aria-label="حذف الكوبون"
++                      >
++                        <Trash2 className="w-4 h-4" />
++                      </button>
++                    </td>
++                  </tr>
++                );
++              })}
++
++              {coupons.length === 0 && (
++                <tr>
++                  <td
++                    colSpan={7}
++                    className="py-8 text-center text-on-surface-variant text-xs"
++                  >
++                    لا توجد أكواد خصم منشأة حالياً. انقر على "إنشاء كود خصم جديد" لإضافة قسيمة.
++                  </td>
++                </tr>
++              )}
++            </tbody>
++          </table>
++        </div>
++      </AppCard>
++
++      {/* Coupon Modal */}
++      <CouponEditorModal
++        isOpen={isCreateModalOpen}
++        onClose={() => setIsCreateModalOpen(false)}
++        onSave={onCreateCoupon}
++        availablePlanSlugs={availablePlanSlugs}
++        isSaving={isSaving}
++      />
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/tabs/CurrenciesSubTab.tsx b/src/features/admin/components/payments/tabs/CurrenciesSubTab.tsx
+new file mode 100644
+index 0000000..8b8f476
+--- /dev/null
++++ b/src/features/admin/components/payments/tabs/CurrenciesSubTab.tsx
+@@ -0,0 +1,174 @@
++"use client";
++
++import React, { useState } from "react";
++import {
++  AdminCurrencyItem,
++  UpdateCurrencyInput,
++} from "../../../types/admin.types";
++import { AppCard, AppBadge, AppButton } from "@/shared/ui";
++import { CurrencyRateModal } from "../modals/CurrencyRateModal";
++import { Coins, Edit2, Globe, Check, AlertCircle } from "lucide-react";
++
++export interface CurrenciesSubTabProps {
++  currencies: AdminCurrencyItem[];
++  onSaveCurrency: (code: string, input: UpdateCurrencyInput) => Promise<boolean>;
++  isSaving?: boolean;
++}
++
++export function CurrenciesSubTab({
++  currencies,
++  onSaveCurrency,
++  isSaving = false,
++}: CurrenciesSubTabProps) {
++  const [selectedCurrency, setSelectedCurrency] = useState<AdminCurrencyItem | null>(null);
++  const [isModalOpen, setIsModalOpen] = useState(false);
++
++  const handleEditRate = (currency: AdminCurrencyItem) => {
++    setSelectedCurrency(currency);
++    setIsModalOpen(true);
++  };
++
++  return (
++    <div className="space-y-6 font-cairo" dir="rtl">
++      {/* Header */}
++      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-surface-container-low border border-outline-variant/30">
++        <div>
++          <h3 className="text-base font-bold text-on-surface">
++            إدارة العملات وأسعار الصرف العالمية
++          </h3>
++          <p className="text-xs text-on-surface-variant">
++            تحديد العملات المتاحة للدفع وحساب أسعار الصرف التلقائية بالنسبة للدولار الأمريكي (USD)
++          </p>
++        </div>
++        <div className="flex items-center gap-2">
++          <AppBadge variant="primary" size="sm">
++            <Coins className="w-3.5 h-3.5 ml-1 inline" />
++            {currencies.length} عملات مهيأة
++          </AppBadge>
++        </div>
++      </div>
++
++      {/* Currencies Table */}
++      <AppCard className="p-0 bg-surface-container-low border-outline-variant/30 overflow-hidden shadow-sm">
++        <div className="overflow-x-auto">
++          <table className="w-full text-right text-xs">
++            <thead className="bg-surface-container text-on-surface-variant border-b border-outline-variant/20">
++              <tr>
++                <th className="py-3 px-4 font-bold">الرمز والعملة</th>
++                <th className="py-3 px-4 font-bold">الاسم بالعربية</th>
++                <th className="py-3 px-4 font-bold">رمز العرض</th>
++                <th className="py-3 px-4 font-bold">سعر الصرف (1 USD =)</th>
++                <th className="py-3 px-4 font-bold">الدول المربوطة تلقائياً</th>
++                <th className="py-3 px-4 font-bold">الحالة</th>
++                <th className="py-3 px-4 font-bold text-center">الإجراءات</th>
++              </tr>
++            </thead>
++            <tbody className="divide-y divide-outline-variant/10">
++              {currencies.map((c) => (
++                <tr
++                  key={c.code}
++                  className="hover:bg-surface-container/50 transition-colors"
++                >
++                  {/* Code & Base Badge */}
++                  <td className="py-3.5 px-4">
++                    <div className="flex items-center gap-2">
++                      <span className="font-mono font-bold text-sm text-on-surface">
++                        {c.code}
++                      </span>
++                      {c.isBaseCurrency && (
++                        <AppBadge variant="live" size="sm">
++                          العملة المرجعية
++                        </AppBadge>
++                      )}
++                    </div>
++                  </td>
++
++                  {/* Arabic Name */}
++                  <td className="py-3.5 px-4 font-medium text-on-surface">
++                    {c.nameAr}
++                  </td>
++
++                  {/* Symbol */}
++                  <td className="py-3.5 px-4">
++                    <span className="px-2 py-0.5 rounded-md bg-surface-container font-mono text-on-surface border border-outline-variant/30">
++                      {c.symbol}
++                    </span>
++                  </td>
++
++                  {/* Exchange Rate to USD */}
++                  <td className="py-3.5 px-4 font-mono font-bold text-primary">
++                    {c.exchangeRateToUSD} {c.code}
++                  </td>
++
++                  {/* Auto-detected Countries */}
++                  <td className="py-3.5 px-4">
++                    <div className="flex items-center gap-1 flex-wrap max-w-xs">
++                      {c.autoDetectCountries && c.autoDetectCountries.length > 0 ? (
++                        c.autoDetectCountries.map((country) => (
++                          <span
++                            key={country}
++                            className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-surface-container text-on-surface-variant border border-outline-variant/20"
++                          >
++                            {country}
++                          </span>
++                        ))
++                      ) : (
++                        <span className="text-outline text-[11px]">—</span>
++                      )}
++                    </div>
++                  </td>
++
++                  {/* Active Status */}
++                  <td className="py-3.5 px-4">
++                    <AppBadge
++                      variant={c.isActive ? "success" : "neutral"}
++                      size="sm"
++                      dot={c.isActive}
++                    >
++                      {c.isActive ? "مفعلة" : "معطلة"}
++                    </AppBadge>
++                  </td>
++
++                  {/* Actions */}
++                  <td className="py-3.5 px-4 text-center">
++                    <button
++                      type="button"
++                      onClick={() => handleEditRate(c)}
++                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-primary/10 transition-colors cursor-pointer"
++                    >
++                      <Edit2 className="w-3.5 h-3.5" />
++                      <span>تعديل سعر الصرف</span>
++                    </button>
++                  </td>
++                </tr>
++              ))}
++
++              {currencies.length === 0 && (
++                <tr>
++                  <td
++                    colSpan={7}
++                    className="py-8 text-center text-on-surface-variant text-xs"
++                  >
++                    لا توجد عملات مهيأة في المنصة حالياً.
++                  </td>
++                </tr>
++              )}
++            </tbody>
++          </table>
++        </div>
++      </AppCard>
++
++      {/* Currency Rate Modal */}
++      <CurrencyRateModal
++        isOpen={isModalOpen}
++        currency={selectedCurrency}
++        onClose={() => {
++          setIsModalOpen(false);
++          setSelectedCurrency(null);
++        }}
++        onSave={onSaveCurrency}
++        isSaving={isSaving}
++      />
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/tabs/GatewaysSubTab.tsx b/src/features/admin/components/payments/tabs/GatewaysSubTab.tsx
+new file mode 100644
+index 0000000..6b1bc63
+--- /dev/null
++++ b/src/features/admin/components/payments/tabs/GatewaysSubTab.tsx
+@@ -0,0 +1,273 @@
++"use client";
++
++import React, { useState } from "react";
++import {
++  AdminGatewayDetails,
++  UpdateGatewayInput,
++} from "../../../types/admin.types";
++import { AppCard, AppBadge, AppButton } from "@/shared/ui";
++import { GatewayConfigModal } from "../modals/GatewayConfigModal";
++import {
++  CreditCard,
++  Smartphone,
++  Wallet,
++  CalendarCheck,
++  Globe,
++  Sliders,
++  CheckCircle2,
++  Lock,
++  Percent,
++} from "lucide-react";
++
++export interface GatewaysSubTabProps {
++  gateways: AdminGatewayDetails[];
++  onToggleGateway: (id: string) => Promise<boolean>;
++  onSaveConfig?: (input: UpdateGatewayInput) => Promise<boolean>;
++  isSaving?: boolean;
++}
++
++export function GatewaysSubTab({
++  gateways,
++  onToggleGateway,
++  onSaveConfig,
++  isSaving = false,
++}: GatewaysSubTabProps) {
++  const [selectedGateway, setSelectedGateway] = useState<AdminGatewayDetails | null>(null);
++  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
++  const [togglingId, setTogglingId] = useState<string | null>(null);
++
++  const getGatewayIcon = (code: string) => {
++    const c = code.toLowerCase();
++    switch (c) {
++      case "mada":
++        return <CreditCard className="w-5 h-5 text-emerald-500" />;
++      case "apple_pay":
++        return <Smartphone className="w-5 h-5 text-on-surface" />;
++      case "stc_pay":
++        return <Wallet className="w-5 h-5 text-purple-400" />;
++      case "tamara":
++        return <CalendarCheck className="w-5 h-5 text-amber-400" />;
++      case "tabby":
++        return <CalendarCheck className="w-5 h-5 text-emerald-400" />;
++      case "fawry":
++        return <Wallet className="w-5 h-5 text-amber-500" />;
++      case "visa_mastercard":
++        return <CreditCard className="w-5 h-5 text-blue-500" />;
++      case "stripe":
++        return <CreditCard className="w-5 h-5 text-indigo-400" />;
++      case "paypal":
++        return <Wallet className="w-5 h-5 text-sky-400" />;
++      default:
++        return <CreditCard className="w-5 h-5 text-primary" />;
++    }
++  };
++
++  const isNational = (gw: AdminGatewayDetails) => {
++    const c = gw.code?.toLowerCase();
++    return (
++      gw.category === "NATIONAL" ||
++      gw.category === "BNPL" ||
++      gw.category === "WALLET" ||
++      ["mada", "stc_pay", "tamara", "tabby", "fawry", "apple_pay"].includes(c)
++    );
++  };
++
++  const nationalGateways = gateways.filter((g) => isNational(g));
++  const internationalGateways = gateways.filter((g) => !isNational(g));
++
++  const handleOpenConfig = (gw: AdminGatewayDetails) => {
++    setSelectedGateway(gw);
++    setIsConfigModalOpen(true);
++  };
++
++  const handleToggle = async (id: string) => {
++    setTogglingId(id);
++    try {
++      await onToggleGateway(id);
++    } finally {
++      setTogglingId(null);
++    }
++  };
++
++  const renderGatewayCard = (gw: AdminGatewayDetails) => {
++    const isThisToggling = togglingId === gw.id;
++
++    return (
++      <AppCard
++        key={gw.id}
++        className="p-5 bg-surface-container-low border-outline-variant/30 flex flex-col justify-between hover:border-outline-variant/60 transition-all shadow-sm"
++      >
++        <div className="space-y-4">
++          {/* Card Top: Icon + Names + Status Badges */}
++          <div className="flex items-start justify-between gap-2">
++            <div className="flex items-center gap-3">
++              <div className="w-11 h-11 rounded-2xl bg-surface-container flex items-center justify-center flex-shrink-0 border border-outline-variant/20 shadow-xs">
++                {getGatewayIcon(gw.code)}
++              </div>
++              <div>
++                <h4 className="font-bold text-sm text-on-surface">{gw.nameAr}</h4>
++                <span className="text-[11px] text-on-surface-variant font-mono">
++                  {gw.nameEn} ({gw.code})
++                </span>
++              </div>
++            </div>
++            <div className="flex flex-col items-end gap-1.5">
++              <AppBadge
++                variant={gw.isEnabled ? "success" : "neutral"}
++                size="sm"
++                dot={gw.isEnabled}
++              >
++                {gw.isEnabled ? "مفعلة" : "معطلة"}
++              </AppBadge>
++              <AppBadge
++                variant={gw.isTestMode ? "warning" : "live"}
++                size="sm"
++              >
++                {gw.isTestMode ? "تجريبي" : "حي"}
++              </AppBadge>
++            </div>
++          </div>
++
++          {/* Fee & Secret Status */}
++          <div className="p-2.5 rounded-xl bg-surface-container border border-outline-variant/20 flex items-center justify-between text-xs">
++            <div className="flex items-center gap-1.5 text-on-surface">
++              <Percent className="w-3.5 h-3.5 text-primary" />
++              <span>الرسوم:</span>
++              <span className="font-mono font-bold">
++                {gw.feePercentage}% + {gw.feeFixed} ر.س
++              </span>
++            </div>
++            <div className="flex items-center gap-1">
++              {gw.hasSecretKey ? (
++                <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
++                  <CheckCircle2 className="w-3 h-3" /> المفاتيح مشفّرة
++                </span>
++              ) : (
++                <span className="flex items-center gap-1 text-[11px] text-on-surface-variant font-medium">
++                  <Lock className="w-3 h-3" /> بانتظار الربط
++                </span>
++              )}
++            </div>
++          </div>
++
++          {/* Supported Currencies */}
++          {gw.supportedCurrencies && gw.supportedCurrencies.length > 0 && (
++            <div className="flex items-center gap-1.5 flex-wrap">
++              <span className="text-[10px] text-on-surface-variant font-bold">العملات:</span>
++              {gw.supportedCurrencies.slice(0, 5).map((cur) => (
++                <span
++                  key={cur}
++                  className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-surface-container text-on-surface-variant border border-outline-variant/30"
++                >
++                  {cur}
++                </span>
++              ))}
++              {gw.supportedCurrencies.length > 5 && (
++                <span className="text-[10px] text-outline">
++                  +{gw.supportedCurrencies.length - 5}
++                </span>
++              )}
++            </div>
++          )}
++        </div>
++
++        {/* Card Actions */}
++        <div className="pt-4 mt-4 border-t border-outline-variant/20 flex items-center justify-between gap-2">
++          <button
++            type="button"
++            disabled={isThisToggling}
++            onClick={() => handleToggle(gw.id)}
++            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
++              gw.isEnabled
++                ? "bg-error/15 text-error hover:bg-error/25"
++                : "bg-primary text-on-primary hover:bg-primary-container"
++            }`}
++          >
++            {isThisToggling
++              ? "جاري التحديث..."
++              : gw.isEnabled
++              ? "تعطيل البوابة"
++              : "تفعيل البوابة"}
++          </button>
++
++          <button
++            type="button"
++            onClick={() => handleOpenConfig(gw)}
++            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer border border-outline-variant/30"
++          >
++            <Sliders className="w-3.5 h-3.5 text-primary" />
++            <span>إعداد المفاتيح والربط</span>
++          </button>
++        </div>
++      </AppCard>
++    );
++  };
++
++  return (
++    <div className="space-y-8 font-cairo" dir="rtl">
++      {/* National Gateways Section */}
++      <div className="space-y-4">
++        <div className="flex items-center justify-between">
++          <div className="flex items-center gap-2">
++            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
++              <CreditCard className="w-4 h-4" />
++            </div>
++            <div>
++              <h3 className="text-base font-bold text-on-surface">
++                بوابات الدفع الوطنية (السعودية والخليج ومصر)
++              </h3>
++              <p className="text-xs text-on-surface-variant">
++                مدى، STC Pay، تمارا، تابي، فوري والدفع المباشر عبر المحافظ
++              </p>
++            </div>
++          </div>
++          <span className="text-xs font-mono text-on-surface-variant">
++            {nationalGateways.length} بوابات
++          </span>
++        </div>
++
++        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
++          {nationalGateways.map(renderGatewayCard)}
++        </div>
++      </div>
++
++      {/* International Gateways Section */}
++      <div className="space-y-4">
++        <div className="flex items-center justify-between">
++          <div className="flex items-center gap-2">
++            <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
++              <Globe className="w-4 h-4" />
++            </div>
++            <div>
++              <h3 className="text-base font-bold text-on-surface">
++                بوابات الدفع العالمية والبطاقات
++              </h3>
++              <p className="text-xs text-on-surface-variant">
++                Stripe، فيزا/ماستركارد، PayPal والمدفوعات الدولية بالدولار واليورو
++              </p>
++            </div>
++          </div>
++          <span className="text-xs font-mono text-on-surface-variant">
++            {internationalGateways.length} بوابات
++          </span>
++        </div>
++
++        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
++          {internationalGateways.map(renderGatewayCard)}
++        </div>
++      </div>
++
++      {/* Config Modal */}
++      <GatewayConfigModal
++        isOpen={isConfigModalOpen}
++        gateway={selectedGateway}
++        onClose={() => {
++          setIsConfigModalOpen(false);
++          setSelectedGateway(null);
++        }}
++        onSave={onSaveConfig || (async () => true)}
++        isSaving={isSaving}
++      />
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/tabs/InvoicesTransactionsSubTab.tsx b/src/features/admin/components/payments/tabs/InvoicesTransactionsSubTab.tsx
+new file mode 100644
+index 0000000..87953e0
+--- /dev/null
++++ b/src/features/admin/components/payments/tabs/InvoicesTransactionsSubTab.tsx
+@@ -0,0 +1,324 @@
++"use client";
++
++import React, { useState } from "react";
++import {
++  AdminTransactionsResult,
++  AdminTransactionsQuery,
++  AdminTransactionItem,
++} from "../../../types/admin.types";
++import { AppCard, AppBadge, AppButton } from "@/shared/ui";
++import {
++  Receipt,
++  Search,
++  Filter,
++  Download,
++  Printer,
++  ChevronRight,
++  ChevronLeft,
++  Calendar,
++  CreditCard,
++  CheckCircle2,
++  AlertCircle,
++  Clock,
++  RotateCcw,
++} from "lucide-react";
++
++export interface InvoicesTransactionsSubTabProps {
++  transactions: AdminTransactionsResult | null;
++  onFilterChange?: (query: AdminTransactionsQuery) => void;
++  isLoading?: boolean;
++}
++
++export function InvoicesTransactionsSubTab({
++  transactions,
++  onFilterChange,
++  isLoading = false,
++}: InvoicesTransactionsSubTabProps) {
++  const [searchTerm, setSearchTerm] = useState("");
++  const [statusFilter, setStatusFilter] = useState("all");
++  const [gatewayFilter, setGatewayFilter] = useState("all");
++
++  const items = transactions?.items || [];
++  const currentPage = transactions?.page || 1;
++  const totalPages = transactions?.totalPages || 1;
++  const totalRecords = transactions?.total || items.length;
++
++  const handleApplyFilter = (page: number = 1) => {
++    if (!onFilterChange) return;
++
++    onFilterChange({
++      page,
++      status: statusFilter === "all" ? undefined : statusFilter,
++      gateway: gatewayFilter === "all" ? undefined : gatewayFilter,
++      search: searchTerm.trim() || undefined,
++    } as AdminTransactionsQuery);
++  };
++
++  const handleSearchSubmit = (e: React.FormEvent) => {
++    e.preventDefault();
++    handleApplyFilter(1);
++  };
++
++  const handlePageChange = (newPage: number) => {
++    if (newPage < 1 || newPage > totalPages) return;
++    handleApplyFilter(newPage);
++  };
++
++  const renderStatusBadge = (status: string) => {
++    const s = status.toUpperCase();
++    switch (s) {
++      case "PAID":
++      case "COMPLETED":
++      case "SUCCESS":
++        return (
++          <AppBadge variant="success" size="sm" dot>
++            مدفوعة
++          </AppBadge>
++        );
++      case "PENDING":
++        return (
++          <AppBadge variant="warning" size="sm">
++            قيد الانتظار
++          </AppBadge>
++        );
++      case "REFUNDED":
++        return (
++          <AppBadge variant="neutral" size="sm">
++            مسترجعة
++          </AppBadge>
++        );
++      case "FAILED":
++        return (
++          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-error/15 text-error border border-error/30">
++            فاشلة
++          </span>
++        );
++      default:
++        return (
++          <AppBadge variant="neutral" size="sm">
++            {status}
++          </AppBadge>
++        );
++    }
++  };
++
++  const formatDate = (dateStr: string) => {
++    try {
++      return new Date(dateStr).toLocaleDateString("ar-SA", {
++        year: "numeric",
++        month: "short",
++        day: "numeric",
++        hour: "2-digit",
++        minute: "2-digit",
++      });
++    } catch {
++      return dateStr;
++    }
++  };
++
++  const handleDownloadInvoice = (item: AdminTransactionItem) => {
++    if (item.pdfUrl) {
++      window.open(item.pdfUrl, "_blank");
++    } else {
++      window.print();
++    }
++  };
++
++  return (
++    <div className="space-y-6 font-cairo" dir="rtl">
++      {/* Search & Filter Bar */}
++      <AppCard className="p-4 bg-surface-container-low border-outline-variant/30 shadow-sm">
++        <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
++          <div className="flex-1 flex flex-col sm:flex-row gap-2.5">
++            {/* Search Input */}
++            <div className="relative flex-1">
++              <input
++                type="text"
++                placeholder="البحث برقم الفاتورة، اسم العميل أو بريده..."
++                value={searchTerm}
++                onChange={(e) => setSearchTerm(e.target.value)}
++                className="w-full px-3.5 py-2 pl-9 rounded-xl border border-outline-variant/40 bg-surface-container text-on-surface text-xs outline-none focus:ring-1 focus:ring-primary"
++              />
++              <Search className="w-4 h-4 text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2" />
++            </div>
++
++            {/* Status Filter */}
++            <select
++              value={statusFilter}
++              onChange={(e) => setStatusFilter(e.target.value)}
++              className="px-3 py-2 rounded-xl border border-outline-variant/40 bg-surface-container text-on-surface text-xs outline-none focus:ring-1 focus:ring-primary"
++            >
++              <option value="all">جميع الحالات</option>
++              <option value="PAID">مدفوعة ومكتملة</option>
++              <option value="PENDING">معلقة / قيد الانتظار</option>
++              <option value="REFUNDED">مسترجعة (Refunded)</option>
++              <option value="FAILED">فاشلة / ملغاة</option>
++            </select>
++
++            {/* Gateway Filter */}
++            <select
++              value={gatewayFilter}
++              onChange={(e) => setGatewayFilter(e.target.value)}
++              className="px-3 py-2 rounded-xl border border-outline-variant/40 bg-surface-container text-on-surface text-xs outline-none focus:ring-1 focus:ring-primary"
++            >
++              <option value="all">جميع بوابات الدفع</option>
++              <option value="mada">مدى (Mada)</option>
++              <option value="apple_pay">Apple Pay</option>
++              <option value="visa_mastercard">بطاقات فيزا وماستركارد</option>
++              <option value="stc_pay">STC Pay</option>
++              <option value="tamara">تمارا (Tamara)</option>
++              <option value="tabby">تابي (Tabby)</option>
++              <option value="stripe">Stripe</option>
++              <option value="paypal">PayPal</option>
++              <option value="fawry">فوري (Fawry)</option>
++            </select>
++          </div>
++
++          <div className="flex items-center gap-2">
++            <AppButton
++              type="submit"
++              variant="primary"
++              size="sm"
++              isLoading={isLoading}
++              leftIcon={<Filter className="w-3.5 h-3.5" />}
++            >
++              تصفية
++            </AppButton>
++          </div>
++        </form>
++      </AppCard>
++
++      {/* Invoices Table Card */}
++      <AppCard className="p-0 bg-surface-container-low border-outline-variant/30 overflow-hidden shadow-sm">
++        <div className="overflow-x-auto">
++          <table className="w-full text-right text-xs">
++            <thead className="bg-surface-container text-on-surface-variant border-b border-outline-variant/20">
++              <tr>
++                <th className="py-3 px-4 font-bold">رقم الفاتورة</th>
++                <th className="py-3 px-4 font-bold">العميل</th>
++                <th className="py-3 px-4 font-bold">المبلغ الإجمالي</th>
++                <th className="py-3 px-4 font-bold">بوابة الدفع</th>
++                <th className="py-3 px-4 font-bold">الحالة</th>
++                <th className="py-3 px-4 font-bold">التاريخ والتوقيت</th>
++                <th className="py-3 px-4 font-bold text-center">الإجراءات</th>
++              </tr>
++            </thead>
++            <tbody className="divide-y divide-outline-variant/10">
++              {items.map((tx) => (
++                <tr
++                  key={tx.id}
++                  className="hover:bg-surface-container/50 transition-colors"
++                >
++                  {/* Invoice Number */}
++                  <td className="py-3.5 px-4 font-mono font-bold text-on-surface">
++                    <div className="flex items-center gap-1.5">
++                      <Receipt className="w-3.5 h-3.5 text-primary" />
++                      <span>{tx.invoiceNumber}</span>
++                    </div>
++                  </td>
++
++                  {/* Customer Info */}
++                  <td className="py-3.5 px-4">
++                    <div className="font-semibold text-on-surface">{tx.customerName}</div>
++                    <div className="text-[11px] font-mono text-on-surface-variant">
++                      {tx.customerEmail}
++                    </div>
++                  </td>
++
++                  {/* Amount Total */}
++                  <td className="py-3.5 px-4">
++                    <div className="font-mono font-bold text-sm text-on-surface">
++                      {tx.amountTotal} {tx.currency}
++                    </div>
++                    {tx.discountAmount > 0 && (
++                      <span className="text-[10px] text-emerald-400 font-mono">
++                        (خصم {tx.discountAmount} {tx.currency})
++                      </span>
++                    )}
++                  </td>
++
++                  {/* Gateway */}
++                  <td className="py-3.5 px-4">
++                    <div className="flex items-center gap-1.5 font-mono text-on-surface">
++                      <CreditCard className="w-3.5 h-3.5 text-on-surface-variant" />
++                      <span>{tx.gatewayCode}</span>
++                    </div>
++                  </td>
++
++                  {/* Status Badge */}
++                  <td className="py-3.5 px-4">
++                    {renderStatusBadge(tx.status)}
++                  </td>
++
++                  {/* Date */}
++                  <td className="py-3.5 px-4 text-[11px] text-on-surface-variant font-mono">
++                    {formatDate(tx.createdAt)}
++                  </td>
++
++                  {/* Actions: Download / Print */}
++                  <td className="py-3.5 px-4 text-center">
++                    <button
++                      type="button"
++                      onClick={() => handleDownloadInvoice(tx)}
++                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
++                      title="طباعة / تحميل الفاتورة"
++                      aria-label="طباعة / تحميل الفاتورة"
++                    >
++                      <Download className="w-3.5 h-3.5 text-primary" />
++                      <span>PDF</span>
++                    </button>
++                  </td>
++                </tr>
++              ))}
++
++              {items.length === 0 && (
++                <tr>
++                  <td
++                    colSpan={7}
++                    className="py-10 text-center text-on-surface-variant text-xs"
++                  >
++                    {isLoading
++                      ? "جاري تحميل سجل الفواتير والمعاملات..."
++                      : "لا توجد فواتير أو معاملات مسجلة مطابقة لمعايير البحث."}
++                  </td>
++                </tr>
++              )}
++            </tbody>
++          </table>
++        </div>
++
++        {/* Pagination Footer */}
++        {totalPages > 1 && (
++          <div className="p-4 border-t border-outline-variant/20 flex items-center justify-between text-xs text-on-surface-variant">
++            <span>
++              إجمالي السجلات: <b className="text-on-surface">{totalRecords}</b>
++            </span>
++            <div className="flex items-center gap-2">
++              <button
++                type="button"
++                disabled={currentPage <= 1 || isLoading}
++                onClick={() => handlePageChange(currentPage - 1)}
++                className="p-1.5 rounded-lg border border-outline-variant/30 hover:bg-surface-container disabled:opacity-40 cursor-pointer"
++                aria-label="الصفحة السابقة"
++              >
++                <ChevronRight className="w-4 h-4" />
++              </button>
++              <span className="font-mono">
++                {currentPage} / {totalPages}
++              </span>
++              <button
++                type="button"
++                disabled={currentPage >= totalPages || isLoading}
++                onClick={() => handlePageChange(currentPage + 1)}
++                className="p-1.5 rounded-lg border border-outline-variant/30 hover:bg-surface-container disabled:opacity-40 cursor-pointer"
++                aria-label="الصفحة التالية"
++              >
++                <ChevronLeft className="w-4 h-4" />
++              </button>
++            </div>
++          </div>
++        )}
++      </AppCard>
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/tabs/PlanQuotasSubTab.tsx b/src/features/admin/components/payments/tabs/PlanQuotasSubTab.tsx
+new file mode 100644
+index 0000000..b5a9653
+--- /dev/null
++++ b/src/features/admin/components/payments/tabs/PlanQuotasSubTab.tsx
+@@ -0,0 +1,399 @@
++"use client";
++
++import React, { useState, useEffect } from "react";
++import {
++  AdminSubscriptionPlanItem,
++  AdminPlanQuotaConfig,
++} from "../../../types/admin.types";
++import { AppCard, AppButton, AppInput, AppBadge } from "@/shared/ui";
++import {
++  Sliders,
++  Check,
++  Save,
++  Link as LinkIcon,
++  Globe,
++  EyeOff,
++  Palette,
++  BarChart2,
++  Headphones,
++  Code,
++  Percent,
++  AlertCircle,
++} from "lucide-react";
++
++export interface PlanQuotasSubTabProps {
++  plans: AdminSubscriptionPlanItem[];
++  onSaveQuotas: (
++    planId: string,
++    quotas: Partial<AdminPlanQuotaConfig>
++  ) => Promise<boolean>;
++  isSaving?: boolean;
++}
++
++const DEFAULT_QUOTAS: AdminPlanQuotaConfig = {
++  maxLinks: 10,
++  allowCustomDomain: false,
++  allowRemoveBranding: false,
++  allowAdvancedThemes: false,
++  allowDetailedAnalytics: false,
++  allowPrioritySupport: false,
++  customCssAllowed: false,
++  storeCommissionRate: 10,
++};
++
++export function PlanQuotasSubTab({
++  plans,
++  onSaveQuotas,
++  isSaving = false,
++}: PlanQuotasSubTabProps) {
++  const [selectedPlanId, setSelectedPlanId] = useState<string>(
++    plans[0]?.id || ""
++  );
++
++  const currentPlan =
++    plans.find((p) => p.id === selectedPlanId) || plans[0] || null;
++
++  const [quotas, setQuotas] = useState<AdminPlanQuotaConfig>(
++    currentPlan?.quotas || DEFAULT_QUOTAS
++  );
++  const [savedSuccess, setSavedSuccess] = useState(false);
++  const [errorMessage, setErrorMessage] = useState<string | null>(null);
++
++  useEffect(() => {
++    if (currentPlan) {
++      setQuotas(currentPlan.quotas || DEFAULT_QUOTAS);
++      setSavedSuccess(false);
++      setErrorMessage(null);
++    }
++  }, [currentPlan?.id]);
++
++  useEffect(() => {
++    if (!selectedPlanId && plans.length > 0) {
++      setSelectedPlanId(plans[0].id);
++    }
++  }, [plans, selectedPlanId]);
++
++  const handleToggle = (key: keyof AdminPlanQuotaConfig) => {
++    setQuotas((prev) => ({
++      ...prev,
++      [key]: !prev[key],
++    }));
++  };
++
++  const handleSave = async () => {
++    if (!currentPlan) return;
++    setErrorMessage(null);
++    setSavedSuccess(false);
++
++    const success = await onSaveQuotas(currentPlan.id, quotas);
++    if (success) {
++      setSavedSuccess(true);
++      setTimeout(() => setSavedSuccess(false), 3000);
++    } else {
++      setErrorMessage("فشل حفظ التخصيص والمحددات، يرجى المحاولة لاحقاً");
++    }
++  };
++
++  if (plans.length === 0) {
++    return (
++      <div className="p-8 text-center bg-surface-container-low rounded-2xl border border-outline-variant/30 text-on-surface-variant font-cairo">
++        لا توجد باقات اشتراك مضافة بعد لتخصيص محدداتها.
++      </div>
++    );
++  }
++
++  return (
++    <div className="space-y-6 font-cairo" dir="rtl">
++      {/* Top Header */}
++      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-surface-container-low border border-outline-variant/30">
++        <div>
++          <h3 className="text-base font-bold text-on-surface">
++            حدود ومحددات مميزات الباقات (Quotas & Limits)
++          </h3>
++          <p className="text-xs text-on-surface-variant">
++            ضبط السقوف الرقمية والمميزات المقفلة والمفتوحة لكل باقة اشتراك بدقة متناهية
++          </p>
++        </div>
++
++        <AppButton
++          variant="primary"
++          size="sm"
++          isLoading={isSaving}
++          onClick={handleSave}
++          leftIcon={savedSuccess ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
++        >
++          {savedSuccess ? "تم حفظ المحددات!" : "حفظ التخصيص والمحددات"}
++        </AppButton>
++      </div>
++
++      {/* Plan Selector Pills */}
++      <div className="flex items-center gap-2 overflow-x-auto pb-1">
++        {plans.map((p) => {
++          const isSelected = p.id === currentPlan?.id;
++          return (
++            <button
++              key={p.id}
++              type="button"
++              onClick={() => setSelectedPlanId(p.id)}
++              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 ${
++                isSelected
++                  ? "bg-primary text-on-primary shadow-sm"
++                  : "bg-surface-container-low text-on-surface-variant hover:text-on-surface border border-outline-variant/30 hover:bg-surface-container"
++              }`}
++            >
++              <span>{p.nameAr}</span>
++              <span className="font-mono text-[10px] opacity-80">({p.slug})</span>
++              {p.badgeAr && (
++                <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-white/20 text-white">
++                  {p.badgeAr}
++                </span>
++              )}
++            </button>
++          );
++        })}
++      </div>
++
++      {/* Error Alert */}
++      {errorMessage && (
++        <div className="p-3.5 rounded-xl text-xs bg-error/15 text-error border border-error/30 flex items-center gap-2">
++          <AlertCircle className="w-4 h-4 flex-shrink-0" />
++          <span>{errorMessage}</span>
++        </div>
++      )}
++
++      {/* Quotas Form Card */}
++      <AppCard className="p-6 bg-surface-container-low border-outline-variant/30 space-y-6">
++        <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
++          <div>
++            <h4 className="font-bold text-sm text-on-surface">
++              إعدادات باقة: {currentPlan?.nameAr} ({currentPlan?.nameEn})
++            </h4>
++            <p className="text-xs text-on-surface-variant mt-0.5">
++              تحديد الحد الأقصى للموارد ونسب العمولات والميزات المصرح بها
++            </p>
++          </div>
++          <AppBadge variant={currentPlan?.isActive ? "success" : "neutral"} size="sm">
++            {currentPlan?.isActive ? "باقة مفعلة" : "باقة معطلة"}
++          </AppBadge>
++        </div>
++
++        {/* Numeric Limits Section */}
++        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
++          <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20 space-y-2">
++            <label className="text-xs font-bold text-on-surface flex items-center gap-2">
++              <LinkIcon className="w-4 h-4 text-primary" />
++              <span>أقصى عدد للروابط النشطة (Max Links)</span>
++            </label>
++            <input
++              type="number"
++              value={quotas.maxLinks}
++              onChange={(e) =>
++                setQuotas({ ...quotas, maxLinks: Number(e.target.value) })
++              }
++              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-on-surface text-sm font-mono outline-none focus:ring-1 focus:ring-primary"
++            />
++            <span className="block text-[11px] text-on-surface-variant">
++              أدخل 9999 أو 0 لإتاحة عدد غير محدود من الروابط
++            </span>
++          </div>
++
++          <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20 space-y-2">
++            <label className="text-xs font-bold text-on-surface flex items-center gap-2">
++              <Percent className="w-4 h-4 text-amber-400" />
++              <span>نسبة عمولة المنصة على المبيعات (%)</span>
++            </label>
++            <input
++              type="number"
++              step="0.1"
++              value={quotas.storeCommissionRate}
++              onChange={(e) =>
++                setQuotas({
++                  ...quotas,
++                  storeCommissionRate: Number(e.target.value),
++                })
++              }
++              className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-on-surface text-sm font-mono outline-none focus:ring-1 focus:ring-primary"
++            />
++            <span className="block text-[11px] text-on-surface-variant">
++              النسبة المقتطعة تلقائياً عند بيع المنتجات الرقمية عبر صفحة المستخدم
++            </span>
++          </div>
++        </div>
++
++        {/* Feature Switches Section */}
++        <div className="space-y-3">
++          <h5 className="font-bold text-xs text-on-surface">الميزات والصلاحيات المتقدمة:</h5>
++          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
++            {/* Custom Domain */}
++            <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20 flex items-center justify-between">
++              <div className="flex items-center gap-3">
++                <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center text-primary">
++                  <Globe className="w-4 h-4" />
++                </div>
++                <div>
++                  <span className="block text-xs font-bold text-on-surface">
++                    ربط نطاق خاص (Custom Domain)
++                  </span>
++                  <span className="text-[11px] text-on-surface-variant">
++                    إمكانية توجيه دومين مخصص مثل yourname.com
++                  </span>
++                </div>
++              </div>
++              <button
++                type="button"
++                onClick={() => handleToggle("allowCustomDomain")}
++                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                  quotas.allowCustomDomain
++                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                    : "bg-surface text-on-surface-variant border border-outline-variant/30"
++                }`}
++              >
++                {quotas.allowCustomDomain ? "مفعل" : "معطل"}
++              </button>
++            </div>
++
++            {/* Remove Branding */}
++            <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20 flex items-center justify-between">
++              <div className="flex items-center gap-3">
++                <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center text-primary">
++                  <EyeOff className="w-4 h-4" />
++                </div>
++                <div>
++                  <span className="block text-xs font-bold text-on-surface">
++                    إزالة شعار المنصة (Remove Branding)
++                  </span>
++                  <span className="text-[11px] text-on-surface-variant">
++                    إخفاء علامة "Made with AN LINKS" من أسفل الصفحة
++                  </span>
++                </div>
++              </div>
++              <button
++                type="button"
++                onClick={() => handleToggle("allowRemoveBranding")}
++                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                  quotas.allowRemoveBranding
++                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                    : "bg-surface text-on-surface-variant border border-outline-variant/30"
++                }`}
++              >
++                {quotas.allowRemoveBranding ? "مفعل" : "معطل"}
++              </button>
++            </div>
++
++            {/* Advanced Themes */}
++            <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20 flex items-center justify-between">
++              <div className="flex items-center gap-3">
++                <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center text-primary">
++                  <Palette className="w-4 h-4" />
++                </div>
++                <div>
++                  <span className="block text-xs font-bold text-on-surface">
++                    قوالب وثيمات حصرية (Advanced Themes)
++                  </span>
++                  <span className="text-[11px] text-on-surface-variant">
++                    إتاحة ثيمات الزجاج والنيون والقوالب الحركية ثلاثية الأبعاد
++                  </span>
++                </div>
++              </div>
++              <button
++                type="button"
++                onClick={() => handleToggle("allowAdvancedThemes")}
++                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                  quotas.allowAdvancedThemes
++                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                    : "bg-surface text-on-surface-variant border border-outline-variant/30"
++                }`}
++              >
++                {quotas.allowAdvancedThemes ? "مفعل" : "معطل"}
++              </button>
++            </div>
++
++            {/* Detailed Analytics */}
++            <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20 flex items-center justify-between">
++              <div className="flex items-center gap-3">
++                <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center text-primary">
++                  <BarChart2 className="w-4 h-4" />
++                </div>
++                <div>
++                  <span className="block text-xs font-bold text-on-surface">
++                    تحليلات تفصيلية جغرافية (Detailed Analytics)
++                  </span>
++                  <span className="text-[11px] text-on-surface-variant">
++                    خريطة الزوار، مصادر الزيارات ونوع الأجهزة والمتصفحات
++                  </span>
++                </div>
++              </div>
++              <button
++                type="button"
++                onClick={() => handleToggle("allowDetailedAnalytics")}
++                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                  quotas.allowDetailedAnalytics
++                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                    : "bg-surface text-on-surface-variant border border-outline-variant/30"
++                }`}
++              >
++                {quotas.allowDetailedAnalytics ? "مفعل" : "معطل"}
++              </button>
++            </div>
++
++            {/* Priority Support */}
++            <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20 flex items-center justify-between">
++              <div className="flex items-center gap-3">
++                <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center text-primary">
++                  <Headphones className="w-4 h-4" />
++                </div>
++                <div>
++                  <span className="block text-xs font-bold text-on-surface">
++                    أولوية الدعم الفني (VIP Priority Support)
++                  </span>
++                  <span className="text-[11px] text-on-surface-variant">
++                    رد سريع خلال ساعة ومسار تذاكر مباشر
++                  </span>
++                </div>
++              </div>
++              <button
++                type="button"
++                onClick={() => handleToggle("allowPrioritySupport")}
++                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                  quotas.allowPrioritySupport
++                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                    : "bg-surface text-on-surface-variant border border-outline-variant/30"
++                }`}
++              >
++                {quotas.allowPrioritySupport ? "مفعل" : "معطل"}
++              </button>
++            </div>
++
++            {/* Custom CSS */}
++            <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20 flex items-center justify-between">
++              <div className="flex items-center gap-3">
++                <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center text-primary">
++                  <Code className="w-4 h-4" />
++                </div>
++                <div>
++                  <span className="block text-xs font-bold text-on-surface">
++                    تخصيص كامل بأكواد CSS (Custom CSS)
++                  </span>
++                  <span className="text-[11px] text-on-surface-variant">
++                    إمكانية حقن أكواد CSS مخصصة لتنسيق الصفحة
++                  </span>
++                </div>
++              </div>
++              <button
++                type="button"
++                onClick={() => handleToggle("customCssAllowed")}
++                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
++                  quotas.customCssAllowed
++                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
++                    : "bg-surface text-on-surface-variant border border-outline-variant/30"
++                }`}
++              >
++                {quotas.customCssAllowed ? "مفعل" : "معطل"}
++              </button>
++            </div>
++          </div>
++        </div>
++      </AppCard>
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/tabs/PlansSubTab.tsx b/src/features/admin/components/payments/tabs/PlansSubTab.tsx
+new file mode 100644
+index 0000000..4024365
+--- /dev/null
++++ b/src/features/admin/components/payments/tabs/PlansSubTab.tsx
+@@ -0,0 +1,281 @@
++"use client";
++
++import React, { useState } from "react";
++import {
++  AdminSubscriptionPlanItem,
++  UpsertPlanInput,
++} from "../../../types/admin.types";
++import { AppCard, AppBadge, AppButton } from "@/shared/ui";
++import { PlanEditorModal } from "../modals/PlanEditorModal";
++import {
++  Layers,
++  Plus,
++  Edit2,
++  Trash2,
++  Check,
++  X as XIcon,
++  Sparkles,
++  Link as LinkIcon,
++  Globe,
++  Percent,
++} from "lucide-react";
++
++export interface PlansSubTabProps {
++  plans: AdminSubscriptionPlanItem[];
++  onSavePlan: (input: UpsertPlanInput) => Promise<boolean>;
++  onDeletePlan: (id: string) => Promise<boolean>;
++  isSaving?: boolean;
++}
++
++export function PlansSubTab({
++  plans,
++  onSavePlan,
++  onDeletePlan,
++  isSaving = false,
++}: PlansSubTabProps) {
++  const [cycle, setCycle] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
++  const [selectedPlan, setSelectedPlan] = useState<AdminSubscriptionPlanItem | null>(null);
++  const [isModalOpen, setIsModalOpen] = useState(false);
++  const [deletingId, setDeletingId] = useState<string | null>(null);
++
++  const handleCreateNew = () => {
++    setSelectedPlan(null);
++    setIsModalOpen(true);
++  };
++
++  const handleEdit = (plan: AdminSubscriptionPlanItem) => {
++    setSelectedPlan(plan);
++    setIsModalOpen(true);
++  };
++
++  const handleDelete = async (id: string, name: string) => {
++    if (confirm(`هل أنت متأكد من رغبتك في حذف أو أرشفة باقة "${name}"؟`)) {
++      setDeletingId(id);
++      try {
++        await onDeletePlan(id);
++      } finally {
++        setDeletingId(null);
++      }
++    }
++  };
++
++  return (
++    <div className="space-y-6 font-cairo" dir="rtl">
++      {/* Top Header & Cycle Toggle */}
++      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-surface-container-low border border-outline-variant/30">
++        <div>
++          <h3 className="text-base font-bold text-on-surface">باقات الاشتراك والتسعير</h3>
++          <p className="text-xs text-on-surface-variant">
++            إدارة مستويات الاشتراك، الأسعار الشهرية والسنوية، والامتيازات الممنوحة للمستخدمين
++          </p>
++        </div>
++
++        <div className="flex items-center gap-3">
++          {/* Cycle Toggle Selector */}
++          <div className="flex items-center bg-surface-container p-1 rounded-xl border border-outline-variant/30 text-xs font-semibold">
++            <button
++              type="button"
++              onClick={() => setCycle("MONTHLY")}
++              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
++                cycle === "MONTHLY"
++                  ? "bg-primary text-on-primary shadow-xs"
++                  : "text-on-surface-variant hover:text-on-surface"
++              }`}
++            >
++              دفع شهري
++            </button>
++            <button
++              type="button"
++              onClick={() => setCycle("YEARLY")}
++              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
++                cycle === "YEARLY"
++                  ? "bg-primary text-on-primary shadow-xs"
++                  : "text-on-surface-variant hover:text-on-surface"
++              }`}
++            >
++              دفع سنوي (توفير)
++            </button>
++          </div>
++
++          {/* Add Plan Button */}
++          <AppButton
++            variant="primary"
++            size="sm"
++            onClick={handleCreateNew}
++            leftIcon={<Plus className="w-4 h-4" />}
++          >
++            إضافة باقة جديدة
++          </AppButton>
++        </div>
++      </div>
++
++      {/* Plans Grid */}
++      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
++        {plans.map((plan) => {
++          const sarPrice =
++            plan.prices?.find(
++              (p) => p.currency === "SAR" && p.billingCycle === cycle
++            )?.amount ?? 0;
++          const usdPrice =
++            plan.prices?.find(
++              (p) => p.currency === "USD" && p.billingCycle === cycle
++            )?.amount ?? 0;
++
++          const isDeleting = deletingId === plan.id;
++          const quotas = plan.quotas || {
++            maxLinks: 5,
++            allowCustomDomain: false,
++            allowRemoveBranding: false,
++            allowAdvancedThemes: false,
++            allowDetailedAnalytics: false,
++            allowPrioritySupport: false,
++            customCssAllowed: false,
++            storeCommissionRate: 10,
++          };
++
++          return (
++            <AppCard
++              key={plan.id}
++              className={`p-5 bg-surface-container-low border flex flex-col justify-between hover:shadow-md transition-all ${
++                plan.badgeAr
++                  ? "border-primary/40 shadow-xs"
++                  : "border-outline-variant/30"
++              }`}
++            >
++              <div className="space-y-4">
++                {/* Header with Title and Badges */}
++                <div>
++                  <div className="flex items-start justify-between gap-2 mb-1.5">
++                    <h4 className="font-bold text-base text-on-surface">{plan.nameAr}</h4>
++                    <div className="flex flex-col items-end gap-1">
++                      {plan.badgeAr && (
++                        <AppBadge variant="primary" size="sm">
++                          <Sparkles className="w-3 h-3 ml-1 inline" />
++                          {plan.badgeAr}
++                        </AppBadge>
++                      )}
++                      <AppBadge
++                        variant={plan.isActive ? "success" : "neutral"}
++                        size="sm"
++                      >
++                        {plan.isActive ? "نشطة" : "معطلة"}
++                      </AppBadge>
++                    </div>
++                  </div>
++                  <span className="text-xs font-mono text-on-surface-variant">
++                    {plan.nameEn} ({plan.slug})
++                  </span>
++                  {plan.descriptionAr && (
++                    <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">
++                      {plan.descriptionAr}
++                    </p>
++                  )}
++                </div>
++
++                {/* Price Display */}
++                <div className="p-3 rounded-xl bg-surface-container border border-outline-variant/20 space-y-1">
++                  <div className="flex items-baseline gap-1 text-on-surface">
++                    <span className="text-2xl font-extrabold font-mono">{sarPrice}</span>
++                    <span className="text-xs font-bold">ر.س</span>
++                    <span className="text-[11px] text-on-surface-variant">
++                      / {cycle === "MONTHLY" ? "شهرياً" : "سنوياً"}
++                    </span>
++                  </div>
++                  <div className="text-[11px] font-mono text-on-surface-variant">
++                    يعادل تقريباً ${usdPrice} USD
++                  </div>
++                </div>
++
++                {/* Quota Highlights List */}
++                <div className="space-y-2 pt-1 text-xs">
++                  <div className="flex items-center gap-2 text-on-surface">
++                    <LinkIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
++                    <span>
++                      {quotas.maxLinks <= 0 || quotas.maxLinks >= 9999
++                        ? "روابط غير محدودة"
++                        : `حتى ${quotas.maxLinks} روابط نشطة`}
++                    </span>
++                  </div>
++
++                  <div className="flex items-center gap-2">
++                    {quotas.allowCustomDomain ? (
++                      <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
++                    ) : (
++                      <XIcon className="w-3.5 h-3.5 text-outline flex-shrink-0" />
++                    )}
++                    <span
++                      className={
++                        quotas.allowCustomDomain
++                          ? "text-on-surface font-medium"
++                          : "text-on-surface-variant line-through opacity-70"
++                      }
++                    >
++                      ربط نطاق خاص (Domain)
++                    </span>
++                  </div>
++
++                  <div className="flex items-center gap-2">
++                    {quotas.allowRemoveBranding ? (
++                      <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
++                    ) : (
++                      <XIcon className="w-3.5 h-3.5 text-outline flex-shrink-0" />
++                    )}
++                    <span
++                      className={
++                        quotas.allowRemoveBranding
++                          ? "text-on-surface font-medium"
++                          : "text-on-surface-variant line-through opacity-70"
++                      }
++                    >
++                      إزالة شعار AN LINKS
++                    </span>
++                  </div>
++
++                  <div className="flex items-center gap-2 text-on-surface">
++                    <Percent className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
++                    <span>عمولة متجر: {quotas.storeCommissionRate}%</span>
++                  </div>
++                </div>
++              </div>
++
++              {/* Action Buttons */}
++              <div className="pt-4 mt-4 border-t border-outline-variant/20 flex items-center justify-between gap-2">
++                <button
++                  type="button"
++                  onClick={() => handleEdit(plan)}
++                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-primary/10 transition-colors cursor-pointer"
++                >
++                  <Edit2 className="w-3.5 h-3.5" />
++                  <span>تعديل الباقة</span>
++                </button>
++
++                <button
++                  type="button"
++                  disabled={isDeleting}
++                  onClick={() => handleDelete(plan.id, plan.nameAr)}
++                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-error hover:bg-error/10 transition-colors cursor-pointer disabled:opacity-50"
++                  aria-label="أرشفة أو حذف الباقة"
++                >
++                  <Trash2 className="w-3.5 h-3.5" />
++                  <span>{isDeleting ? "..." : "أرشفة/حذف"}</span>
++                </button>
++              </div>
++            </AppCard>
++          );
++        })}
++      </div>
++
++      {/* Plan Editor Modal */}
++      <PlanEditorModal
++        isOpen={isModalOpen}
++        plan={selectedPlan}
++        onClose={() => {
++          setIsModalOpen(false);
++          setSelectedPlan(null);
++        }}
++        onSave={onSavePlan}
++        isSaving={isSaving}
++      />
++    </div>
++  );
++}
+diff --git a/src/features/admin/index.ts b/src/features/admin/index.ts
+index e9b8b33..33391c4 100644
+--- a/src/features/admin/index.ts
++++ b/src/features/admin/index.ts
+@@ -33,4 +33,14 @@ export * from "./components/AdminSettingsTab";
+ export * from "./components/AdminReportsTab";
+ export * from "./components/AdminSessionsTab";
+ export * from "./components/AdminSidebar";
++export * from "./components/payments/tabs/GatewaysSubTab";
++export * from "./components/payments/tabs/PlansSubTab";
++export * from "./components/payments/tabs/PlanQuotasSubTab";
++export * from "./components/payments/tabs/CurrenciesSubTab";
++export * from "./components/payments/tabs/CouponsSubTab";
++export * from "./components/payments/tabs/InvoicesTransactionsSubTab";
++export * from "./components/payments/modals/GatewayConfigModal";
++export * from "./components/payments/modals/PlanEditorModal";
++export * from "./components/payments/modals/CouponEditorModal";
++export * from "./components/payments/modals/CurrencyRateModal";
+ export * from "@/shared/lib/crypto";
+diff --git a/tests/unit/admin-financials-tabs.test.tsx b/tests/unit/admin-financials-tabs.test.tsx
+new file mode 100644
+index 0000000..594e0de
+--- /dev/null
++++ b/tests/unit/admin-financials-tabs.test.tsx
+@@ -0,0 +1,535 @@
++import { describe, it, expect, vi } from "vitest";
++import React from "react";
++import { renderToStaticMarkup } from "react-dom/server";
++import {
++  GatewaysSubTab,
++  PlansSubTab,
++  PlanQuotasSubTab,
++  CurrenciesSubTab,
++  CouponsSubTab,
++  InvoicesTransactionsSubTab,
++  GatewayConfigModal,
++  PlanEditorModal,
++  CouponEditorModal,
++  CurrencyRateModal,
++} from "@/features/admin";
++import {
++  AdminGatewayDetails,
++  AdminSubscriptionPlanItem,
++  AdminCurrencyItem,
++  AdminCouponItem,
++  AdminTransactionsResult,
++} from "@/features/admin/types/admin.types";
++
++/* =========================================================================
++ * Mock Fixtures
++ * ========================================================================= */
++
++const MOCK_GATEWAYS: AdminGatewayDetails[] = [
++  {
++    id: "gw-mada",
++    code: "mada",
++    nameAr: "مدى للبطاقات المصرفية",
++    nameEn: "Mada Debit",
++    category: "NATIONAL",
++    isEnabled: true,
++    isTestMode: false,
++    publishableKey: "pk_mada_test",
++    hasSecretKey: true,
++    hasWebhookSecret: true,
++    feePercentage: 1.75,
++    feeFixed: 1.0,
++    supportedCurrencies: ["SAR"],
++    sortOrder: 1,
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++  {
++    id: "gw-tamara",
++    code: "tamara",
++    nameAr: "تمارا للتقسيط BNPL",
++    nameEn: "Tamara",
++    category: "BNPL",
++    isEnabled: false,
++    isTestMode: true,
++    publishableKey: null,
++    hasSecretKey: false,
++    hasWebhookSecret: false,
++    feePercentage: 4.5,
++    feeFixed: 1.5,
++    supportedCurrencies: ["SAR", "AED"],
++    sortOrder: 2,
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++  {
++    id: "gw-stripe",
++    code: "stripe",
++    nameAr: "سترايب العالمية",
++    nameEn: "Stripe Global",
++    category: "INTERNATIONAL",
++    isEnabled: true,
++    isTestMode: false,
++    publishableKey: "pk_live_stripe_xyz",
++    hasSecretKey: true,
++    hasWebhookSecret: true,
++    feePercentage: 2.9,
++    feeFixed: 1.0,
++    supportedCurrencies: ["USD", "EUR", "SAR"],
++    sortOrder: 3,
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++];
++
++const MOCK_PLANS: AdminSubscriptionPlanItem[] = [
++  {
++    id: "plan-creator",
++    slug: "creator",
++    nameAr: "باقة صانع المحتوى",
++    nameEn: "Creator Plan",
++    descriptionAr: "مثالية للمؤثرين والمبتدئين",
++    badgeAr: "الأكثر شعبية",
++    isActive: true,
++    sortOrder: 1,
++    prices: [
++      { currency: "SAR", billingCycle: "MONTHLY", amount: 39, isActive: true },
++      { currency: "SAR", billingCycle: "YEARLY", amount: 390, isActive: true },
++      { currency: "USD", billingCycle: "MONTHLY", amount: 10, isActive: true },
++      { currency: "USD", billingCycle: "YEARLY", amount: 100, isActive: true },
++    ],
++    quotas: {
++      maxLinks: 25,
++      allowCustomDomain: true,
++      allowRemoveBranding: false,
++      allowAdvancedThemes: true,
++      allowDetailedAnalytics: true,
++      allowPrioritySupport: false,
++      customCssAllowed: false,
++      storeCommissionRate: 7.5,
++    },
++  },
++  {
++    id: "plan-pro",
++    slug: "pro",
++    nameAr: "باقة المحترفين",
++    nameEn: "Pro Elite",
++    descriptionAr: "لأصحاب العلامات والشركات",
++    badgeAr: "قيمة استثنائية",
++    isActive: true,
++    sortOrder: 2,
++    prices: [
++      { currency: "SAR", billingCycle: "MONTHLY", amount: 79, isActive: true },
++      { currency: "SAR", billingCycle: "YEARLY", amount: 790, isActive: true },
++      { currency: "USD", billingCycle: "MONTHLY", amount: 20, isActive: true },
++      { currency: "USD", billingCycle: "YEARLY", amount: 200, isActive: true },
++    ],
++    quotas: {
++      maxLinks: 9999,
++      allowCustomDomain: true,
++      allowRemoveBranding: true,
++      allowAdvancedThemes: true,
++      allowDetailedAnalytics: true,
++      allowPrioritySupport: true,
++      customCssAllowed: true,
++      storeCommissionRate: 3.0,
++    },
++  },
++];
++
++const MOCK_CURRENCIES: AdminCurrencyItem[] = [
++  {
++    code: "SAR",
++    nameAr: "ريال سعودي",
++    symbol: "ر.س",
++    exchangeRateToUSD: 3.75,
++    isBaseCurrency: true,
++    isActive: true,
++    autoDetectCountries: ["SA", "KSA"],
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++  {
++    code: "USD",
++    nameAr: "دولار أمريكي",
++    symbol: "$",
++    exchangeRateToUSD: 1.0,
++    isBaseCurrency: false,
++    isActive: true,
++    autoDetectCountries: ["US"],
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++  {
++    code: "AED",
++    nameAr: "درهم إماراتي",
++    symbol: "د.إ",
++    exchangeRateToUSD: 3.67,
++    isBaseCurrency: false,
++    isActive: true,
++    autoDetectCountries: ["AE"],
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++];
++
++const MOCK_COUPONS: AdminCouponItem[] = [
++  {
++    id: "cp-ramadan",
++    code: "RAMADAN50",
++    descriptionAr: "عرض شهر رمضان المبارك 50%",
++    discountType: "PERCENTAGE",
++    discountValue: 50,
++    maxUses: 100,
++    usedCount: 24,
++    maxUsesPerUser: 1,
++    validFrom: "2026-03-01T00:00:00Z",
++    validUntil: "2026-04-01T00:00:00Z",
++    isActive: true,
++    applicablePlanSlugs: ["creator", "pro"],
++    createdAt: "2026-02-28T00:00:00Z",
++  },
++  {
++    id: "cp-flat20",
++    code: "WELCOME20",
++    descriptionAr: "خصم 20 ريال للمنضمين الجدد",
++    discountType: "FIXED_AMOUNT",
++    discountValue: 20,
++    maxUses: null,
++    usedCount: 5,
++    maxUsesPerUser: 1,
++    validFrom: "2026-01-01T00:00:00Z",
++    validUntil: null,
++    isActive: false,
++    applicablePlanSlugs: [],
++    createdAt: "2026-01-01T00:00:00Z",
++  },
++];
++
++const MOCK_TRANSACTIONS: AdminTransactionsResult = {
++  items: [
++    {
++      id: "tx-1",
++      invoiceNumber: "INV-2026-0001",
++      userId: "user-1",
++      customerName: "سلطان القحطاني",
++      customerEmail: "sultan@example.com",
++      amountSubtotal: 39,
++      discountAmount: 0,
++      taxAmount: 0,
++      amountTotal: 39,
++      currency: "SAR",
++      gatewayCode: "mada",
++      gatewayTxId: "gw_tx_12345",
++      status: "PAID",
++      pdfUrl: "https://anlinks.dev/invoices/INV-2026-0001.pdf",
++      createdAt: "2026-11-14T10:30:00Z",
++    },
++    {
++      id: "tx-2",
++      invoiceNumber: "INV-2026-0002",
++      userId: "user-2",
++      customerName: "Omar Bradley",
++      customerEmail: "omar@example.com",
++      amountSubtotal: 20,
++      discountAmount: 0,
++      taxAmount: 0,
++      amountTotal: 20,
++      currency: "USD",
++      gatewayCode: "stripe",
++      gatewayTxId: null,
++      status: "FAILED",
++      pdfUrl: null,
++      createdAt: "2026-11-14T11:00:00Z",
++    },
++  ],
++  total: 2,
++  page: 1,
++  limit: 10,
++  totalPages: 1,
++};
++
++/* =========================================================================
++ * Tests Suite
++ * ========================================================================= */
++
++describe("Admin Financial Sub-Tabs Suite", () => {
++  describe("GatewaysSubTab", () => {
++    it("should render National and International sections with badges and fees", () => {
++      const onToggle = vi.fn().mockResolvedValue(true);
++      const html = renderToStaticMarkup(
++        React.createElement(GatewaysSubTab, {
++          gateways: MOCK_GATEWAYS,
++          onToggleGateway: onToggle,
++        })
++      );
++
++      // Verify section titles
++      expect(html).toContain("بوابات الدفع الوطنية (السعودية والخليج ومصر)");
++      expect(html).toContain("بوابات الدفع العالمية والبطاقات");
++
++      // Verify gateway names and categories
++      expect(html).toContain("مدى للبطاقات المصرفية");
++      expect(html).toContain("تمارا للتقسيط BNPL");
++      expect(html).toContain("سترايب العالمية");
++
++      // Verify badges and fees
++      expect(html).toContain("مفعلة");
++      expect(html).toContain("معطلة");
++      expect(html).toContain("1.75% + 1 ر.س");
++      expect(html).toContain("إعداد المفاتيح والربط");
++    });
++  });
++
++  describe("PlansSubTab", () => {
++    it("should render plan cards with pricing, badges, and quota limits", () => {
++      const onSave = vi.fn().mockResolvedValue(true);
++      const onDelete = vi.fn().mockResolvedValue(true);
++
++      const html = renderToStaticMarkup(
++        React.createElement(PlansSubTab, {
++          plans: MOCK_PLANS,
++          onSavePlan: onSave,
++          onDeletePlan: onDelete,
++        })
++      );
++
++      expect(html).toContain("باقات الاشتراك والتسعير");
++      expect(html).toContain("إضافة باقة جديدة");
++      expect(html).toContain("باقة صانع المحتوى");
++      expect(html).toContain("باقة المحترفين");
++      expect(html).toContain("الأكثر شعبية");
++      expect(html).toContain("قيمة استثنائية");
++      expect(html).toContain("39");
++      expect(html).toContain("ر.س");
++      expect(html).toContain("حتى 25 روابط نشطة");
++      expect(html).toContain("روابط غير محدودة");
++      expect(html).toContain("تعديل الباقة");
++      expect(html).toContain("أرشفة/حذف");
++    });
++  });
++
++  describe("PlanQuotasSubTab", () => {
++    it("should render plan selectors, limits, and toggle switches", () => {
++      const onSaveQuotas = vi.fn().mockResolvedValue(true);
++
++      const html = renderToStaticMarkup(
++        React.createElement(PlanQuotasSubTab, {
++          plans: MOCK_PLANS,
++          onSaveQuotas,
++        })
++      );
++
++      expect(html).toContain("حدود ومحددات مميزات الباقات");
++      expect(html).toContain("حفظ التخصيص والمحددات");
++      expect(html).toContain("أقصى عدد للروابط النشطة");
++      expect(html).toContain("نسبة عمولة المنصة على المبيعات (%)");
++      expect(html).toContain("ربط نطاق خاص (Custom Domain)");
++      expect(html).toContain("إزالة شعار المنصة (Remove Branding)");
++      expect(html).toContain("قوالب وثيمات حصرية (Advanced Themes)");
++      expect(html).toContain("تحليلات تفصيلية جغرافية (Detailed Analytics)");
++    });
++  });
++
++  describe("CurrenciesSubTab", () => {
++    it("should render currencies table with base currency badge and rate", () => {
++      const onSaveCurrency = vi.fn().mockResolvedValue(true);
++
++      const html = renderToStaticMarkup(
++        React.createElement(CurrenciesSubTab, {
++          currencies: MOCK_CURRENCIES,
++          onSaveCurrency,
++        })
++      );
++
++      expect(html).toContain("إدارة العملات وأسعار الصرف العالمية");
++      expect(html).toContain("SAR");
++      expect(html).toContain("ريال سعودي");
++      expect(html).toContain("العملة المرجعية");
++      expect(html).toContain("3.75 SAR");
++      expect(html).toContain("USD");
++      expect(html).toContain("AED");
++      expect(html).toContain("تعديل سعر الصرف");
++    });
++  });
++
++  describe("CouponsSubTab", () => {
++    it("should render coupons table with discount value, usage, and status", () => {
++      const onCreate = vi.fn().mockResolvedValue(true);
++      const onToggle = vi.fn().mockResolvedValue(true);
++      const onDelete = vi.fn().mockResolvedValue(true);
++
++      const html = renderToStaticMarkup(
++        React.createElement(CouponsSubTab, {
++          coupons: MOCK_COUPONS,
++          onCreateCoupon: onCreate,
++          onToggleCoupon: onToggle,
++          onDeleteCoupon: onDelete,
++        })
++      );
++
++      expect(html).toContain("إدارة أكواد الخصم والعروض الترويجية");
++      expect(html).toContain("إنشاء كود خصم جديد");
++      expect(html).toContain("RAMADAN50");
++      expect(html).toContain("50% خصم");
++      expect(html).toContain("WELCOME20");
++      expect(html).toContain("20 ر.س خصم");
++      expect(html).toContain("24");
++      expect(html).toContain("100");
++    });
++  });
++
++  describe("InvoicesTransactionsSubTab", () => {
++    it("should render transaction list, customer details, and invoice download button", () => {
++      const onFilterChange = vi.fn();
++
++      const html = renderToStaticMarkup(
++        React.createElement(InvoicesTransactionsSubTab, {
++          transactions: MOCK_TRANSACTIONS,
++          onFilterChange,
++        })
++      );
++
++      expect(html).toContain("INV-2026-0001");
++      expect(html).toContain("سلطان القحطاني");
++      expect(html).toContain("sultan@example.com");
++      expect(html).toContain("39 SAR");
++      expect(html).toContain("mada");
++      expect(html).toContain("مدفوعة");
++      expect(html).toContain("INV-2026-0002");
++      expect(html).toContain("Omar Bradley");
++      expect(html).toContain("فاشلة");
++      expect(html).toContain("PDF");
++    });
++  });
++});
++
++/* =========================================================================
++ * Modals Suite
++ * ========================================================================= */
++
++describe("Admin Financial Modals Suite", () => {
++  describe("GatewayConfigModal", () => {
++    it("should return null when isOpen is false", () => {
++      const onSave = vi.fn().mockResolvedValue(true);
++      const html = renderToStaticMarkup(
++        React.createElement(GatewayConfigModal, {
++          isOpen: false,
++          gateway: MOCK_GATEWAYS[0],
++          onClose: vi.fn(),
++          onSave,
++        })
++      );
++      expect(html).toBe("");
++    });
++
++    it("should render modal inputs and encryption indicators when isOpen is true", () => {
++      const onSave = vi.fn().mockResolvedValue(true);
++      const html = renderToStaticMarkup(
++        React.createElement(GatewayConfigModal, {
++          isOpen: true,
++          gateway: MOCK_GATEWAYS[0],
++          onClose: vi.fn(),
++          onSave,
++        })
++      );
++
++      expect(html).toContain("إعدادات بوابة مدى للبطاقات المصرفية");
++      expect(html).toContain("المفتاح العام (Publishable / Public API Key)");
++      expect(html).toContain("المفتاح السري (Secret Key)");
++      expect(html).toContain("مضبوط ومشفّر");
++      expect(html).toContain("نسبة العمولة (%)");
++      expect(html).toContain("رسوم ثابتة (SAR)");
++      expect(html).toContain("حفظ المفاتيح والإعدادات");
++    });
++  });
++
++  describe("PlanEditorModal", () => {
++    it("should return null when isOpen is false", () => {
++      const html = renderToStaticMarkup(
++        React.createElement(PlanEditorModal, {
++          isOpen: false,
++          onClose: vi.fn(),
++          onSave: vi.fn().mockResolvedValue(true),
++        })
++      );
++      expect(html).toBe("");
++    });
++
++    it("should render plan editor form with pricing matrix when isOpen is true", () => {
++      const html = renderToStaticMarkup(
++        React.createElement(PlanEditorModal, {
++          isOpen: true,
++          plan: MOCK_PLANS[0],
++          onClose: vi.fn(),
++          onSave: vi.fn().mockResolvedValue(true),
++        })
++      );
++
++      expect(html).toContain("تعديل باقة باقة صانع المحتوى");
++      expect(html).toContain("المعرف الفريد (Slug)");
++      expect(html).toContain("الاسم بالعربية");
++      expect(html).toContain("مصفوفة التسعير متعددة العملات");
++      expect(html).toContain("SAR");
++      expect(html).toContain("USD");
++      expect(html).toContain("AED");
++      expect(html).toContain("EGP");
++      expect(html).toContain("حفظ تعديلات الباقة");
++    });
++  });
++
++  describe("CouponEditorModal", () => {
++    it("should return null when isOpen is false", () => {
++      const html = renderToStaticMarkup(
++        React.createElement(CouponEditorModal, {
++          isOpen: false,
++          onClose: vi.fn(),
++          onSave: vi.fn().mockResolvedValue(true),
++        })
++      );
++      expect(html).toBe("");
++    });
++
++    it("should render coupon creation form with discount types and validity fields", () => {
++      const html = renderToStaticMarkup(
++        React.createElement(CouponEditorModal, {
++          isOpen: true,
++          onClose: vi.fn(),
++          onSave: vi.fn().mockResolvedValue(true),
++        })
++      );
++
++      expect(html).toContain("إنشاء كود خصم جديد");
++      expect(html).toContain("رمز الكود (Coupon Code)");
++      expect(html).toContain("نوع الخصم");
++      expect(html).toContain("نسبة مئوية (%)");
++      expect(html).toContain("أقصى عدد استخدام كلي");
++      expect(html).toContain("صالح من تاريخ");
++      expect(html).toContain("إنشاء كود الخصم");
++    });
++  });
++
++  describe("CurrencyRateModal", () => {
++    it("should return null when isOpen is false", () => {
++      const html = renderToStaticMarkup(
++        React.createElement(CurrencyRateModal, {
++          isOpen: false,
++          currency: MOCK_CURRENCIES[0],
++          onClose: vi.fn(),
++          onSave: vi.fn().mockResolvedValue(true),
++        })
++      );
++      expect(html).toBe("");
++    });
++
++    it("should render currency exchange rate form with auto-detection countries", () => {
++      const html = renderToStaticMarkup(
++        React.createElement(CurrencyRateModal, {
++          isOpen: true,
++          currency: MOCK_CURRENCIES[0],
++          onClose: vi.fn(),
++          onSave: vi.fn().mockResolvedValue(true),
++        })
++      );
++
++      expect(html).toContain("تعديل سعر صرف ريال سعودي");
++      expect(html).toContain("سعر الصرف مقابل 1 دولار أمريكي");
++      expect(html).toContain("رموز الدول للكشف التلقائي");
++      expect(html).toContain("حفظ سعر الصرف");
++    });
++  });
++});

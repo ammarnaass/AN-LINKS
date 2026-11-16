@@ -1,0 +1,624 @@
+diff --git a/.env.example b/.env.example
+index 14e271f..fdb0a8f 100644
+--- a/.env.example
++++ b/.env.example
+@@ -1,3 +1,4 @@
+ DATABASE_URL="postgresql://user:password@localhost:5432/an_links?schema=public"
+ NEXTAUTH_SECRET="your-super-secret-jwt-key"
+ NEXTAUTH_URL="http://localhost:3000"
++PAYMENT_ENCRYPTION_KEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 7331a97..3fb9fe3 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -21,6 +21,9 @@ model User {
+   links         Link[]
+   socials       SocialLink[]
+   sessions      UserSession[]
++  subscriptions UserSubscription[]
++  invoices      FinancialInvoice[]
++  auditLogs     FinancialAuditLog[]
+ }
+ 
+ model Profile {
+@@ -112,3 +115,152 @@ model UserSession {
+ 
+   @@index([userId, isActive])
+ }
++
++// ==========================================
++// Financial & Subscription Management Models
++// ==========================================
++
++model PaymentGateway {
++  id                  String   @id @default(cuid())
++  code                String   @unique // mada, apple_pay, stc_pay, tamara, tabby, stripe, paypal, fawry
++  nameAr              String
++  nameEn              String
++  category            String   // NATIONAL | INTERNATIONAL | BNPL | WALLET
++  isEnabled           Boolean  @default(false)
++  isTestMode          Boolean  @default(true)
++  publishableKey      String?
++  secretKeyEncrypted  String?  // مشفر في قاعدة البيانات
++  webhookSecret       String?
++  feePercentage       Float    @default(0.0) // عمولة البوابة المقتطعة
++  feeFixed            Float    @default(0.0) // رسوم ثابتة لكل عملية
++  supportedCurrencies String[] // ["SAR", "AED", "USD", ...]
++  sortOrder           Int      @default(0)
++  createdAt           DateTime @default(now())
++  updatedAt           DateTime @updatedAt
++}
++
++model SubscriptionPlan {
++  id             String              @id @default(cuid())
++  slug           String              @unique // free, creator, pro, agency
++  nameAr         String
++  nameEn         String
++  descriptionAr  String?
++  badgeAr        String?             // "الأكثر شعبية", "عرض خاص"
++  isActive       Boolean             @default(true)
++  sortOrder      Int                 @default(0)
++  prices         PlanPrice[]
++  quotas         PlanQuota?
++  subscriptions  UserSubscription[]
++  createdAt      DateTime            @default(now())
++  updatedAt      DateTime            @updatedAt
++}
++
++model PlanPrice {
++  id              String           @id @default(cuid())
++  planId          String
++  plan            SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
++  currency        String           // SAR, AED, USD, EGP, KWD
++  billingCycle    String           // MONTHLY, YEARLY, LIFETIME
++  amount          Float            // المبلغ الفعلي للدفع
++  originalAmount  Float?           // المبلغ قبل الخصم (لإظهار الشطب والتوفير)
++  isActive        Boolean          @default(true)
++  externalPriceId String?          // المعرف المرتبط في Stripe أو Moyasar
++  
++  @@unique([planId, currency, billingCycle])
++}
++
++model PlanQuota {
++  id                     String           @id @default(cuid())
++  planId                 String           @unique
++  plan                   SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
++  maxLinks               Int              @default(10) // عدد الروابط المسموحة
++  allowCustomDomain      Boolean          @default(false) // ربط دومين خاص
++  allowRemoveBranding    Boolean          @default(false) // إخفاء شعار المنصة
++  allowAdvancedThemes    Boolean          @default(false) // قوالب CSS وخلفيات الفيديو
++  allowDetailedAnalytics Boolean          @default(false) // إحصائيات دقيقة ومصادر الزيارات
++  allowPrioritySupport   Boolean          @default(false) // دعم فني مخصص
++  customCssAllowed       Boolean          @default(false)
++  storeCommissionRate    Float            @default(5.0) // نسبة عمولة المنصة من مبيعات المتجر الرقمي للمستخدم
++}
++
++model CurrencyConfig {
++  code                String   @id // SAR, AED, USD, KWD, EGP, EUR
++  nameAr              String
++  symbol              String   // ر.س, د.إ, $, ج.م
++  exchangeRateToUSD   Float    // سعر الصرف مقابل الدولار
++  isBaseCurrency      Boolean  @default(false)
++  isActive            Boolean  @default(true)
++  autoDetectCountries String[] // ["SA"], ["AE"], ["EG", "SD"]
++  updatedAt           DateTime @updatedAt
++}
++
++model PromotionCoupon {
++  id                  String    @id @default(cuid())
++  code                String    @unique // مثلاً: SAUDI94, LAUNCH50
++  descriptionAr       String?
++  discountType        String    // PERCENTAGE | FIXED_AMOUNT
++  discountValue       Float     // قيمة الخصم (مثلاً 20 لـ 20%، أو 50 ريال)
++  maxUses             Int?      // أقصى عدد لاستخدام الكوبون إجمالاً
++  usedCount           Int       @default(0)
++  maxUsesPerUser      Int       @default(1)
++  validFrom           DateTime  @default(now())
++  validUntil          DateTime?
++  isActive            Boolean   @default(true)
++  applicablePlanSlugs String[]  // الباقات المسموح تطبيق الخصم عليها
++  createdAt           DateTime  @default(now())
++}
++
++model UserSubscription {
++  id                    String           @id @default(cuid())
++  userId                String
++  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
++  planId                String
++  plan                  SubscriptionPlan @relation(fields: [planId], references: [id])
++  status                String           @default("ACTIVE") // ACTIVE, PAST_DUE, CANCELED, EXPIRED
++  billingCycle          String           // MONTHLY, YEARLY, LIFETIME
++  currency              String
++  amountPaid            Float
++  couponCode            String?
++  gatewayCode           String           // mada, stripe, tamara
++  gatewaySubscriptionId String?
++  currentPeriodStart    DateTime         @default(now())
++  currentPeriodEnd      DateTime
++  cancelAtPeriodEnd     Boolean          @default(false)
++  createdAt             DateTime         @default(now())
++  updatedAt             DateTime         @updatedAt
++
++  @@index([userId, status])
++}
++
++model FinancialInvoice {
++  id             String   @id @default(cuid())
++  invoiceNumber  String   @unique // INV-2026-0001
++  userId         String
++  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
++  amountSubtotal Float
++  discountAmount Float    @default(0.0)
++  taxAmount      Float    @default(0.0) // ضريبة القيمة المضافة 15% (KSA)
++  amountTotal    Float
++  currency       String
++  gatewayCode    String
++  gatewayTxId    String?
++  status         String   // PAID, FAILED, REFUNDED
++  pdfUrl         String?
++  createdAt      DateTime @default(now())
++}
++
++model FinancialAuditLog {
++  id        String   @id @default(cuid())
++  adminId   String
++  action    String
++  entity    String
++  entityId  String?
++  details   Json?
++  ipAddress String?
++  createdAt DateTime @default(now())
++  user      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
++
++  @@index([adminId])
++  @@index([entity, entityId])
++}
++
+diff --git a/prisma/seed-financials.ts b/prisma/seed-financials.ts
+new file mode 100644
+index 0000000..2850104
+--- /dev/null
++++ b/prisma/seed-financials.ts
+@@ -0,0 +1,421 @@
++import { PrismaClient } from "@prisma/client";
++
++export async function seedFinancials(prisma: PrismaClient): Promise<void> {
++  console.log("💳 Seeding Financial Management Data (Gateways, Currencies, Plans, Quotas)...");
++
++  // 1. Seed Payment Gateways
++  const gateways = [
++    {
++      code: "mada",
++      nameAr: "مدى (بطاقات الخصم المباشر)",
++      nameEn: "mada Debit Cards",
++      category: "NATIONAL",
++      isEnabled: true,
++      isTestMode: true,
++      publishableKey: "pk_test_mada_dummy_sample",
++      secretKeyEncrypted: null,
++      webhookSecret: "whsec_mada_dummy_sample",
++      feePercentage: 1.0,
++      feeFixed: 1.0,
++      supportedCurrencies: ["SAR"],
++      sortOrder: 1,
++    },
++    {
++      code: "apple_pay",
++      nameAr: "Apple Pay",
++      nameEn: "Apple Pay",
++      category: "WALLET",
++      isEnabled: true,
++      isTestMode: true,
++      publishableKey: "pk_test_applepay_dummy_sample",
++      secretKeyEncrypted: null,
++      webhookSecret: "whsec_applepay_dummy_sample",
++      feePercentage: 1.75,
++      feeFixed: 1.0,
++      supportedCurrencies: ["SAR", "AED", "USD", "EUR", "KWD"],
++      sortOrder: 2,
++    },
++    {
++      code: "stc_pay",
++      nameAr: "STC Pay",
++      nameEn: "STC Pay",
++      category: "WALLET",
++      isEnabled: true,
++      isTestMode: true,
++      publishableKey: "pk_test_stcpay_dummy_sample",
++      secretKeyEncrypted: null,
++      webhookSecret: "whsec_stcpay_dummy_sample",
++      feePercentage: 1.5,
++      feeFixed: 0.0,
++      supportedCurrencies: ["SAR"],
++      sortOrder: 3,
++    },
++    {
++      code: "tamara",
++      nameAr: "تمارا (قسمها على 4 دفعات)",
++      nameEn: "Tamara Buy Now Pay Later",
++      category: "BNPL",
++      isEnabled: true,
++      isTestMode: true,
++      publishableKey: "pk_test_tamara_dummy_sample",
++      secretKeyEncrypted: null,
++      webhookSecret: "whsec_tamara_dummy_sample",
++      feePercentage: 4.5,
++      feeFixed: 1.5,
++      supportedCurrencies: ["SAR", "AED", "KWD"],
++      sortOrder: 4,
++    },
++    {
++      code: "tabby",
++      nameAr: "تابي (تسوق الآن وادفع لاحقاً)",
++      nameEn: "Tabby BNPL",
++      category: "BNPL",
++      isEnabled: true,
++      isTestMode: true,
++      publishableKey: "pk_test_tabby_dummy_sample",
++      secretKeyEncrypted: null,
++      webhookSecret: "whsec_tabby_dummy_sample",
++      feePercentage: 4.9,
++      feeFixed: 1.0,
++      supportedCurrencies: ["SAR", "AED", "KWD", "EGP"],
++      sortOrder: 5,
++    },
++    {
++      code: "stripe",
++      nameAr: "Stripe (بطاقات ائتمانية عالمية)",
++      nameEn: "Stripe International Cards",
++      category: "INTERNATIONAL",
++      isEnabled: true,
++      isTestMode: true,
++      publishableKey: "pk_test_stripe_dummy_sample",
++      secretKeyEncrypted: null,
++      webhookSecret: "whsec_stripe_dummy_sample",
++      feePercentage: 2.9,
++      feeFixed: 1.0,
++      supportedCurrencies: ["USD", "EUR", "SAR", "AED", "EGP", "KWD"],
++      sortOrder: 6,
++    },
++    {
++      code: "paypal",
++      nameAr: "PayPal (المحفظة الدولية)",
++      nameEn: "PayPal Express Checkout",
++      category: "INTERNATIONAL",
++      isEnabled: false,
++      isTestMode: true,
++      publishableKey: "client_id_paypal_dummy_sample",
++      secretKeyEncrypted: null,
++      webhookSecret: "whsec_paypal_dummy_sample",
++      feePercentage: 3.9,
++      feeFixed: 1.5,
++      supportedCurrencies: ["USD", "EUR"],
++      sortOrder: 7,
++    },
++    {
++      code: "fawry",
++      nameAr: "فوري (المدفوعات المصرية)",
++      nameEn: "Fawry Pay Egypt",
++      category: "NATIONAL",
++      isEnabled: false,
++      isTestMode: true,
++      publishableKey: "merchant_code_fawry_sample",
++      secretKeyEncrypted: null,
++      webhookSecret: "whsec_fawry_dummy_sample",
++      feePercentage: 2.0,
++      feeFixed: 2.0,
++      supportedCurrencies: ["EGP"],
++      sortOrder: 8,
++    },
++  ];
++
++  for (const gw of gateways) {
++    await prisma.paymentGateway.upsert({
++      where: { code: gw.code },
++      update: {
++        nameAr: gw.nameAr,
++        nameEn: gw.nameEn,
++        category: gw.category,
++        feePercentage: gw.feePercentage,
++        feeFixed: gw.feeFixed,
++        supportedCurrencies: gw.supportedCurrencies,
++        sortOrder: gw.sortOrder,
++      },
++      create: gw,
++    });
++  }
++  console.log(`✅ Seeded ${gateways.length} payment gateways.`);
++
++  // 2. Seed Currencies
++  const currencies = [
++    {
++      code: "SAR",
++      nameAr: "ريال سعودي",
++      symbol: "ر.س",
++      exchangeRateToUSD: 0.2667,
++      isBaseCurrency: true,
++      isActive: true,
++      autoDetectCountries: ["SA"],
++    },
++    {
++      code: "AED",
++      nameAr: "درهم إماراتي",
++      symbol: "د.إ",
++      exchangeRateToUSD: 0.2723,
++      isBaseCurrency: false,
++      isActive: true,
++      autoDetectCountries: ["AE"],
++    },
++    {
++      code: "KWD",
++      nameAr: "دينار كويتي",
++      symbol: "د.ك",
++      exchangeRateToUSD: 3.25,
++      isBaseCurrency: false,
++      isActive: true,
++      autoDetectCountries: ["KW"],
++    },
++    {
++      code: "EGP",
++      nameAr: "جنيه مصري",
++      symbol: "ج.م",
++      exchangeRateToUSD: 0.020,
++      isBaseCurrency: false,
++      isActive: true,
++      autoDetectCountries: ["EG"],
++    },
++    {
++      code: "USD",
++      nameAr: "دولار أمريكي",
++      symbol: "$",
++      exchangeRateToUSD: 1.0,
++      isBaseCurrency: false,
++      isActive: true,
++      autoDetectCountries: ["US"],
++    },
++    {
++      code: "EUR",
++      nameAr: "يورو أوروبي",
++      symbol: "€",
++      exchangeRateToUSD: 1.08,
++      isBaseCurrency: false,
++      isActive: true,
++      autoDetectCountries: ["FR", "DE", "ES", "IT"],
++    },
++  ];
++
++  for (const cur of currencies) {
++    await prisma.currencyConfig.upsert({
++      where: { code: cur.code },
++      update: {
++        nameAr: cur.nameAr,
++        symbol: cur.symbol,
++        exchangeRateToUSD: cur.exchangeRateToUSD,
++        isBaseCurrency: cur.isBaseCurrency,
++        isActive: cur.isActive,
++        autoDetectCountries: cur.autoDetectCountries,
++      },
++      create: cur,
++    });
++  }
++  console.log(`✅ Seeded ${currencies.length} currency configurations.`);
++
++  // 3. Seed Subscription Plans, Quotas & Localized Prices
++  const plans = [
++    {
++      slug: "free",
++      nameAr: "الباقة المجانية",
++      nameEn: "Free Plan",
++      descriptionAr: "للانطلاق والبداية الشخصية بروابط أساسية وإحصائيات بسيطة",
++      badgeAr: null,
++      isActive: true,
++      sortOrder: 1,
++      quotas: {
++        maxLinks: 5,
++        allowCustomDomain: false,
++        allowRemoveBranding: false,
++        allowAdvancedThemes: false,
++        allowDetailedAnalytics: false,
++        allowPrioritySupport: false,
++        customCssAllowed: false,
++        storeCommissionRate: 10.0,
++      },
++      prices: [
++        { currency: "SAR", billingCycle: "MONTHLY", amount: 0.0, originalAmount: 0.0 },
++        { currency: "SAR", billingCycle: "YEARLY", amount: 0.0, originalAmount: 0.0 },
++        { currency: "USD", billingCycle: "MONTHLY", amount: 0.0, originalAmount: 0.0 },
++        { currency: "USD", billingCycle: "YEARLY", amount: 0.0, originalAmount: 0.0 },
++      ],
++    },
++    {
++      slug: "creator",
++      nameAr: "باقة صناع المحتوى",
++      nameEn: "Creator Plan",
++      descriptionAr: "مثالية للمؤثرين والمبدعين وأصحاب المتاجر الرقمية الناشئة",
++      badgeAr: "الأكثر اختياراً",
++      isActive: true,
++      sortOrder: 2,
++      quotas: {
++        maxLinks: 25,
++        allowCustomDomain: true,
++        allowRemoveBranding: true,
++        allowAdvancedThemes: true,
++        allowDetailedAnalytics: true,
++        allowPrioritySupport: false,
++        customCssAllowed: false,
++        storeCommissionRate: 5.0,
++      },
++      prices: [
++        { currency: "SAR", billingCycle: "MONTHLY", amount: 29.0, originalAmount: 39.0 },
++        { currency: "SAR", billingCycle: "YEARLY", amount: 290.0, originalAmount: 348.0 },
++        { currency: "USD", billingCycle: "MONTHLY", amount: 8.0, originalAmount: 11.0 },
++        { currency: "USD", billingCycle: "YEARLY", amount: 80.0, originalAmount: 96.0 },
++        { currency: "AED", billingCycle: "MONTHLY", amount: 29.0, originalAmount: 39.0 },
++        { currency: "AED", billingCycle: "YEARLY", amount: 290.0, originalAmount: 348.0 },
++        { currency: "EGP", billingCycle: "MONTHLY", amount: 390.0, originalAmount: 490.0 },
++        { currency: "EGP", billingCycle: "YEARLY", amount: 3900.0, originalAmount: 4680.0 },
++      ],
++    },
++    {
++      slug: "pro",
++      nameAr: "باقة المحترفين",
++      nameEn: "Pro Plan",
++      descriptionAr: "للمحترفين ورواد الأعمال مع تحليلات متقدمة ودعم أولوية",
++      badgeAr: "الأكثر شعبية",
++      isActive: true,
++      sortOrder: 3,
++      quotas: {
++        maxLinks: 100,
++        allowCustomDomain: true,
++        allowRemoveBranding: true,
++        allowAdvancedThemes: true,
++        allowDetailedAnalytics: true,
++        allowPrioritySupport: true,
++        customCssAllowed: true,
++        storeCommissionRate: 2.5,
++      },
++      prices: [
++        { currency: "SAR", billingCycle: "MONTHLY", amount: 49.0, originalAmount: 69.0 },
++        { currency: "SAR", billingCycle: "YEARLY", amount: 490.0, originalAmount: 588.0 },
++        { currency: "USD", billingCycle: "MONTHLY", amount: 14.0, originalAmount: 19.0 },
++        { currency: "USD", billingCycle: "YEARLY", amount: 140.0, originalAmount: 168.0 },
++        { currency: "AED", billingCycle: "MONTHLY", amount: 49.0, originalAmount: 69.0 },
++        { currency: "AED", billingCycle: "YEARLY", amount: 490.0, originalAmount: 588.0 },
++        { currency: "EGP", billingCycle: "MONTHLY", amount: 690.0, originalAmount: 890.0 },
++        { currency: "EGP", billingCycle: "YEARLY", amount: 6900.0, originalAmount: 8280.0 },
++      ],
++    },
++    {
++      slug: "agency",
++      nameAr: "باقة الوكالات والشركات",
++      nameEn: "Agency Plan",
++      descriptionAr: "حلول متكاملة لفرق العمل والوكالات مع روابط غير محدودة وأقل نسبة عمولة",
++      badgeAr: "للشركات والفرق",
++      isActive: true,
++      sortOrder: 4,
++      quotas: {
++        maxLinks: 9999,
++        allowCustomDomain: true,
++        allowRemoveBranding: true,
++        allowAdvancedThemes: true,
++        allowDetailedAnalytics: true,
++        allowPrioritySupport: true,
++        customCssAllowed: true,
++        storeCommissionRate: 1.0,
++      },
++      prices: [
++        { currency: "SAR", billingCycle: "MONTHLY", amount: 149.0, originalAmount: 199.0 },
++        { currency: "SAR", billingCycle: "YEARLY", amount: 1490.0, originalAmount: 1788.0 },
++        { currency: "USD", billingCycle: "MONTHLY", amount: 39.0, originalAmount: 55.0 },
++        { currency: "USD", billingCycle: "YEARLY", amount: 390.0, originalAmount: 468.0 },
++        { currency: "AED", billingCycle: "MONTHLY", amount: 149.0, originalAmount: 199.0 },
++        { currency: "AED", billingCycle: "YEARLY", amount: 1490.0, originalAmount: 1788.0 },
++        { currency: "EGP", billingCycle: "MONTHLY", amount: 1990.0, originalAmount: 2490.0 },
++        { currency: "EGP", billingCycle: "YEARLY", amount: 19900.0, originalAmount: 23880.0 },
++      ],
++    },
++  ];
++
++  for (const p of plans) {
++    const plan = await prisma.subscriptionPlan.upsert({
++      where: { slug: p.slug },
++      update: {
++        nameAr: p.nameAr,
++        nameEn: p.nameEn,
++        descriptionAr: p.descriptionAr,
++        badgeAr: p.badgeAr,
++        isActive: p.isActive,
++        sortOrder: p.sortOrder,
++      },
++      create: {
++        slug: p.slug,
++        nameAr: p.nameAr,
++        nameEn: p.nameEn,
++        descriptionAr: p.descriptionAr,
++        badgeAr: p.badgeAr,
++        isActive: p.isActive,
++        sortOrder: p.sortOrder,
++      },
++    });
++
++    // Upsert Quota
++    await prisma.planQuota.upsert({
++      where: { planId: plan.id },
++      update: p.quotas,
++      create: {
++        planId: plan.id,
++        ...p.quotas,
++      },
++    });
++
++    // Upsert Prices
++    for (const pr of p.prices) {
++      await prisma.planPrice.upsert({
++        where: {
++          planId_currency_billingCycle: {
++            planId: plan.id,
++            currency: pr.currency,
++            billingCycle: pr.billingCycle,
++          },
++        },
++        update: {
++          amount: pr.amount,
++          originalAmount: pr.originalAmount,
++          isActive: true,
++        },
++        create: {
++          planId: plan.id,
++          currency: pr.currency,
++          billingCycle: pr.billingCycle,
++          amount: pr.amount,
++          originalAmount: pr.originalAmount,
++          isActive: true,
++        },
++      });
++    }
++  }
++  console.log(`✅ Seeded ${plans.length} subscription plans with quotas & localized pricing.`);
++
++  // 4. Seed Sample Promotional Coupon
++  await prisma.promotionCoupon.upsert({
++    where: { code: "LAUNCH50" },
++    update: {
++      discountType: "PERCENTAGE",
++      discountValue: 50.0,
++      maxUses: 500,
++      maxUsesPerUser: 1,
++      isActive: true,
++      applicablePlanSlugs: ["creator", "pro", "agency"],
++    },
++    create: {
++      code: "LAUNCH50",
++      descriptionAr: "كوبون خصم الإطلاق الرسمي 50% لجميع الباقات المدفوعة",
++      discountType: "PERCENTAGE",
++      discountValue: 50.0,
++      maxUses: 500,
++      usedCount: 0,
++      maxUsesPerUser: 1,
++      isActive: true,
++      applicablePlanSlugs: ["creator", "pro", "agency"],
++    },
++  });
++  console.log("✅ Seeded promotional coupon: LAUNCH50 (50% OFF).");
++}
+diff --git a/prisma/seed.ts b/prisma/seed.ts
+index 4abdebf..2b71bce 100644
+--- a/prisma/seed.ts
++++ b/prisma/seed.ts
+@@ -1,5 +1,6 @@
+ import { PrismaClient } from "@prisma/client";
+ import bcrypt from "bcryptjs";
++import { seedFinancials } from "./seed-financials.ts";
+ 
+ const prisma = new PrismaClient();
+ 
+@@ -166,6 +167,9 @@ async function main() {
+     },
+   });
+ 
++  // 7. Seed Financial Infrastructure (Gateways, Plans, Currencies)
++  await seedFinancials(prisma);
++
+   console.log("🎉 Seeding completed successfully!");
+ }
+ 

@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 /home/ammar/AN LINKS
+
+ ✓ tests/integration/analytics-api.test.ts (3 tests) 9ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  06:52:47
+   Duration  1.02s (transform 99ms, setup 0ms, collect 123ms, tests 9ms, environment 1ms, prepare 146ms)
+

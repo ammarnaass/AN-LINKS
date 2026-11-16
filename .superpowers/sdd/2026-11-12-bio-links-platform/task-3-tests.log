@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 /home/ammar/AN LINKS
+
+ ✓ tests/integration/auth.test.ts (7 tests) 302ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  06:30:15
+   Duration  1.36s (transform 112ms, setup 0ms, collect 157ms, tests 302ms, environment 0ms, prepare 172ms)
+

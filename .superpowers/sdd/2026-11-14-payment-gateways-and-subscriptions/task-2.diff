@@ -1,0 +1,559 @@
+diff --git a/src/features/admin/components/AdminPaymentsTab.tsx b/src/features/admin/components/AdminPaymentsTab.tsx
+index 5011777..1b3019b 100644
+--- a/src/features/admin/components/AdminPaymentsTab.tsx
++++ b/src/features/admin/components/AdminPaymentsTab.tsx
+@@ -23,6 +23,10 @@ export function AdminPaymentsTab({ settings, transactions, onUpdateSettings }: A
+     visa_mastercard: <CreditCard className="w-5 h-5 text-primary" />,
+     stc_pay: <Wallet className="w-5 h-5 text-purple-400" />,
+     tamara: <CalendarCheck className="w-5 h-5 text-amber-400" />,
++    tabby: <CalendarCheck className="w-5 h-5 text-emerald-400" />,
++    fawry: <Wallet className="w-5 h-5 text-amber-500" />,
++    stripe: <CreditCard className="w-5 h-5 text-indigo-400" />,
++    paypal: <Wallet className="w-5 h-5 text-blue-400" />,
+   };
+ 
+   const handleToggleGateway = (id: GatewayId) => {
+diff --git a/src/features/admin/index.ts b/src/features/admin/index.ts
+index ae89c77..160ec4a 100644
+--- a/src/features/admin/index.ts
++++ b/src/features/admin/index.ts
+@@ -13,3 +13,4 @@ export * from "./components/AdminSettingsTab";
+ export * from "./components/AdminReportsTab";
+ export * from "./components/AdminSessionsTab";
+ export * from "./components/AdminSidebar";
++export * from "@/shared/lib/crypto";
+diff --git a/src/features/admin/services/admin.defaults.ts b/src/features/admin/services/admin.defaults.ts
+index 3eef960..693791c 100644
+--- a/src/features/admin/services/admin.defaults.ts
++++ b/src/features/admin/services/admin.defaults.ts
+@@ -61,6 +61,54 @@ export const DEFAULT_GATEWAYS: Record<GatewayId, AdminGatewayConfig> = {
+     secretKey: "tamara_test_sec_************",
+     webhookSecret: "whsec_tamara_test_5532",
+   },
++  tabby: {
++    id: "tabby",
++    name: "Tabby",
++    nameAr: "تابي (Tabby)",
++    descriptionAr: "قسّم مشترياتك على 4 دفعات بدون فوائد أو رسوم خفية",
++    icon: "calendar-check",
++    isEnabled: false,
++    isTestMode: true,
++    publishableKey: "tabby_test_pub_123456",
++    secretKey: "tabby_test_sec_************",
++    webhookSecret: "whsec_tabby_test_1234",
++  },
++  fawry: {
++    id: "fawry",
++    name: "Fawry",
++    nameAr: "فوري (Fawry)",
++    descriptionAr: "شبكة المدفوعات الإلكترونية الرائدة في مصر للمحافظ والبطاقات ونقاط البيع",
++    icon: "wallet",
++    isEnabled: false,
++    isTestMode: true,
++    publishableKey: "fawry_merchant_code_1234",
++    secretKey: "fawry_sec_************",
++    webhookSecret: "whsec_fawry_test_1234",
++  },
++  stripe: {
++    id: "stripe",
++    name: "Stripe",
++    nameAr: "سترايب (Stripe)",
++    descriptionAr: "معالجة المدفوعات والاشتراكات العالمية بالبطاقات والعملات المتعددة",
++    icon: "credit-card",
++    isEnabled: false,
++    isTestMode: true,
++    publishableKey: "pk_test_stripe_123456",
++    secretKey: "sk_test_stripe_sec_************",
++    webhookSecret: "whsec_stripe_test_1234",
++  },
++  paypal: {
++    id: "paypal",
++    name: "PayPal",
++    nameAr: "باي بال (PayPal)",
++    descriptionAr: "بوابة المدفوعات الدولية الأكثر شهرة حول العالم",
++    icon: "wallet",
++    isEnabled: false,
++    isTestMode: true,
++    publishableKey: "client_id_paypal_123456",
++    secretKey: "paypal_sec_************",
++    webhookSecret: "whsec_paypal_test_1234",
++  },
+ };
+ 
+ export const DEFAULT_PLATFORM_SETTINGS: AdminPlatformSettings = {
+diff --git a/src/features/admin/types/admin.types.ts b/src/features/admin/types/admin.types.ts
+index 5a53ab7..1e5fa69 100644
+--- a/src/features/admin/types/admin.types.ts
++++ b/src/features/admin/types/admin.types.ts
+@@ -1,4 +1,13 @@
+-export type GatewayId = "mada" | "apple_pay" | "visa_mastercard" | "stc_pay" | "tamara";
++export type GatewayId =
++  | "mada"
++  | "apple_pay"
++  | "visa_mastercard"
++  | "stc_pay"
++  | "tamara"
++  | "tabby"
++  | "fawry"
++  | "stripe"
++  | "paypal";
+ 
+ export interface AdminGatewayConfig {
+   id: GatewayId;
+@@ -111,3 +120,151 @@ export interface AdminReportItem {
+   status: string;
+   createdAt: string;
+ }
++
++/* =========================================================================
++ * Financial Gateway, Subscription & Billing Contracts
++ * ========================================================================= */
++
++export interface AdminGatewayDetails {
++  id: string;
++  code: GatewayId | string;
++  nameAr: string;
++  nameEn: string;
++  category: "NATIONAL" | "INTERNATIONAL" | "BNPL" | "WALLET";
++  isEnabled: boolean;
++  isTestMode: boolean;
++  publishableKey: string | null;
++  hasSecretKey: boolean; // secret is masked for security
++  hasWebhookSecret: boolean;
++  feePercentage: number;
++  feeFixed: number;
++  supportedCurrencies: string[];
++  sortOrder: number;
++  updatedAt: string;
++}
++
++export interface AdminPlanPriceItem {
++  id?: string;
++  currency: string;
++  billingCycle: "MONTHLY" | "YEARLY" | "LIFETIME";
++  amount: number;
++  originalAmount?: number | null;
++  isActive: boolean;
++}
++
++export interface AdminPlanQuotaConfig {
++  maxLinks: number;
++  allowCustomDomain: boolean;
++  allowRemoveBranding: boolean;
++  allowAdvancedThemes: boolean;
++  allowDetailedAnalytics: boolean;
++  allowPrioritySupport: boolean;
++  customCssAllowed: boolean;
++  storeCommissionRate: number;
++}
++
++export interface AdminSubscriptionPlanItem {
++  id: string;
++  slug: string;
++  nameAr: string;
++  nameEn: string;
++  descriptionAr?: string | null;
++  badgeAr?: string | null;
++  isActive: boolean;
++  sortOrder: number;
++  prices: AdminPlanPriceItem[];
++  quotas: AdminPlanQuotaConfig;
++  subscribersCount?: number;
++}
++
++export interface AdminCurrencyItem {
++  code: string;
++  nameAr: string;
++  symbol: string;
++  exchangeRateToUSD: number;
++  isBaseCurrency: boolean;
++  isActive: boolean;
++  autoDetectCountries: string[];
++  updatedAt: string;
++}
++
++export interface AdminCouponItem {
++  id: string;
++  code: string;
++  descriptionAr?: string | null;
++  discountType: "PERCENTAGE" | "FIXED_AMOUNT";
++  discountValue: number;
++  maxUses?: number | null;
++  usedCount: number;
++  maxUsesPerUser: number;
++  validFrom: string;
++  validUntil?: string | null;
++  isActive: boolean;
++  applicablePlanSlugs: string[];
++  createdAt: string;
++}
++
++export interface AdminAuditLogItem {
++  id: string;
++  adminId: string;
++  adminEmail?: string;
++  action: string;
++  entity: string;
++  entityId?: string | null;
++  details?: Record<string, unknown> | null;
++  createdAt: string;
++}
++
++/* =========================================================================
++ * Mutation DTOs
++ * ========================================================================= */
++
++export interface UpdateGatewayInput {
++  id: string;
++  isEnabled?: boolean;
++  isTestMode?: boolean;
++  publishableKey?: string;
++  secretKey?: string;
++  webhookSecret?: string;
++  feePercentage?: number;
++  feeFixed?: number;
++  supportedCurrencies?: string[];
++}
++
++export interface UpsertPlanInput {
++  id?: string;
++  slug: string;
++  nameAr: string;
++  nameEn: string;
++  descriptionAr?: string;
++  badgeAr?: string;
++  isActive?: boolean;
++  sortOrder?: number;
++  prices?: AdminPlanPriceItem[];
++  quotas?: Partial<AdminPlanQuotaConfig>;
++}
++
++export interface UpsertQuotaInput extends Partial<AdminPlanQuotaConfig> {
++  planId?: string;
++}
++
++export interface UpdateCurrencyInput {
++  code: string;
++  nameAr?: string;
++  symbol?: string;
++  exchangeRateToUSD?: number;
++  isActive?: boolean;
++  autoDetectCountries?: string[];
++}
++
++export interface CreateCouponInput {
++  code: string;
++  descriptionAr?: string;
++  discountType: "PERCENTAGE" | "FIXED_AMOUNT";
++  discountValue: number;
++  maxUses?: number;
++  maxUsesPerUser?: number;
++  validFrom?: string;
++  validUntil?: string;
++  applicablePlanSlugs?: string[];
++}
+diff --git a/src/shared/index.ts b/src/shared/index.ts
+index f23f424..cfe251a 100644
+--- a/src/shared/index.ts
++++ b/src/shared/index.ts
+@@ -1,4 +1,5 @@
+ export * from "./db";
+ export * from "./ui";
+ export * from "./utils";
++export * from "./lib/crypto";
+ 
+diff --git a/src/shared/lib/crypto.ts b/src/shared/lib/crypto.ts
+new file mode 100644
+index 0000000..79e346e
+--- /dev/null
++++ b/src/shared/lib/crypto.ts
+@@ -0,0 +1,137 @@
++import crypto from "node:crypto";
++
++const ALGORITHM = "aes-256-gcm";
++const IV_LENGTH_BYTES = 12; // 96-bit IV recommended for GCM
++const AUTH_TAG_LENGTH_BYTES = 16; // 128-bit authentication tag
++
++/**
++ * Retrieves and validates the 32-byte encryption key from the environment.
++ * Accepts either a 64-character hex string or a 32-byte raw string.
++ */
++function getEncryptionKey(): Buffer {
++  const rawKey = process.env.PAYMENT_ENCRYPTION_KEY;
++  if (!rawKey) {
++    throw new Error(
++      "PAYMENT_ENCRYPTION_KEY environment variable is missing. It must be set to 32 bytes (64 hex characters or 32 raw bytes)."
++    );
++  }
++
++  // Check 64-character hex representation
++  if (rawKey.length === 64 && /^[0-9a-fA-F]{64}$/.test(rawKey)) {
++    return Buffer.from(rawKey, "hex");
++  }
++
++  // Check 32 raw UTF-8 bytes
++  const utf8Buffer = Buffer.from(rawKey, "utf-8");
++  if (utf8Buffer.length === 32) {
++    return utf8Buffer;
++  }
++
++  throw new Error(
++    "PAYMENT_ENCRYPTION_KEY must be 32 bytes (64 hex characters or 32 raw bytes)."
++  );
++}
++
++/**
++ * Encrypts a plain-text secret using AES-256-GCM.
++ * Returns payload formatted as `${ivHex}:${authTagHex}:${encryptedHex}`.
++ */
++export function encryptSecret(plainText: string): string {
++  const key = getEncryptionKey();
++  const iv = crypto.randomBytes(IV_LENGTH_BYTES);
++
++  const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
++  let encrypted = cipher.update(plainText, "utf8", "hex");
++  encrypted += cipher.final("hex");
++
++  const authTag = cipher.getAuthTag();
++
++  return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted}`;
++}
++
++/**
++ * Decrypts an AES-256-GCM cipher payload in format `${ivHex}:${authTagHex}:${encryptedHex}`.
++ * Throws an informative error if payload format is malformed or tampering occurs.
++ */
++export function decryptSecret(cipherPayload: string): string {
++  if (typeof cipherPayload !== "string" || !cipherPayload.trim()) {
++    throw new Error("Invalid cipher payload: payload must be a non-empty string");
++  }
++
++  const parts = cipherPayload.split(":");
++  if (parts.length !== 3) {
++    throw new Error(
++      "Invalid cipher payload format: expected ${ivHex}:${authTagHex}:${encryptedHex}"
++    );
++  }
++
++  const [ivHex, authTagHex, encryptedHex] = parts;
++  if (!ivHex || !authTagHex) {
++    throw new Error(
++      "Invalid cipher payload: IV and auth tag must be present non-empty hex strings"
++    );
++  }
++
++  const key = getEncryptionKey();
++
++  try {
++    const iv = Buffer.from(ivHex, "hex");
++    const authTag = Buffer.from(authTagHex, "hex");
++
++    if (iv.length !== IV_LENGTH_BYTES && iv.length !== 16) {
++      throw new Error(`Invalid IV length: expected ${IV_LENGTH_BYTES} or 16 bytes`);
++    }
++
++    if (authTag.length !== AUTH_TAG_LENGTH_BYTES) {
++      throw new Error(`Invalid auth tag length: expected ${AUTH_TAG_LENGTH_BYTES} bytes`);
++    }
++
++    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
++    decipher.setAuthTag(authTag);
++
++    let decrypted = decipher.update(encryptedHex, "hex", "utf8");
++    decrypted += decipher.final("utf8");
++
++    return decrypted;
++  } catch (err: unknown) {
++    throw new Error(
++      `Failed to decrypt secret (tampered or malformed payload): ${
++        err instanceof Error ? err.message : String(err)
++      }`
++    );
++  }
++}
++
++/**
++ * Masks a secret string for safe display or logging.
++ * Retains recognizable provider prefix (e.g., sk_live_, whsec_) and last 4 characters.
++ * Example: `sk_live_51NzABC1234567890abcdef3a8f` -> `sk_live_••••••••3a8f`
++ */
++export function maskSecret(secret: string): string {
++  if (!secret) return "";
++
++  // If already masked, preserve it without altering
++  if (secret.includes("••••")) return secret;
++
++  const MASK_BULLETS = "••••••••";
++
++  // Check for common prefix patterns (e.g. sk_live_, sk_test_, whsec_, pk_live_, etc.)
++  const prefixMatch = secret.match(/^([a-zA-Z0-9]+_(?:[a-zA-Z0-9]+_)?)(\S+)$/);
++  if (prefixMatch) {
++    const prefix = prefixMatch[1];
++    const rest = prefixMatch[2];
++    if (rest.length <= 4) {
++      return `${prefix}${MASK_BULLETS}`;
++    }
++    const suffix = rest.slice(-4);
++    return `${prefix}${MASK_BULLETS}${suffix}`;
++  }
++
++  // Without recognizable underscore prefix
++  if (secret.length <= 8) {
++    return MASK_BULLETS;
++  }
++
++  const suffix = secret.slice(-4);
++  return `${MASK_BULLETS}${suffix}`;
++}
+diff --git a/tests/unit/crypto.test.ts b/tests/unit/crypto.test.ts
+new file mode 100644
+index 0000000..a824c3d
+--- /dev/null
++++ b/tests/unit/crypto.test.ts
+@@ -0,0 +1,146 @@
++import { describe, it, expect, beforeEach, afterEach } from "vitest";
++import { encryptSecret, decryptSecret, maskSecret } from "@/shared/lib/crypto";
++
++describe("Core Cryptography (AES-256-GCM)", () => {
++  const originalEnv = process.env.PAYMENT_ENCRYPTION_KEY;
++  const VALID_HEX_KEY = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
++  const VALID_32BYTE_RAW_KEY = "12345678901234567890123456789012";
++
++  beforeEach(() => {
++    process.env.PAYMENT_ENCRYPTION_KEY = VALID_HEX_KEY;
++  });
++
++  afterEach(() => {
++    process.env.PAYMENT_ENCRYPTION_KEY = originalEnv;
++  });
++
++  describe("encryptSecret", () => {
++    it("encrypts plaintext and returns format ${ivHex}:${authTagHex}:${encryptedHex}", () => {
++      const plaintext = "sk_live_very_secret_api_key_12345";
++      const cipherPayload = encryptSecret(plaintext);
++
++      expect(cipherPayload).toBeTypeOf("string");
++      const parts = cipherPayload.split(":");
++      expect(parts).toHaveLength(3);
++
++      const [ivHex, authTagHex, encryptedHex] = parts;
++      expect(ivHex).toMatch(/^[0-9a-fA-F]+$/);
++      // GCM standard IV is 12 bytes = 24 hex characters
++      expect(ivHex.length).toBe(24);
++      // Auth Tag is 16 bytes = 32 hex characters
++      expect(authTagHex).toMatch(/^[0-9a-fA-F]{32}$/);
++      // Encrypted hex
++      expect(encryptedHex).toMatch(/^[0-9a-fA-F]+$/);
++      expect(encryptedHex.length).toBeGreaterThan(0);
++    });
++
++    it("produces different ciphertexts (different IVs) for the same plaintext", () => {
++      const plaintext = "fixed_secret_value";
++      const cipher1 = encryptSecret(plaintext);
++      const cipher2 = encryptSecret(plaintext);
++
++      expect(cipher1).not.toBe(cipher2);
++      expect(cipher1.split(":")[0]).not.toBe(cipher2.split(":")[0]);
++    });
++
++    it("works with a 32 raw bytes key", () => {
++      process.env.PAYMENT_ENCRYPTION_KEY = VALID_32BYTE_RAW_KEY;
++      const cipher = encryptSecret("test_payload");
++      const decrypted = decryptSecret(cipher);
++      expect(decrypted).toBe("test_payload");
++    });
++
++    it("throws an error when PAYMENT_ENCRYPTION_KEY is missing", () => {
++      delete process.env.PAYMENT_ENCRYPTION_KEY;
++      expect(() => encryptSecret("my_secret")).toThrow(/PAYMENT_ENCRYPTION_KEY/i);
++    });
++
++    it("throws an error when PAYMENT_ENCRYPTION_KEY is of invalid length", () => {
++      process.env.PAYMENT_ENCRYPTION_KEY = "too_short_key";
++      expect(() => encryptSecret("my_secret")).toThrow(/32 bytes/i);
++
++      process.env.PAYMENT_ENCRYPTION_KEY = "0123456789abcdef"; // 16 chars
++      expect(() => encryptSecret("my_secret")).toThrow(/32 bytes/i);
++    });
++  });
++
++  describe("decryptSecret", () => {
++    it("decrypts valid ciphertext back to original plaintext", () => {
++      const plaintexts = [
++        "sk_live_51M0abcdef123456789",
++        "whsec_test_webhook_secret_998877",
++        "رمز-سري-عربي-معقد-12345",
++        "Special chars: !@#$%^&*()_+~`-={}|[]:\";'<>?,./",
++        "",
++      ];
++
++      for (const text of plaintexts) {
++        const encrypted = encryptSecret(text);
++        const decrypted = decryptSecret(encrypted);
++        expect(decrypted).toBe(text);
++      }
++    });
++
++    it("throws informative error on malformed payload format", () => {
++      const malformedPayloads = [
++        "",
++        "not-a-valid-payload",
++        "only:two:parts:here:extra",
++        "::",
++        "singlepart",
++      ];
++
++      for (const malformed of malformedPayloads) {
++        expect(() => decryptSecret(malformed)).toThrow(/Invalid cipher payload/i);
++      }
++    });
++
++    it("throws an informative error if tampering occurs on ciphertext or auth tag", () => {
++      const encrypted = encryptSecret("confidential_payment_data");
++      const [ivHex, authTagHex, encryptedHex] = encrypted.split(":");
++
++      // Tamper ciphertext
++      const tamperedCipher = encryptedHex.slice(0, -2) + (encryptedHex.endsWith("aa") ? "bb" : "aa");
++      const tamperedPayload = `${ivHex}:${authTagHex}:${tamperedCipher}`;
++      expect(() => decryptSecret(tamperedPayload)).toThrow(/tamper|fail/i);
++
++      // Tamper auth tag
++      const tamperedTag = authTagHex.slice(0, -2) + (authTagHex.endsWith("00") ? "11" : "00");
++      const tamperedTagPayload = `${ivHex}:${tamperedTag}:${encryptedHex}`;
++      expect(() => decryptSecret(tamperedTagPayload)).toThrow(/tamper|fail/i);
++    });
++
++    it("throws an error if decryption key changes or is invalid", () => {
++      const encrypted = encryptSecret("secret_value");
++      process.env.PAYMENT_ENCRYPTION_KEY = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210";
++      expect(() => decryptSecret(encrypted)).toThrow(/tamper|fail/i);
++    });
++  });
++
++  describe("maskSecret", () => {
++    it("masks Stripe/payment API keys preserving prefix and last 4 chars", () => {
++      expect(maskSecret("sk_live_51NzABC1234567890abcdef3a8f")).toBe("sk_live_••••••••3a8f");
++      expect(maskSecret("sk_test_51NzABC1234567890abcdef3a8f")).toBe("sk_test_••••••••3a8f");
++      expect(maskSecret("whsec_51NzABC1234567890abcdef3a8f")).toBe("whsec_••••••••3a8f");
++      expect(maskSecret("pk_live_51NzABC1234567890abcdef3a8f")).toBe("pk_live_••••••••3a8f");
++    });
++
++    it("masks secrets without prefix displaying mask and last 4 chars", () => {
++      expect(maskSecret("mySecretTokenLongerThanEight3a8f")).toBe("••••••••3a8f");
++    });
++
++    it("masks short secrets entirely", () => {
++      expect(maskSecret("12345678")).toBe("••••••••");
++      expect(maskSecret("short")).toBe("••••••••");
++    });
++
++    it("handles empty or blank string gracefully", () => {
++      expect(maskSecret("")).toBe("");
++    });
++
++    it("preserves already masked secrets without double masking", () => {
++      const alreadyMasked = "sk_live_••••••••3a8f";
++      expect(maskSecret(alreadyMasked)).toBe(alreadyMasked);
++    });
++  });
++});

@@ -1,0 +1,63 @@
+# Review package: 79a08b8834e22725bab2e06bf547534e3e9660b4..73bf196308d6fd602d355cd7ceebc57dc00dc27c
+
+## Commits
+73bf196 fix(financials): enable allowImportingTsExtensions in tsconfig for seed imports
+
+## Files changed
+ tsconfig.json | 26 ++++++++++++++++++++------
+ 1 file changed, 20 insertions(+), 6 deletions(-)
+
+## Diff
+diff --git a/tsconfig.json b/tsconfig.json
+index 55e2a02..1c90962 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -1,27 +1,41 @@
+ {
+   "compilerOptions": {
+     "target": "ES2022",
+-    "lib": ["dom", "dom.iterable", "esnext"],
++    "lib": [
++      "dom",
++      "dom.iterable",
++      "esnext"
++    ],
+     "allowJs": true,
+     "skipLibCheck": true,
+     "strict": true,
+     "noEmit": true,
+     "esModuleInterop": true,
+     "module": "esnext",
+     "moduleResolution": "bundler",
+     "resolveJsonModule": true,
+     "isolatedModules": true,
+     "jsx": "preserve",
+     "incremental": true,
+     "plugins": [
+       {
+         "name": "next"
+       }
+     ],
+     "paths": {
+-      "@/*": ["./src/*"]
+-    }
++      "@/*": [
++        "./src/*"
++      ]
++    },
++    "allowImportingTsExtensions": true
+   },
+-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+-  "exclude": ["node_modules"]
+-}
++  "include": [
++    "next-env.d.ts",
++    "**/*.ts",
++    "**/*.tsx",
++    ".next/types/**/*.ts"
++  ],
++  "exclude": [
++    "node_modules"
++  ]
++}
+\ No newline at end of file

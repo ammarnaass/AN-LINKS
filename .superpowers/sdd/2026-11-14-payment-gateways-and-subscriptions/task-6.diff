@@ -1,0 +1,1605 @@
+diff --git a/src/features/admin/components/AdminPaymentsTab.tsx b/src/features/admin/components/AdminPaymentsTab.tsx
+index 1b3019b..e7694bd 100644
+--- a/src/features/admin/components/AdminPaymentsTab.tsx
++++ b/src/features/admin/components/AdminPaymentsTab.tsx
+@@ -1,186 +1,32 @@
+ "use client";
+ 
+-import React, { useState } from "react";
+-import { AdminPlatformSettings, AdminTransaction, GatewayId } from "../types/admin.types";
+-import { AppCard, AppButton, AppBadge, AppInput } from "@/shared/ui";
+-import { CreditCard, Smartphone, Wallet, CalendarCheck, Check, Save } from "lucide-react";
++import React from "react";
++import {
++  AdminPlatformSettings,
++  AdminTransaction,
++} from "../types/admin.types";
++import { FinancialSubTab } from "../hooks/useAdminFinancials";
++import { AdminFinancialsContainer } from "./payments/AdminFinancialsContainer";
+ 
+ export interface AdminPaymentsTabProps {
+-  settings: AdminPlatformSettings;
+-  transactions: AdminTransaction[];
+-  onUpdateSettings: (updated: Partial<AdminPlatformSettings>) => Promise<boolean>;
++  settings?: AdminPlatformSettings;
++  transactions?: AdminTransaction[];
++  onUpdateSettings?: (
++    updated: Partial<AdminPlatformSettings>
++  ) => Promise<boolean>;
++  initialSubTab?: FinancialSubTab;
+ }
+ 
+-export function AdminPaymentsTab({ settings, transactions, onUpdateSettings }: AdminPaymentsTabProps) {
+-  const [gateways, setGateways] = useState(settings.gateways);
+-  const [pricing, setPricing] = useState(settings.pricing);
+-  const [isSaving, setIsSaving] = useState(false);
+-  const [savedSuccess, setSavedSuccess] = useState(false);
+-
+-  const GATEWAY_ICONS: Record<GatewayId, React.ReactNode> = {
+-    mada: <CreditCard className="w-5 h-5 text-emerald-400" />,
+-    apple_pay: <Smartphone className="w-5 h-5 text-on-surface" />,
+-    visa_mastercard: <CreditCard className="w-5 h-5 text-primary" />,
+-    stc_pay: <Wallet className="w-5 h-5 text-purple-400" />,
+-    tamara: <CalendarCheck className="w-5 h-5 text-amber-400" />,
+-    tabby: <CalendarCheck className="w-5 h-5 text-emerald-400" />,
+-    fawry: <Wallet className="w-5 h-5 text-amber-500" />,
+-    stripe: <CreditCard className="w-5 h-5 text-indigo-400" />,
+-    paypal: <Wallet className="w-5 h-5 text-blue-400" />,
+-  };
+-
+-  const handleToggleGateway = (id: GatewayId) => {
+-    setGateways((prev) => ({
+-      ...prev,
+-      [id]: { ...prev[id], isEnabled: !prev[id].isEnabled },
+-    }));
+-  };
+-
+-  const handleSave = async () => {
+-    setIsSaving(true);
+-    const success = await onUpdateSettings({ gateways, pricing });
+-    setIsSaving(false);
+-    if (success) {
+-      setSavedSuccess(true);
+-      setTimeout(() => setSavedSuccess(false), 2500);
+-    }
+-  };
+-
++/**
++ * Backward-compatible wrapper mounting AdminFinancialsContainer.
++ * Accepts legacy optional settings, transactions, and onUpdateSettings props without breaking callers.
++ */
++export function AdminPaymentsTab({
++  initialSubTab = "gateways",
++}: AdminPaymentsTabProps = {}) {
+   return (
+-    <div className="space-y-6 font-cairo" dir="rtl">
+-      {/* Header with Save Button */}
+-      <div className="flex items-center justify-between p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+-        <div>
+-          <h3 className="text-base font-bold text-on-surface">إدارة بوابات الدفع والاشتراكات المالية</h3>
+-          <p className="text-xs text-on-surface-variant">تحكم بتفعيل بوابات الدفع الوطنية والعالمية وضبط أسعار الباقات والعمولات</p>
+-        </div>
+-        <AppButton
+-          variant="primary"
+-          size="sm"
+-          isLoading={isSaving}
+-          onClick={handleSave}
+-          leftIcon={savedSuccess ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+-        >
+-          {savedSuccess ? "تم الحفظ!" : "حفظ التغييرات"}
+-        </AppButton>
+-      </div>
+-
+-      {/* Payment Gateways Grid */}
+-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+-        {(Object.keys(gateways) as GatewayId[]).map((id) => {
+-          const gw = gateways[id];
+-          return (
+-            <AppCard key={id} className="p-5 bg-surface-container-low border-outline-variant/30 space-y-4 flex flex-col justify-between">
+-              <div>
+-                <div className="flex items-center justify-between mb-3">
+-                  <div className="flex items-center gap-2.5">
+-                    <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center">
+-                      {GATEWAY_ICONS[id]}
+-                    </div>
+-                    <div>
+-                      <h4 className="font-bold text-sm text-on-surface">{gw.nameAr}</h4>
+-                      <span className="text-[10px] text-on-surface-variant font-mono">{gw.name}</span>
+-                    </div>
+-                  </div>
+-                  <AppBadge variant={gw.isEnabled ? "success" : "neutral"} size="sm" dot={gw.isEnabled}>
+-                    {gw.isEnabled ? "مفعلة" : "معطلة"}
+-                  </AppBadge>
+-                </div>
+-                <p className="text-xs text-on-surface-variant leading-relaxed">{gw.descriptionAr}</p>
+-              </div>
+-
+-              <div className="pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+-                <button
+-                  type="button"
+-                  onClick={() => handleToggleGateway(id)}
+-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+-                    gw.isEnabled
+-                      ? "bg-error/15 text-error hover:bg-error/25"
+-                      : "bg-primary text-on-primary hover:bg-primary-container"
+-                  }`}
+-                >
+-                  {gw.isEnabled ? "تعطيل البوابة" : "تفعيل البوابة"}
+-                </button>
+-                <span className="text-[11px] text-outline font-mono">
+-                  {gw.isTestMode ? "وضع التجربة (Sandbox)" : "وضع الإنتاج الحي"}
+-                </span>
+-              </div>
+-            </AppCard>
+-          );
+-        })}
+-      </div>
+-
+-      {/* Pricing & Platform Commission */}
+-      <AppCard className="p-6 bg-surface-container-low border-outline-variant/30 space-y-4">
+-        <h4 className="font-bold text-sm text-on-surface">تسعير باقات المنصة والعمولة</h4>
+-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+-          <AppInput
+-            label="سعر اشتراك باقة Pro الشهري (ر.س)"
+-            type="number"
+-            value={pricing.proMonthlyPrice}
+-            onChange={(e) => setPricing({ ...pricing, proMonthlyPrice: Number(e.target.value) })}
+-          />
+-          <AppInput
+-            label="سعر اشتراك باقة Pro السنوي (ر.س)"
+-            type="number"
+-            value={pricing.proYearlyPrice}
+-            onChange={(e) => setPricing({ ...pricing, proYearlyPrice: Number(e.target.value) })}
+-          />
+-          <AppInput
+-            label="نسبة عمولة المنصة من المبيعات (%)"
+-            type="number"
+-            value={pricing.storeCommissionRate}
+-            onChange={(e) => setPricing({ ...pricing, storeCommissionRate: Number(e.target.value) })}
+-          />
+-        </div>
+-      </AppCard>
+-
+-      {/* Recent Transactions Table */}
+-      <AppCard className="p-6 bg-surface-container-low border-outline-variant/30 space-y-4">
+-        <div className="flex items-center justify-between">
+-          <h4 className="font-bold text-sm text-on-surface">سجل المعاملات والاشتراكات الأخيرة</h4>
+-          <span className="text-xs text-on-surface-variant font-mono">{transactions.length} عمليات مسجلة</span>
+-        </div>
+-
+-        <div className="overflow-x-auto">
+-          <table className="w-full text-right text-xs">
+-            <thead className="bg-surface-container text-on-surface-variant border-b border-outline-variant/20">
+-              <tr>
+-                <th className="py-2.5 px-3 font-bold">رقم العملية</th>
+-                <th className="py-2.5 px-3 font-bold">العميل</th>
+-                <th className="py-2.5 px-3 font-bold">المبلغ</th>
+-                <th className="py-2.5 px-3 font-bold">البوابة</th>
+-                <th className="py-2.5 px-3 font-bold">الباقة</th>
+-                <th className="py-2.5 px-3 font-bold">الحالة</th>
+-              </tr>
+-            </thead>
+-            <tbody className="divide-y divide-outline-variant/20">
+-              {transactions.length === 0 ? (
+-                <tr>
+-                  <td colSpan={6} className="py-8 text-center text-on-surface-variant text-xs">
+-                    لا توجد عمليات دفع مسجلة بعد. عند اشتراك صناع المحتوى في الباقات المدفوعة، ستظهر العمليات هنا فوراً.
+-                  </td>
+-                </tr>
+-              ) : (
+-                transactions.map((tx) => (
+-                  <tr key={tx.id} className="hover:bg-surface-container/30">
+-                    <td className="py-2.5 px-3 font-mono text-primary">{tx.transactionNumber}</td>
+-                    <td className="py-2.5 px-3">{tx.customerName}</td>
+-                    <td className="py-2.5 px-3 font-bold">{tx.amount} {tx.currency}</td>
+-                    <td className="py-2.5 px-3 font-mono text-on-surface-variant">{tx.gateway}</td>
+-                    <td className="py-2.5 px-3">{tx.plan}</td>
+-                    <td className="py-2.5 px-3">
+-                      <AppBadge variant={tx.status === "COMPLETED" ? "success" : "neutral"} size="sm">
+-                        {tx.status === "COMPLETED" ? "مكتملة" : "قيد المعالجة"}
+-                      </AppBadge>
+-                    </td>
+-                  </tr>
+-                ))
+-              )}
+-            </tbody>
+-          </table>
+-        </div>
+-      </AppCard>
++    <div className="w-full">
++      <AdminFinancialsContainer initialSubTab={initialSubTab} />
+     </div>
+   );
+ }
+diff --git a/src/features/admin/components/payments/AdminFinancialsContainer.tsx b/src/features/admin/components/payments/AdminFinancialsContainer.tsx
+new file mode 100644
+index 0000000..b857c0f
+--- /dev/null
++++ b/src/features/admin/components/payments/AdminFinancialsContainer.tsx
+@@ -0,0 +1,533 @@
++"use client";
++
++import React, { useState, useCallback } from "react";
++import {
++  FinancialSubTab,
++  useAdminFinancials,
++} from "../../hooks/useAdminFinancials";
++import {
++  AdminGatewayDetails,
++  AdminSubscriptionPlanItem,
++  AdminCurrencyItem,
++} from "../../types/admin.types";
++import { AppCard, AppButton } from "@/shared/ui";
++import {
++  CreditCard,
++  Package,
++  Sliders,
++  Globe,
++  Tag,
++  Receipt,
++  RotateCcw,
++  CheckCircle2,
++  AlertCircle,
++  X,
++} from "lucide-react";
++
++import { GatewaysSubTab } from "./tabs/GatewaysSubTab";
++import { PlansSubTab } from "./tabs/PlansSubTab";
++import { PlanQuotasSubTab } from "./tabs/PlanQuotasSubTab";
++import { CurrenciesSubTab } from "./tabs/CurrenciesSubTab";
++import { CouponsSubTab } from "./tabs/CouponsSubTab";
++import { InvoicesTransactionsSubTab } from "./tabs/InvoicesTransactionsSubTab";
++
++import { GatewayConfigModal } from "./modals/GatewayConfigModal";
++import { PlanEditorModal } from "./modals/PlanEditorModal";
++import { CouponEditorModal } from "./modals/CouponEditorModal";
++import { CurrencyRateModal } from "./modals/CurrencyRateModal";
++
++export interface AdminFinancialsContainerProps {
++  initialSubTab?: FinancialSubTab;
++  initialModal?: "gateway" | "plan" | "coupon" | "currency" | null;
++  initialModalData?:
++    | AdminGatewayDetails
++    | AdminSubscriptionPlanItem
++    | AdminCurrencyItem
++    | null;
++  customHook?: ReturnType<typeof useAdminFinancials>;
++  className?: string;
++}
++
++export function AdminFinancialsContainer({
++  initialSubTab = "gateways",
++  initialModal = null,
++  initialModalData = null,
++  customHook,
++  className = "",
++}: AdminFinancialsContainerProps) {
++  const defaultHook = useAdminFinancials(initialSubTab);
++  const financials = customHook || defaultHook;
++
++  const {
++    activeSubTab,
++    setActiveSubTab,
++    overview,
++    gateways,
++    plans,
++    currencies,
++    coupons,
++    transactions,
++    isSaving,
++    updateGatewayConfig,
++    savePlan,
++    createCoupon,
++    saveCurrency,
++  } = financials;
++
++  // 4 Modals State managed at container level
++  const [gatewayModalState, setGatewayModalState] = useState<{
++    isOpen: boolean;
++    gateway: AdminGatewayDetails | null;
++  }>({
++    isOpen: initialModal === "gateway",
++    gateway:
++      initialModal === "gateway"
++        ? (initialModalData as AdminGatewayDetails) || null
++        : null,
++  });
++
++  const [planModalState, setPlanModalState] = useState<{
++    isOpen: boolean;
++    plan: AdminSubscriptionPlanItem | null;
++  }>({
++    isOpen: initialModal === "plan",
++    plan:
++      initialModal === "plan"
++        ? (initialModalData as AdminSubscriptionPlanItem) || null
++        : null,
++  });
++
++  const [couponModalOpen, setCouponModalOpen] = useState(
++    initialModal === "coupon"
++  );
++
++  const [currencyModalState, setCurrencyModalState] = useState<{
++    isOpen: boolean;
++    currency: AdminCurrencyItem | null;
++  }>({
++    isOpen: initialModal === "currency",
++    currency:
++      initialModal === "currency"
++        ? (initialModalData as AdminCurrencyItem) || null
++        : null,
++  });
++
++  // Modal Handlers
++  const handleOpenGatewayModal = useCallback((gw: AdminGatewayDetails) => {
++    setGatewayModalState({ isOpen: true, gateway: gw });
++  }, []);
++
++  const handleCloseGatewayModal = useCallback(() => {
++    setGatewayModalState({ isOpen: false, gateway: null });
++  }, []);
++
++  const handleOpenCreatePlan = useCallback(() => {
++    setPlanModalState({ isOpen: true, plan: null });
++  }, []);
++
++  const handleOpenEditPlan = useCallback((plan: AdminSubscriptionPlanItem) => {
++    setPlanModalState({ isOpen: true, plan });
++  }, []);
++
++  const handleClosePlanModal = useCallback(() => {
++    setPlanModalState({ isOpen: false, plan: null });
++  }, []);
++
++  const handleOpenCreateCoupon = useCallback(() => {
++    setCouponModalOpen(true);
++  }, []);
++
++  const handleCloseCouponModal = useCallback(() => {
++    setCouponModalOpen(false);
++  }, []);
++
++  const handleOpenEditRate = useCallback((curr: AdminCurrencyItem) => {
++    setCurrencyModalState({ isOpen: true, currency: curr });
++  }, []);
++
++  const handleCloseCurrencyModal = useCallback(() => {
++    setCurrencyModalState({ isOpen: false, currency: null });
++  }, []);
++
++  // Overview Statistics Calculations
++  const totalGateways = overview?.totalGateways ?? gateways.length;
++  const activeGateways =
++    overview?.activeGateways ?? gateways.filter((g) => g.isEnabled).length;
++  const totalPlans = overview?.totalPlans ?? plans.length;
++  const activePlans =
++    overview?.totalPlans ?? plans.filter((p) => p.isActive).length;
++  const totalCurrencies = overview?.totalCurrencies ?? currencies.length;
++  const totalCoupons = overview?.totalCoupons ?? coupons.length;
++  const activeCoupons =
++    overview?.totalCoupons ?? coupons.filter((c) => c.isActive).length;
++  const totalRevenue = overview?.totalRevenue ?? 0;
++  const totalInvoices = transactions?.total ?? overview?.totalInvoices ?? 0;
++
++  // Tabs Definition
++  const tabs: Array<{
++    key: FinancialSubTab;
++    label: string;
++    icon: React.ReactNode;
++    badge?: number | string;
++  }> = [
++    {
++      key: "gateways",
++      label: "بوابات الدفع",
++      icon: <CreditCard className="w-4 h-4 shrink-0" />,
++      badge: `${activeGateways}/${totalGateways}`,
++    },
++    {
++      key: "plans",
++      label: "باقات الاشتراك",
++      icon: <Package className="w-4 h-4 shrink-0" />,
++      badge: totalPlans > 0 ? totalPlans : undefined,
++    },
++    {
++      key: "quotas",
++      label: "المحددات والمميزات",
++      icon: <Sliders className="w-4 h-4 shrink-0" />,
++    },
++    {
++      key: "currencies",
++      label: "العملات وأسعار الصرف",
++      icon: <Globe className="w-4 h-4 shrink-0" />,
++      badge: totalCurrencies > 0 ? totalCurrencies : undefined,
++    },
++    {
++      key: "coupons",
++      label: "كوبونات الخصم",
++      icon: <Tag className="w-4 h-4 shrink-0" />,
++      badge: activeCoupons > 0 ? activeCoupons : undefined,
++    },
++    {
++      key: "transactions",
++      label: "المعاملات والفواتير",
++      icon: <Receipt className="w-4 h-4 shrink-0" />,
++      badge: totalInvoices > 0 ? totalInvoices : undefined,
++    },
++  ];
++
++  return (
++    <div
++      className={`space-y-6 font-cairo ${className}`}
++      dir="rtl"
++      data-testid="admin-financials-container"
++    >
++      {/* Header Section */}
++      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-surface-container-low border border-outline-variant/30">
++        <div>
++          <div className="flex items-center gap-2.5 mb-1">
++            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
++              <CreditCard className="w-4 h-4" />
++            </div>
++            <h2 className="text-base sm:text-lg font-bold text-on-surface">
++              إدارة بوابات الدفع والاشتراكات والعمليات المالية
++            </h2>
++          </div>
++          <p className="text-xs text-on-surface-variant">
++            منظومة مالية شاملة لإدارة بوابات الدفع، خطط الاشتراكات، الصلاحيات،
++            العملات وأكواد الخصم
++          </p>
++        </div>
++
++        <div className="flex items-center gap-2">
++          <AppButton
++            variant="outline"
++            size="sm"
++            onClick={financials.refreshData}
++            isLoading={financials.isLoading}
++            leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
++          >
++            تحديث البيانات
++          </AppButton>
++        </div>
++      </div>
++
++      {/* Feedback Banner */}
++      {financials.feedback && (
++        <div
++          role="status"
++          aria-live="polite"
++          className={`p-4 rounded-xl flex items-center justify-between text-xs font-semibold ${
++            financials.feedback.type === "success"
++              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
++              : "bg-error/10 text-error border border-error/30"
++          }`}
++        >
++          <div className="flex items-center gap-2">
++            {financials.feedback.type === "success" ? (
++              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
++            ) : (
++              <AlertCircle className="w-4 h-4 shrink-0 text-error" />
++            )}
++            <span>{financials.feedback.message}</span>
++          </div>
++          <button
++            type="button"
++            onClick={financials.clearFeedback}
++            className="p-1 rounded-lg hover:bg-surface-container/50 text-on-surface-variant hover:text-on-surface cursor-pointer"
++            aria-label="إغلاق الإشعار"
++          >
++            <X className="w-3.5 h-3.5" />
++          </button>
++        </div>
++      )}
++
++      {/* Global Error Banner */}
++      {financials.error && !financials.feedback && (
++        <div
++          role="alert"
++          className="p-4 rounded-xl flex items-center justify-between bg-error/10 text-error border border-error/30 text-xs font-semibold"
++        >
++          <div className="flex items-center gap-2">
++            <AlertCircle className="w-4 h-4 shrink-0 text-error" />
++            <span>{financials.error}</span>
++          </div>
++          <button
++            type="button"
++            onClick={() => financials.setError(null)}
++            className="p-1 rounded-lg hover:bg-surface-container/50 text-on-surface-variant hover:text-on-surface cursor-pointer"
++            aria-label="إغلاق التنبيه"
++          >
++            <X className="w-3.5 h-3.5" />
++          </button>
++        </div>
++      )}
++
++      {/* Overview Statistics Bar */}
++      <div
++        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5"
++        data-testid="financial-overview-stats"
++      >
++        {/* Card 1: Gateways */}
++        <AppCard className="p-4 bg-surface-container-low border-outline-variant/30 flex items-center justify-between">
++          <div className="flex flex-col">
++            <span className="text-[11px] font-semibold text-on-surface-variant mb-1">
++              بوابات الدفع
++            </span>
++            <span className="text-xl font-bold text-on-surface font-mono">
++              {activeGateways} / {totalGateways}
++            </span>
++            <span className="text-[10px] text-emerald-400 mt-0.5">
++              {activeGateways} بوابات نشطة
++            </span>
++          </div>
++          <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-primary">
++            <CreditCard className="w-4 h-4" />
++          </div>
++        </AppCard>
++
++        {/* Card 2: Plans */}
++        <AppCard className="p-4 bg-surface-container-low border-outline-variant/30 flex items-center justify-between">
++          <div className="flex flex-col">
++            <span className="text-[11px] font-semibold text-on-surface-variant mb-1">
++              باقات الاشتراك
++            </span>
++            <span className="text-xl font-bold text-on-surface font-mono">
++              {activePlans}
++            </span>
++            <span className="text-[10px] text-on-surface-variant mt-0.5">
++              {totalPlans} إجمالي الباقات
++            </span>
++          </div>
++          <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-amber-400">
++            <Package className="w-4 h-4" />
++          </div>
++        </AppCard>
++
++        {/* Card 3: Currencies */}
++        <AppCard className="p-4 bg-surface-container-low border-outline-variant/30 flex items-center justify-between">
++          <div className="flex flex-col">
++            <span className="text-[11px] font-semibold text-on-surface-variant mb-1">
++              العملات المدعومة
++            </span>
++            <span className="text-xl font-bold text-on-surface font-mono">
++              {totalCurrencies}
++            </span>
++            <span className="text-[10px] text-on-surface-variant mt-0.5">
++              SAR العملة الأساسية
++            </span>
++          </div>
++          <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-sky-400">
++            <Globe className="w-4 h-4" />
++          </div>
++        </AppCard>
++
++        {/* Card 4: Coupons */}
++        <AppCard className="p-4 bg-surface-container-low border-outline-variant/30 flex items-center justify-between">
++          <div className="flex flex-col">
++            <span className="text-[11px] font-semibold text-on-surface-variant mb-1">
++              كوبونات الخصم
++            </span>
++            <span className="text-xl font-bold text-on-surface font-mono">
++              {activeCoupons}
++            </span>
++            <span className="text-[10px] text-on-surface-variant mt-0.5">
++              {totalCoupons} إجمالي الكوبونات
++            </span>
++          </div>
++          <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-purple-400">
++            <Tag className="w-4 h-4" />
++          </div>
++        </AppCard>
++
++        {/* Card 5: Revenue */}
++        <AppCard className="p-4 bg-surface-container-low border-outline-variant/30 flex items-center justify-between col-span-2 sm:col-span-1">
++          <div className="flex flex-col">
++            <span className="text-[11px] font-semibold text-on-surface-variant mb-1">
++              إجمالي التحصيل
++            </span>
++            <span className="text-xl font-bold text-on-surface font-mono">
++              {totalRevenue.toLocaleString("ar-SA")} ر.س
++            </span>
++            <span className="text-[10px] text-on-surface-variant mt-0.5">
++              {totalInvoices} عملية مسجلة
++            </span>
++          </div>
++          <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center shrink-0 text-emerald-400">
++            <Receipt className="w-4 h-4" />
++          </div>
++        </AppCard>
++      </div>
++
++      {/* Navigation Tabs Bar */}
++      <div
++        role="tablist"
++        aria-label="تبويبات الإدارة المالية"
++        className="w-full flex items-center gap-1.5 p-1.5 rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-x-auto no-scrollbar"
++      >
++        {tabs.map((tab) => {
++          const isActive = activeSubTab === tab.key;
++          return (
++            <button
++              key={tab.key}
++              role="tab"
++              aria-selected={isActive}
++              type="button"
++              onClick={() => setActiveSubTab(tab.key)}
++              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
++                isActive
++                  ? "bg-primary-container text-on-primary-container shadow-sm"
++                  : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
++              }`}
++            >
++              {tab.icon}
++              <span>{tab.label}</span>
++              {tab.badge !== undefined && (
++                <span
++                  className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
++                    isActive
++                      ? "bg-primary text-on-primary"
++                      : "bg-surface-container-high text-on-surface-variant"
++                  }`}
++                >
++                  {tab.badge}
++                </span>
++              )}
++            </button>
++          );
++        })}
++      </div>
++
++      {/* Active Sub-Tab View */}
++      <div className="w-full" data-testid={`subtab-${activeSubTab}`}>
++        {activeSubTab === "gateways" && (
++          <GatewaysSubTab
++            gateways={financials.gateways}
++            onToggleGateway={financials.toggleGateway}
++            onSaveConfig={financials.updateGatewayConfig}
++            isSaving={financials.isSaving}
++            onOpenConfig={handleOpenGatewayModal}
++          />
++        )}
++
++        {activeSubTab === "plans" && (
++          <PlansSubTab
++            plans={financials.plans}
++            onSavePlan={financials.savePlan}
++            onDeletePlan={financials.deletePlan}
++            isSaving={financials.isSaving}
++            onOpenCreatePlan={handleOpenCreatePlan}
++            onOpenEditPlan={handleOpenEditPlan}
++          />
++        )}
++
++        {activeSubTab === "quotas" && (
++          <PlanQuotasSubTab
++            plans={financials.plans}
++            onSaveQuotas={financials.saveQuotas}
++            isSaving={financials.isSaving}
++          />
++        )}
++
++        {activeSubTab === "currencies" && (
++          <CurrenciesSubTab
++            currencies={financials.currencies}
++            onSaveCurrency={financials.saveCurrency}
++            isSaving={financials.isSaving}
++            onOpenEditRate={handleOpenEditRate}
++          />
++        )}
++
++        {activeSubTab === "coupons" && (
++          <CouponsSubTab
++            coupons={financials.coupons}
++            availablePlanSlugs={financials.plans.map((p) => ({
++              slug: p.slug,
++              nameAr: p.nameAr,
++            }))}
++            onCreateCoupon={financials.createCoupon}
++            onToggleCoupon={financials.toggleCoupon}
++            onDeleteCoupon={financials.deleteCoupon}
++            isSaving={financials.isSaving}
++            onOpenCreateCoupon={handleOpenCreateCoupon}
++          />
++        )}
++
++        {activeSubTab === "transactions" && (
++          <InvoicesTransactionsSubTab
++            transactions={financials.transactions}
++            onFilterChange={financials.filterTransactions}
++            isLoading={financials.isLoading}
++          />
++        )}
++      </div>
++
++      {/* 4 Admin Modals Managed Centrally */}
++      <GatewayConfigModal
++        isOpen={gatewayModalState.isOpen}
++        gateway={gatewayModalState.gateway}
++        onClose={handleCloseGatewayModal}
++        onSave={updateGatewayConfig}
++        isSaving={isSaving}
++      />
++
++      <PlanEditorModal
++        isOpen={planModalState.isOpen}
++        plan={planModalState.plan}
++        onClose={handleClosePlanModal}
++        onSave={savePlan}
++        isSaving={isSaving}
++      />
++
++      <CouponEditorModal
++        isOpen={couponModalOpen}
++        onClose={handleCloseCouponModal}
++        onSave={createCoupon}
++        availablePlanSlugs={plans.map((p) => ({
++          slug: p.slug,
++          nameAr: p.nameAr,
++        }))}
++        isSaving={isSaving}
++      />
++
++      <CurrencyRateModal
++        isOpen={currencyModalState.isOpen}
++        currency={currencyModalState.currency}
++        onClose={handleCloseCurrencyModal}
++        onSave={saveCurrency}
++        isSaving={isSaving}
++      />
++    </div>
++  );
++}
+diff --git a/src/features/admin/components/payments/tabs/CouponsSubTab.tsx b/src/features/admin/components/payments/tabs/CouponsSubTab.tsx
+index 1eeff83..217037e 100644
+--- a/src/features/admin/components/payments/tabs/CouponsSubTab.tsx
++++ b/src/features/admin/components/payments/tabs/CouponsSubTab.tsx
+@@ -25,6 +25,7 @@ export interface CouponsSubTabProps {
+   onToggleCoupon: (id: string) => Promise<boolean>;
+   onDeleteCoupon: (id: string) => Promise<boolean>;
+   isSaving?: boolean;
++  onOpenCreateCoupon?: () => void;
+ }
+ 
+ export function CouponsSubTab({
+@@ -34,12 +35,21 @@ export function CouponsSubTab({
+   onToggleCoupon,
+   onDeleteCoupon,
+   isSaving = false,
++  onOpenCreateCoupon,
+ }: CouponsSubTabProps) {
+   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+   const [togglingId, setTogglingId] = useState<string | null>(null);
+   const [deletingId, setDeletingId] = useState<string | null>(null);
+ 
++  const handleOpenCreate = () => {
++    if (onOpenCreateCoupon) {
++      onOpenCreateCoupon();
++    } else {
++      setIsCreateModalOpen(true);
++    }
++  };
++
+   const handleCopyCode = (code: string) => {
+     navigator.clipboard?.writeText(code);
+     setCopiedCode(code);
+@@ -95,7 +105,7 @@ export function CouponsSubTab({
+         <AppButton
+           variant="primary"
+           size="sm"
+-          onClick={() => setIsCreateModalOpen(true)}
++          onClick={handleOpenCreate}
+           leftIcon={<Plus className="w-4 h-4" />}
+         >
+           إنشاء كود خصم جديد
+@@ -257,14 +267,16 @@ export function CouponsSubTab({
+         </div>
+       </AppCard>
+ 
+-      {/* Coupon Modal */}
+-      <CouponEditorModal
+-        isOpen={isCreateModalOpen}
+-        onClose={() => setIsCreateModalOpen(false)}
+-        onSave={onCreateCoupon}
+-        availablePlanSlugs={availablePlanSlugs}
+-        isSaving={isSaving}
+-      />
++      {/* Coupon Modal (Fallback if not managed by container) */}
++      {!onOpenCreateCoupon && (
++        <CouponEditorModal
++          isOpen={isCreateModalOpen}
++          onClose={() => setIsCreateModalOpen(false)}
++          onSave={onCreateCoupon}
++          availablePlanSlugs={availablePlanSlugs}
++          isSaving={isSaving}
++        />
++      )}
+     </div>
+   );
+ }
+diff --git a/src/features/admin/components/payments/tabs/CurrenciesSubTab.tsx b/src/features/admin/components/payments/tabs/CurrenciesSubTab.tsx
+index 8b8f476..70a07d4 100644
+--- a/src/features/admin/components/payments/tabs/CurrenciesSubTab.tsx
++++ b/src/features/admin/components/payments/tabs/CurrenciesSubTab.tsx
+@@ -13,19 +13,25 @@ export interface CurrenciesSubTabProps {
+   currencies: AdminCurrencyItem[];
+   onSaveCurrency: (code: string, input: UpdateCurrencyInput) => Promise<boolean>;
+   isSaving?: boolean;
++  onOpenEditRate?: (currency: AdminCurrencyItem) => void;
+ }
+ 
+ export function CurrenciesSubTab({
+   currencies,
+   onSaveCurrency,
+   isSaving = false,
++  onOpenEditRate,
+ }: CurrenciesSubTabProps) {
+   const [selectedCurrency, setSelectedCurrency] = useState<AdminCurrencyItem | null>(null);
+   const [isModalOpen, setIsModalOpen] = useState(false);
+ 
+   const handleEditRate = (currency: AdminCurrencyItem) => {
+-    setSelectedCurrency(currency);
+-    setIsModalOpen(true);
++    if (onOpenEditRate) {
++      onOpenEditRate(currency);
++    } else {
++      setSelectedCurrency(currency);
++      setIsModalOpen(true);
++    }
+   };
+ 
+   return (
+@@ -158,17 +164,19 @@ export function CurrenciesSubTab({
+         </div>
+       </AppCard>
+ 
+-      {/* Currency Rate Modal */}
+-      <CurrencyRateModal
+-        isOpen={isModalOpen}
+-        currency={selectedCurrency}
+-        onClose={() => {
+-          setIsModalOpen(false);
+-          setSelectedCurrency(null);
+-        }}
+-        onSave={onSaveCurrency}
+-        isSaving={isSaving}
+-      />
++      {/* Currency Rate Modal (Fallback if not managed by container) */}
++      {!onOpenEditRate && (
++        <CurrencyRateModal
++          isOpen={isModalOpen}
++          currency={selectedCurrency}
++          onClose={() => {
++            setIsModalOpen(false);
++            setSelectedCurrency(null);
++          }}
++          onSave={onSaveCurrency}
++          isSaving={isSaving}
++        />
++      )}
+     </div>
+   );
+ }
+diff --git a/src/features/admin/components/payments/tabs/GatewaysSubTab.tsx b/src/features/admin/components/payments/tabs/GatewaysSubTab.tsx
+index 6b1bc63..6ebb2a6 100644
+--- a/src/features/admin/components/payments/tabs/GatewaysSubTab.tsx
++++ b/src/features/admin/components/payments/tabs/GatewaysSubTab.tsx
+@@ -24,6 +24,7 @@ export interface GatewaysSubTabProps {
+   onToggleGateway: (id: string) => Promise<boolean>;
+   onSaveConfig?: (input: UpdateGatewayInput) => Promise<boolean>;
+   isSaving?: boolean;
++  onOpenConfig?: (gateway: AdminGatewayDetails) => void;
+ }
+ 
+ export function GatewaysSubTab({
+@@ -31,6 +32,7 @@ export function GatewaysSubTab({
+   onToggleGateway,
+   onSaveConfig,
+   isSaving = false,
++  onOpenConfig,
+ }: GatewaysSubTabProps) {
+   const [selectedGateway, setSelectedGateway] = useState<AdminGatewayDetails | null>(null);
+   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+@@ -76,8 +78,12 @@ export function GatewaysSubTab({
+   const internationalGateways = gateways.filter((g) => !isNational(g));
+ 
+   const handleOpenConfig = (gw: AdminGatewayDetails) => {
+-    setSelectedGateway(gw);
+-    setIsConfigModalOpen(true);
++    if (onOpenConfig) {
++      onOpenConfig(gw);
++    } else {
++      setSelectedGateway(gw);
++      setIsConfigModalOpen(true);
++    }
+   };
+ 
+   const handleToggle = async (id: string) => {
+@@ -257,17 +263,19 @@ export function GatewaysSubTab({
+         </div>
+       </div>
+ 
+-      {/* Config Modal */}
+-      <GatewayConfigModal
+-        isOpen={isConfigModalOpen}
+-        gateway={selectedGateway}
+-        onClose={() => {
+-          setIsConfigModalOpen(false);
+-          setSelectedGateway(null);
+-        }}
+-        onSave={onSaveConfig || (async () => true)}
+-        isSaving={isSaving}
+-      />
++      {/* Config Modal (Fallback if not managed by container) */}
++      {!onOpenConfig && (
++        <GatewayConfigModal
++          isOpen={isConfigModalOpen}
++          gateway={selectedGateway}
++          onClose={() => {
++            setIsConfigModalOpen(false);
++            setSelectedGateway(null);
++          }}
++          onSave={onSaveConfig || (async () => true)}
++          isSaving={isSaving}
++        />
++      )}
+     </div>
+   );
+ }
+diff --git a/src/features/admin/components/payments/tabs/PlansSubTab.tsx b/src/features/admin/components/payments/tabs/PlansSubTab.tsx
+index 4024365..2ce3608 100644
+--- a/src/features/admin/components/payments/tabs/PlansSubTab.tsx
++++ b/src/features/admin/components/payments/tabs/PlansSubTab.tsx
+@@ -25,6 +25,8 @@ export interface PlansSubTabProps {
+   onSavePlan: (input: UpsertPlanInput) => Promise<boolean>;
+   onDeletePlan: (id: string) => Promise<boolean>;
+   isSaving?: boolean;
++  onOpenCreatePlan?: () => void;
++  onOpenEditPlan?: (plan: AdminSubscriptionPlanItem) => void;
+ }
+ 
+ export function PlansSubTab({
+@@ -32,6 +34,8 @@ export function PlansSubTab({
+   onSavePlan,
+   onDeletePlan,
+   isSaving = false,
++  onOpenCreatePlan,
++  onOpenEditPlan,
+ }: PlansSubTabProps) {
+   const [cycle, setCycle] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
+   const [selectedPlan, setSelectedPlan] = useState<AdminSubscriptionPlanItem | null>(null);
+@@ -39,13 +43,21 @@ export function PlansSubTab({
+   const [deletingId, setDeletingId] = useState<string | null>(null);
+ 
+   const handleCreateNew = () => {
+-    setSelectedPlan(null);
+-    setIsModalOpen(true);
++    if (onOpenCreatePlan) {
++      onOpenCreatePlan();
++    } else {
++      setSelectedPlan(null);
++      setIsModalOpen(true);
++    }
+   };
+ 
+   const handleEdit = (plan: AdminSubscriptionPlanItem) => {
+-    setSelectedPlan(plan);
+-    setIsModalOpen(true);
++    if (onOpenEditPlan) {
++      onOpenEditPlan(plan);
++    } else {
++      setSelectedPlan(plan);
++      setIsModalOpen(true);
++    }
+   };
+ 
+   const handleDelete = async (id: string, name: string) => {
+@@ -265,17 +277,19 @@ export function PlansSubTab({
+         })}
+       </div>
+ 
+-      {/* Plan Editor Modal */}
+-      <PlanEditorModal
+-        isOpen={isModalOpen}
+-        plan={selectedPlan}
+-        onClose={() => {
+-          setIsModalOpen(false);
+-          setSelectedPlan(null);
+-        }}
+-        onSave={onSavePlan}
+-        isSaving={isSaving}
+-      />
++      {/* Plan Editor Modal (Fallback if not managed by container) */}
++      {!onOpenCreatePlan && !onOpenEditPlan && (
++        <PlanEditorModal
++          isOpen={isModalOpen}
++          plan={selectedPlan}
++          onClose={() => {
++            setIsModalOpen(false);
++            setSelectedPlan(null);
++          }}
++          onSave={onSavePlan}
++          isSaving={isSaving}
++        />
++      )}
+     </div>
+   );
+ }
+diff --git a/src/features/admin/index.ts b/src/features/admin/index.ts
+index 33391c4..916b44d 100644
+--- a/src/features/admin/index.ts
++++ b/src/features/admin/index.ts
+@@ -33,6 +33,7 @@ export * from "./components/AdminSettingsTab";
+ export * from "./components/AdminReportsTab";
+ export * from "./components/AdminSessionsTab";
+ export * from "./components/AdminSidebar";
++export * from "./components/payments/AdminFinancialsContainer";
+ export * from "./components/payments/tabs/GatewaysSubTab";
+ export * from "./components/payments/tabs/PlansSubTab";
+ export * from "./components/payments/tabs/PlanQuotasSubTab";
+diff --git a/tests/unit/admin-financials-ui.test.tsx b/tests/unit/admin-financials-ui.test.tsx
+new file mode 100644
+index 0000000..1c63b4c
+--- /dev/null
++++ b/tests/unit/admin-financials-ui.test.tsx
+@@ -0,0 +1,559 @@
++import { describe, it, expect, vi } from "vitest";
++import React from "react";
++import { renderToStaticMarkup } from "react-dom/server";
++import {
++  AdminFinancialsContainer,
++  AdminPaymentsTab,
++  DEFAULT_PLATFORM_SETTINGS,
++} from "@/features/admin";
++import {
++  AdminGatewayDetails,
++  AdminSubscriptionPlanItem,
++  AdminCurrencyItem,
++  AdminCouponItem,
++  AdminTransactionsResult,
++  FinancialOverviewStats,
++  AdminTransaction,
++} from "@/features/admin/types/admin.types";
++import { FinancialSubTab, useAdminFinancials } from "@/features/admin/hooks/useAdminFinancials";
++
++/* =========================================================================
++ * Mock Fixtures
++ * ========================================================================= */
++
++const MOCK_GATEWAYS: AdminGatewayDetails[] = [
++  {
++    id: "gw-mada",
++    code: "mada",
++    nameAr: "مدى للبطاقات المصرفية",
++    nameEn: "Mada Debit",
++    category: "NATIONAL",
++    isEnabled: true,
++    isTestMode: false,
++    publishableKey: "pk_live_mada_123",
++    hasSecretKey: true,
++    hasWebhookSecret: true,
++    feePercentage: 1.75,
++    feeFixed: 1.0,
++    supportedCurrencies: ["SAR"],
++    sortOrder: 1,
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++  {
++    id: "gw-tamara",
++    code: "tamara",
++    nameAr: "تمارا للتقسيط BNPL",
++    nameEn: "Tamara BNPL",
++    category: "BNPL",
++    isEnabled: false,
++    isTestMode: true,
++    publishableKey: null,
++    hasSecretKey: false,
++    hasWebhookSecret: false,
++    feePercentage: 4.5,
++    feeFixed: 1.5,
++    supportedCurrencies: ["SAR", "AED"],
++    sortOrder: 2,
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++  {
++    id: "gw-stripe",
++    code: "stripe",
++    nameAr: "سترايب العالمية",
++    nameEn: "Stripe Global",
++    category: "INTERNATIONAL",
++    isEnabled: true,
++    isTestMode: false,
++    publishableKey: "pk_live_stripe_999",
++    hasSecretKey: true,
++    hasWebhookSecret: true,
++    feePercentage: 2.9,
++    feeFixed: 1.0,
++    supportedCurrencies: ["USD", "EUR", "SAR"],
++    sortOrder: 3,
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++];
++
++const MOCK_PLANS: AdminSubscriptionPlanItem[] = [
++  {
++    id: "plan-creator",
++    slug: "creator",
++    nameAr: "باقة صانع المحتوى",
++    nameEn: "Creator Plan",
++    descriptionAr: "مثالية للمؤثرين والمبتدئين",
++    badgeAr: "الأكثر شعبية",
++    isActive: true,
++    sortOrder: 1,
++    prices: [
++      { currency: "SAR", billingCycle: "MONTHLY", amount: 39, isActive: true },
++      { currency: "SAR", billingCycle: "YEARLY", amount: 390, isActive: true },
++      { currency: "USD", billingCycle: "MONTHLY", amount: 10, isActive: true },
++    ],
++    quotas: {
++      maxLinks: 25,
++      allowCustomDomain: true,
++      allowRemoveBranding: false,
++      allowAdvancedThemes: true,
++      allowDetailedAnalytics: true,
++      allowPrioritySupport: false,
++      customCssAllowed: false,
++      storeCommissionRate: 5.0,
++    },
++  },
++  {
++    id: "plan-pro",
++    slug: "pro",
++    nameAr: "باقة المحترفين",
++    nameEn: "Pro Plan",
++    descriptionAr: "للعلامات التجارية والشركات الناشئة",
++    badgeAr: "قيمة استثنائية",
++    isActive: true,
++    sortOrder: 2,
++    prices: [
++      { currency: "SAR", billingCycle: "MONTHLY", amount: 89, isActive: true },
++      { currency: "SAR", billingCycle: "YEARLY", amount: 890, isActive: true },
++    ],
++    quotas: {
++      maxLinks: 100,
++      allowCustomDomain: true,
++      allowRemoveBranding: true,
++      allowAdvancedThemes: true,
++      allowDetailedAnalytics: true,
++      allowPrioritySupport: true,
++      customCssAllowed: true,
++      storeCommissionRate: 2.5,
++    },
++  },
++];
++
++const MOCK_CURRENCIES: AdminCurrencyItem[] = [
++  {
++    code: "SAR",
++    nameAr: "ريال سعودي",
++    symbol: "ر.س",
++    exchangeRateToUSD: 3.75,
++    isBaseCurrency: true,
++    isActive: true,
++    autoDetectCountries: ["SA"],
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++  {
++    code: "USD",
++    nameAr: "دولار أمريكي",
++    symbol: "$",
++    exchangeRateToUSD: 1.0,
++    isBaseCurrency: false,
++    isActive: true,
++    autoDetectCountries: ["US"],
++    updatedAt: "2026-11-15T00:00:00Z",
++  },
++];
++
++const MOCK_COUPONS: AdminCouponItem[] = [
++  {
++    id: "cp-ramadan",
++    code: "RAMADAN50",
++    descriptionAr: "خصم رمضان المبارك 50%",
++    discountType: "PERCENTAGE",
++    discountValue: 50,
++    maxUses: 100,
++    maxUsesPerUser: 1,
++    usedCount: 24,
++    validFrom: "2026-03-01T00:00:00Z",
++    validUntil: "2026-04-01T00:00:00Z",
++    applicablePlanSlugs: ["creator", "pro"],
++    isActive: true,
++    createdAt: "2026-03-01T00:00:00Z",
++  },
++];
++
++const MOCK_TRANSACTIONS: AdminTransactionsResult = {
++  items: [
++    {
++      id: "tx-1",
++      invoiceNumber: "INV-2026-0001",
++      userId: "u-1",
++      customerName: "سلطان القحطاني",
++      customerEmail: "sultan@example.com",
++      amountSubtotal: 33.91,
++      discountAmount: 0,
++      taxAmount: 5.09,
++      amountTotal: 39.0,
++      currency: "SAR",
++      gatewayCode: "mada",
++      gatewayTxId: "mada_ch_12345",
++      status: "COMPLETED",
++      pdfUrl: "https://storage.example.com/invoices/inv-1.pdf",
++      createdAt: "2026-11-15T01:00:00Z",
++    },
++  ],
++  total: 42,
++  page: 1,
++  limit: 10,
++  totalPages: 5,
++};
++
++const MOCK_OVERVIEW: FinancialOverviewStats = {
++  totalGateways: 3,
++  activeGateways: 2,
++  totalPlans: 2,
++  totalCurrencies: 2,
++  totalCoupons: 1,
++  totalInvoices: 42,
++  totalRevenue: 15420,
++};
++
++const MOCK_LEGACY_TRANSACTIONS: AdminTransaction[] = [
++  {
++    id: "tx-legacy-1",
++    transactionNumber: "TX-9901",
++    customerName: "فهد العتيبي",
++    customerEmail: "fahad@example.com",
++    amount: 89,
++    currency: "SAR",
++    gateway: "mada",
++    plan: "PRO_MONTHLY",
++    status: "COMPLETED",
++    createdAt: "2026-11-14T12:00:00Z",
++  },
++];
++
++function createMockFinancialsHook(
++  overrides: Partial<ReturnType<typeof useAdminFinancials>> = {}
++) {
++  return {
++    activeSubTab: "gateways" as FinancialSubTab,
++    setActiveSubTab: vi.fn(),
++    overview: MOCK_OVERVIEW,
++    gateways: MOCK_GATEWAYS,
++    plans: MOCK_PLANS,
++    currencies: MOCK_CURRENCIES,
++    coupons: MOCK_COUPONS,
++    transactions: MOCK_TRANSACTIONS,
++    isLoading: false,
++    isSaving: false,
++    error: null,
++    feedback: null,
++    clearFeedback: vi.fn(),
++    setFeedback: vi.fn(),
++    setError: vi.fn(),
++    toggleGateway: vi.fn().mockResolvedValue(true),
++    updateGatewayConfig: vi.fn().mockResolvedValue(true),
++    savePlan: vi.fn().mockResolvedValue(true),
++    deletePlan: vi.fn().mockResolvedValue(true),
++    saveQuotas: vi.fn().mockResolvedValue(true),
++    saveCurrency: vi.fn().mockResolvedValue(true),
++    createCoupon: vi.fn().mockResolvedValue(true),
++    toggleCoupon: vi.fn().mockResolvedValue(true),
++    deleteCoupon: vi.fn().mockResolvedValue(true),
++    refreshData: vi.fn().mockResolvedValue(undefined),
++    filterTransactions: vi.fn().mockResolvedValue(undefined),
++    ...overrides,
++  };
++}
++
++/* =========================================================================
++ * UI Unit Test Suites
++ * ========================================================================= */
++
++describe("Admin Financials UI & Container Suite", () => {
++  describe("Overview Statistics Bar", () => {
++    it("should render overview metrics for gateways, plans, currencies, coupons, and total revenue", () => {
++      const mockHook = createMockFinancialsHook();
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      // Gateways stat card
++      expect(html).toContain("بوابات الدفع");
++      expect(html).toContain("2 / 3");
++      expect(html).toContain("2 بوابات نشطة");
++
++      // Plans stat card
++      expect(html).toContain("باقات الاشتراك");
++      expect(html).toContain("2");
++      expect(html).toContain("2 إجمالي الباقات");
++
++      // Currencies stat card
++      expect(html).toContain("العملات المدعومة");
++      expect(html).toContain("SAR العملة الأساسية");
++
++      // Coupons stat card
++      expect(html).toContain("كوبونات الخصم");
++      expect(html).toContain("1 إجمالي الكوبونات");
++
++      // Revenue stat card
++      expect(html).toContain("إجمالي التحصيل");
++      expect(html).toContain("ر.س");
++      expect(html).toContain("42 عملية مسجلة");
++    });
++
++    it("should compute accurate fallback numbers when overview is null", () => {
++      const mockHook = createMockFinancialsHook({
++        overview: null,
++      });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      // Fallback: activeGateways = 2, total = 3
++      expect(html).toContain("2 / 3");
++      expect(html).toContain("بوابات الدفع");
++    });
++  });
++
++  describe("Responsive Arabic Navigation Tabs", () => {
++    it("should render all 6 sub-tabs with correct Arabic labels and count badges", () => {
++      const mockHook = createMockFinancialsHook();
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("بوابات الدفع");
++      expect(html).toContain("باقات الاشتراك");
++      expect(html).toContain("المحددات والمميزات");
++      expect(html).toContain("العملات وأسعار الصرف");
++      expect(html).toContain("كوبونات الخصم");
++      expect(html).toContain("المعاملات والفواتير");
++
++      // Verify role and aria attributes
++      expect(html).toContain('role="tablist"');
++      expect(html).toContain('aria-label="تبويبات الإدارة المالية"');
++      expect(html).toContain('aria-selected="true"');
++    });
++  });
++
++  describe("Sub-Tab View Switching", () => {
++    it("should render GatewaysSubTab when activeSubTab is 'gateways'", () => {
++      const mockHook = createMockFinancialsHook({ activeSubTab: "gateways" });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("بوابات الدفع الوطنية (السعودية والخليج ومصر)");
++      expect(html).toContain("مدى للبطاقات المصرفية");
++      expect(html).toContain("سترايب العالمية");
++      expect(html).toContain("إعداد المفاتيح والربط");
++
++      // Should NOT render plans or coupons tables
++      expect(html).not.toContain("حدود ومحددات مميزات الباقات");
++      expect(html).not.toContain("RAMADAN50");
++    });
++
++    it("should render PlansSubTab when activeSubTab is 'plans'", () => {
++      const mockHook = createMockFinancialsHook({ activeSubTab: "plans" });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("باقات الاشتراك والتسعير");
++      expect(html).toContain("إضافة باقة جديدة");
++      expect(html).toContain("باقة صانع المحتوى");
++      expect(html).toContain("باقة المحترفين");
++      expect(html).toContain("تعديل الباقة");
++      expect(html).not.toContain("بوابات الدفع الوطنية (السعودية والخليج ومصر)");
++    });
++
++    it("should render PlanQuotasSubTab when activeSubTab is 'quotas'", () => {
++      const mockHook = createMockFinancialsHook({ activeSubTab: "quotas" });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("حدود ومحددات مميزات الباقات");
++      expect(html).toContain("أقصى عدد للروابط النشطة");
++      expect(html).toContain("نسبة عمولة المنصة على المبيعات (%)");
++      expect(html).toContain("ربط نطاق خاص (Custom Domain)");
++      expect(html).not.toContain("سجل العمليات والفواتير والاشتراكات");
++    });
++
++    it("should render CurrenciesSubTab when activeSubTab is 'currencies'", () => {
++      const mockHook = createMockFinancialsHook({ activeSubTab: "currencies" });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("إدارة العملات وأسعار الصرف العالمية");
++      expect(html).toContain("ريال سعودي");
++      expect(html).toContain("العملة المرجعية");
++      expect(html).toContain("تعديل سعر الصرف");
++      expect(html).not.toContain("إنشاء كود خصم جديد");
++    });
++
++    it("should render CouponsSubTab when activeSubTab is 'coupons'", () => {
++      const mockHook = createMockFinancialsHook({ activeSubTab: "coupons" });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("إدارة أكواد الخصم والعروض الترويجية");
++      expect(html).toContain("إنشاء كود خصم جديد");
++      expect(html).toContain("RAMADAN50");
++      expect(html).toContain("50% خصم");
++      expect(html).not.toContain("بوابات الدفع العالمية والبطاقات");
++    });
++
++    it("should render InvoicesTransactionsSubTab when activeSubTab is 'transactions'", () => {
++      const mockHook = createMockFinancialsHook({ activeSubTab: "transactions" });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("البحث برقم الفاتورة، اسم العميل أو بريده...");
++      expect(html).toContain("INV-2026-0001");
++      expect(html).toContain("سلطان القحطاني");
++      expect(html).toContain("sultan@example.com");
++      expect(html).toContain("PDF");
++      expect(html).not.toContain("حدود ومحددات مميزات الباقات");
++    });
++  });
++
++  describe("Opening Modal Dialogs from Container State & Respective Sub-Tabs", () => {
++    it("should open and render GatewayConfigModal when initialModal is 'gateway'", () => {
++      const mockHook = createMockFinancialsHook();
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer
++          customHook={mockHook}
++          initialModal="gateway"
++          initialModalData={MOCK_GATEWAYS[0]}
++        />
++      );
++
++      expect(html).toContain("إعدادات بوابة مدى للبطاقات المصرفية");
++      expect(html).toContain("المفتاح العام (Publishable / Public API Key)");
++      expect(html).toContain("المفتاح السري (Secret Key)");
++      expect(html).toContain("مضبوط ومشفّر");
++      expect(html).toContain("حفظ المفاتيح والإعدادات");
++    });
++
++    it("should open and render PlanEditorModal when initialModal is 'plan'", () => {
++      const mockHook = createMockFinancialsHook();
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer
++          customHook={mockHook}
++          initialModal="plan"
++          initialModalData={MOCK_PLANS[0]}
++        />
++      );
++
++      expect(html).toContain("تعديل باقة باقة صانع المحتوى");
++      expect(html).toContain("مصفوفة التسعير متعددة العملات");
++      expect(html).toContain("SAR");
++      expect(html).toContain("USD");
++      expect(html).toContain("حفظ تعديلات الباقة");
++    });
++
++    it("should open and render CouponEditorModal when initialModal is 'coupon'", () => {
++      const mockHook = createMockFinancialsHook();
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer
++          customHook={mockHook}
++          initialModal="coupon"
++        />
++      );
++
++      expect(html).toContain("إنشاء كود خصم جديد");
++      expect(html).toContain("رمز الكود (Coupon Code)");
++      expect(html).toContain("نوع الخصم");
++      expect(html).toContain("نسبة مئوية (%)");
++      expect(html).toContain("إنشاء كود الخصم");
++    });
++
++    it("should open and render CurrencyRateModal when initialModal is 'currency'", () => {
++      const mockHook = createMockFinancialsHook();
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer
++          customHook={mockHook}
++          initialModal="currency"
++          initialModalData={MOCK_CURRENCIES[0]}
++        />
++      );
++
++      expect(html).toContain("تعديل سعر صرف ريال سعودي");
++      expect(html).toContain("سعر الصرف مقابل 1 دولار أمريكي");
++      expect(html).toContain("رموز الدول للكشف التلقائي");
++      expect(html).toContain("حفظ سعر الصرف");
++    });
++  });
++
++  describe("Feedback and Error Banners", () => {
++    it("should render success feedback banner when feedback is provided", () => {
++      const mockHook = createMockFinancialsHook({
++        feedback: {
++          type: "success",
++          message: "تم تفعيل بوابة الدفع بنجاح",
++        },
++      });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("تم تفعيل بوابة الدفع بنجاح");
++      expect(html).toContain('role="status"');
++    });
++
++    it("should render error feedback banner when feedback is an error", () => {
++      const mockHook = createMockFinancialsHook({
++        feedback: {
++          type: "error",
++          message: "فشل حفظ باقة الاشتراك",
++        },
++      });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("فشل حفظ باقة الاشتراك");
++      expect(html).toContain('role="status"');
++    });
++
++    it("should render global error banner when error string is present", () => {
++      const mockHook = createMockFinancialsHook({
++        error: "حدث خطأ غير متوقع في جلب البيانات",
++      });
++      const html = renderToStaticMarkup(
++        <AdminFinancialsContainer customHook={mockHook} />
++      );
++
++      expect(html).toContain("حدث خطأ غير متوقع في جلب البيانات");
++      expect(html).toContain('role="alert"');
++    });
++  });
++
++  describe("Backward Compatibility: AdminPaymentsTab Integration", () => {
++    it("should mount AdminFinancialsContainer when rendered with NO props", () => {
++      const html = renderToStaticMarkup(<AdminPaymentsTab />);
++
++      expect(html).toContain("إدارة بوابات الدفع والاشتراكات والعمليات المالية");
++      expect(html).toContain("بوابات الدفع");
++      expect(html).toContain("باقات الاشتراك");
++      expect(html).toContain("المعاملات والفواتير");
++    });
++
++    it("should accept legacy props (settings, transactions, onUpdateSettings) without crashing", () => {
++      const onUpdateSettings = vi.fn().mockResolvedValue(true);
++      const html = renderToStaticMarkup(
++        <AdminPaymentsTab
++          settings={DEFAULT_PLATFORM_SETTINGS}
++          transactions={MOCK_LEGACY_TRANSACTIONS}
++          onUpdateSettings={onUpdateSettings}
++        />
++      );
++
++      expect(html).toContain("إدارة بوابات الدفع والاشتراكات والعمليات المالية");
++      expect(html).toContain("بوابات الدفع");
++      expect(html).toContain("المحددات والمميزات");
++    });
++
++    it("should accept initialSubTab prop through AdminPaymentsTab", () => {
++      const html = renderToStaticMarkup(
++        <AdminPaymentsTab initialSubTab="plans" />
++      );
++
++      expect(html).toContain("باقات الاشتراك");
++      expect(html).toContain("باقات الاشتراك والتسعير");
++      expect(html).toContain("إدارة بوابات الدفع والاشتراكات والعمليات المالية");
++    });
++  });
++});

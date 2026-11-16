@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 /home/ammar/AN LINKS
+
+ ✓ tests/unit/image-upload.test.ts (4 tests) 217ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  06:49:37
+   Duration  1.21s (transform 78ms, setup 0ms, collect 108ms, tests 217ms, environment 0ms, prepare 191ms)
+

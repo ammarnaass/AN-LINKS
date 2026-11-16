@@ -1,0 +1,1353 @@
+diff --git a/src/features/admin/hooks/useAdminFinancials.ts b/src/features/admin/hooks/useAdminFinancials.ts
+new file mode 100644
+index 0000000..33bfa39
+--- /dev/null
++++ b/src/features/admin/hooks/useAdminFinancials.ts
+@@ -0,0 +1,500 @@
++"use client";
++
++import { useState, useEffect, useCallback, useRef } from "react";
++import {
++  FinancialOverviewStats,
++  AdminGatewayDetails,
++  UpdateGatewayInput,
++  AdminSubscriptionPlanItem,
++  UpsertPlanInput,
++  AdminPlanQuotaConfig,
++  AdminCurrencyItem,
++  UpdateCurrencyInput,
++  AdminCouponItem,
++  CreateCouponInput,
++  AdminTransactionsQuery,
++  AdminTransactionsResult,
++} from "../types/admin.types";
++import {
++  fetchFinancialOverview,
++  fetchAdminGateways,
++  updateAdminGateway,
++  fetchAdminPlans,
++  upsertAdminPlan,
++  deleteAdminPlan,
++  updateAdminPlanQuotas,
++  fetchAdminCurrencies,
++  updateAdminCurrency,
++  fetchAdminCoupons,
++  createAdminCoupon,
++  toggleAdminCoupon,
++  deleteAdminCoupon,
++  fetchAdminTransactions,
++} from "../services/admin-financials.client";
++
++export type FinancialSubTab =
++  | "gateways"
++  | "plans"
++  | "quotas"
++  | "currencies"
++  | "coupons"
++  | "transactions";
++
++export interface FinancialFeedback {
++  type: "success" | "error";
++  message: string;
++}
++
++export function useAdminFinancials(initialSubTab: FinancialSubTab = "gateways") {
++  const [activeSubTab, setActiveSubTab] = useState<FinancialSubTab>(initialSubTab);
++
++  // Data states
++  const [overview, setOverview] = useState<FinancialOverviewStats | null>(null);
++  const [gateways, setGateways] = useState<AdminGatewayDetails[]>([]);
++  const [plans, setPlans] = useState<AdminSubscriptionPlanItem[]>([]);
++  const [currencies, setCurrencies] = useState<AdminCurrencyItem[]>([]);
++  const [coupons, setCoupons] = useState<AdminCouponItem[]>([]);
++  const [transactions, setTransactions] = useState<AdminTransactionsResult | null>(null);
++
++  // Status & message states
++  const [isLoading, setIsLoading] = useState<boolean>(true);
++  const [isSaving, setIsSaving] = useState<boolean>(false);
++  const [error, setError] = useState<string | null>(null);
++  const [feedback, setFeedback] = useState<FinancialFeedback | null>(null);
++
++  const isMountedRef = useRef<boolean>(true);
++
++  const clearFeedback = useCallback(() => {
++    setFeedback(null);
++  }, []);
++
++  /**
++   * Refreshes all financial data across all tabs simultaneously.
++   */
++  const refreshData = useCallback(async (): Promise<void> => {
++    setIsLoading(true);
++    setError(null);
++
++    try {
++      const [ovRes, gwRes, plRes, crRes, cpRes, txRes] = await Promise.allSettled([
++        fetchFinancialOverview(),
++        fetchAdminGateways(),
++        fetchAdminPlans(),
++        fetchAdminCurrencies(),
++        fetchAdminCoupons(),
++        fetchAdminTransactions(),
++      ]);
++
++      if (!isMountedRef.current) return;
++
++      if (ovRes.status === "fulfilled") setOverview(ovRes.value);
++      if (gwRes.status === "fulfilled") setGateways(gwRes.value);
++      if (plRes.status === "fulfilled") setPlans(plRes.value);
++      if (crRes.status === "fulfilled") setCurrencies(crRes.value);
++      if (cpRes.status === "fulfilled") setCoupons(cpRes.value);
++      if (txRes.status === "fulfilled") setTransactions(txRes.value);
++
++      const rejected = [ovRes, gwRes, plRes, crRes, cpRes, txRes].filter(
++        (r) => r.status === "rejected"
++      ) as PromiseRejectedResult[];
++
++      if (rejected.length > 0) {
++        const firstError = rejected[0].reason;
++        const msg =
++          firstError instanceof Error
++            ? firstError.message
++            : "حدث خطأ أثناء تحميل بعض البيانات المالية";
++        setError(msg);
++      }
++    } catch (err) {
++      if (!isMountedRef.current) return;
++      const msg =
++        err instanceof Error ? err.message : "فشل تحميل البيانات المالية";
++      setError(msg);
++      setFeedback({ type: "error", message: msg });
++    } finally {
++      if (isMountedRef.current) {
++        setIsLoading(false);
++      }
++    }
++  }, []);
++
++  // Auto-fetch all data on mount with cleanup
++  useEffect(() => {
++    isMountedRef.current = true;
++    refreshData();
++    return () => {
++      isMountedRef.current = false;
++    };
++  }, [refreshData]);
++
++  /**
++   * Optimistically toggles a payment gateway enabled state with rollback.
++   */
++  const toggleGateway = useCallback(
++    async (id: string): Promise<boolean> => {
++      const current = gateways.find((g) => g.id === id);
++      if (!current) return false;
++
++      const nextStatus = !current.isEnabled;
++      // Optimistic update
++      setGateways((prev) =>
++        prev.map((g) => (g.id === id ? { ...g, isEnabled: nextStatus } : g))
++      );
++      setError(null);
++
++      try {
++        const updated = await updateAdminGateway({ id, isEnabled: nextStatus });
++        setGateways((prev) =>
++          prev.map((g) => (g.id === id ? updated : g))
++        );
++        setFeedback({
++          type: "success",
++          message: nextStatus
++            ? "تم تفعيل بوابة الدفع بنجاح"
++            : "تم تعطيل بوابة الدفع بنجاح",
++        });
++        return true;
++      } catch (err) {
++        // Rollback
++        setGateways((prev) =>
++          prev.map((g) => (g.id === id ? current : g))
++        );
++        const msg =
++          err instanceof Error ? err.message : "فشل تعديل حالة بوابة الدفع";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      }
++    },
++    [gateways]
++  );
++
++  /**
++   * Updates credentials, fees, and configurations of a payment gateway.
++   */
++  const updateGatewayConfig = useCallback(
++    async (input: UpdateGatewayInput): Promise<boolean> => {
++      setIsSaving(true);
++      setError(null);
++      try {
++        const updated = await updateAdminGateway(input);
++        setGateways((prev) =>
++          prev.map((g) => (g.id === input.id ? updated : g))
++        );
++        setFeedback({
++          type: "success",
++          message: "تم حفظ إعدادات بوابة الدفع بنجاح",
++        });
++        return true;
++      } catch (err) {
++        const msg =
++          err instanceof Error ? err.message : "فشل تحديث إعدادات بوابة الدفع";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      } finally {
++        setIsSaving(false);
++      }
++    },
++    []
++  );
++
++  /**
++   * Saves or creates a subscription plan with prices and quotas.
++   */
++  const savePlan = useCallback(
++    async (input: UpsertPlanInput): Promise<boolean> => {
++      setIsSaving(true);
++      setError(null);
++      try {
++        const saved = await upsertAdminPlan(input);
++        setPlans((prev) => {
++          const index = prev.findIndex(
++            (p) => p.id === saved.id || p.slug === saved.slug
++          );
++          if (index >= 0) {
++            const next = [...prev];
++            next[index] = saved;
++            return next;
++          }
++          return [...prev, saved];
++        });
++        setFeedback({
++          type: "success",
++          message: "تم حفظ باقة الاشتراك بنجاح",
++        });
++        return true;
++      } catch (err) {
++        const msg =
++          err instanceof Error ? err.message : "فشل حفظ باقة الاشتراك";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      } finally {
++        setIsSaving(false);
++      }
++    },
++    []
++  );
++
++  /**
++   * Deactivates or permanently deletes a subscription plan.
++   */
++  const deletePlan = useCallback(
++    async (id: string): Promise<boolean> => {
++      setIsSaving(true);
++      setError(null);
++      try {
++        const res = await deleteAdminPlan(id);
++        if (res.deactivated) {
++          setPlans((prev) =>
++            prev.map((p) => (p.id === id ? { ...p, isActive: false } : p))
++          );
++        } else {
++          setPlans((prev) => prev.filter((p) => p.id !== id));
++        }
++        setFeedback({
++          type: "success",
++          message: res.message || "تم حذف أو تعطيل باقة الاشتراك",
++        });
++        return true;
++      } catch (err) {
++        const msg =
++          err instanceof Error ? err.message : "فشل حذف باقة الاشتراك";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      } finally {
++        setIsSaving(false);
++      }
++    },
++    []
++  );
++
++  /**
++   * Updates quotas and feature allowances for a plan.
++   */
++  const saveQuotas = useCallback(
++    async (
++      planId: string,
++      quotas: Partial<AdminPlanQuotaConfig>
++    ): Promise<boolean> => {
++      setIsSaving(true);
++      setError(null);
++      try {
++        await updateAdminPlanQuotas(planId, quotas);
++        setPlans((prev) =>
++          prev.map((p) =>
++            p.id === planId
++              ? {
++                  ...p,
++                  quotas: {
++                    ...p.quotas,
++                    ...quotas,
++                  },
++                }
++              : p
++          )
++        );
++        setFeedback({
++          type: "success",
++          message: "تم تحديث حدود ومميزات الباقة بنجاح",
++        });
++        return true;
++      } catch (err) {
++        const msg =
++          err instanceof Error
++            ? err.message
++            : "فشل تحديث حدود ومميزات الباقة";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      } finally {
++        setIsSaving(false);
++      }
++    },
++    []
++  );
++
++  /**
++   * Updates currency rates, active status, or country mappings.
++   */
++  const saveCurrency = useCallback(
++    async (code: string, input: UpdateCurrencyInput): Promise<boolean> => {
++      setIsSaving(true);
++      setError(null);
++      try {
++        const updated = await updateAdminCurrency(code, input);
++        setCurrencies((prev) =>
++          prev.map((c) => (c.code === code ? updated : c))
++        );
++        setFeedback({
++          type: "success",
++          message: "تم تحديث إعدادات العملة بنجاح",
++        });
++        return true;
++      } catch (err) {
++        const msg =
++          err instanceof Error ? err.message : "فشل تحديث إعدادات العملة";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      } finally {
++        setIsSaving(false);
++      }
++    },
++    []
++  );
++
++  /**
++   * Creates a new promotional or discount coupon.
++   */
++  const createCoupon = useCallback(
++    async (input: CreateCouponInput): Promise<boolean> => {
++      setIsSaving(true);
++      setError(null);
++      try {
++        const created = await createAdminCoupon(input);
++        setCoupons((prev) => [created, ...prev]);
++        setFeedback({
++          type: "success",
++          message: "تم إنشاء كوبون الخصم بنجاح",
++        });
++        return true;
++      } catch (err) {
++        const msg =
++          err instanceof Error ? err.message : "فشل إنشاء كوبون الخصم";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      } finally {
++        setIsSaving(false);
++      }
++    },
++    []
++  );
++
++  /**
++   * Toggles the active state of a coupon with rollback.
++   */
++  const toggleCoupon = useCallback(
++    async (id: string): Promise<boolean> => {
++      const current = coupons.find((c) => c.id === id);
++      if (!current) return false;
++
++      const nextStatus = !current.isActive;
++      // Optimistic update
++      setCoupons((prev) =>
++        prev.map((c) => (c.id === id ? { ...c, isActive: nextStatus } : c))
++      );
++      setIsSaving(true);
++      setError(null);
++
++      try {
++        const updated = await toggleAdminCoupon(id, nextStatus);
++        setCoupons((prev) =>
++          prev.map((c) => (c.id === id ? updated : c))
++        );
++        setFeedback({
++          type: "success",
++          message: nextStatus
++            ? "تم تفعيل كوبون الخصم بنجاح"
++            : "تم تعطيل كوبون الخصم بنجاح",
++        });
++        return true;
++      } catch (err) {
++        // Rollback
++        setCoupons((prev) =>
++          prev.map((c) => (c.id === id ? current : c))
++        );
++        const msg =
++          err instanceof Error ? err.message : "فشل تعديل حالة الكوبون";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      } finally {
++        setIsSaving(false);
++      }
++    },
++    [coupons]
++  );
++
++  /**
++   * Deletes a discount coupon.
++   */
++  const deleteCoupon = useCallback(
++    async (id: string): Promise<boolean> => {
++      setIsSaving(true);
++      setError(null);
++      try {
++        await deleteAdminCoupon(id);
++        setCoupons((prev) => prev.filter((c) => c.id !== id));
++        setFeedback({
++          type: "success",
++          message: "تم حذف كوبون الخصم بنجاح",
++        });
++        return true;
++      } catch (err) {
++        const msg =
++          err instanceof Error ? err.message : "فشل حذف كوبون الخصم";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++        return false;
++      } finally {
++        setIsSaving(false);
++      }
++    },
++    []
++  );
++
++  /**
++   * Filters transactions and invoices with pagination and search.
++   */
++  const filterTransactions = useCallback(
++    async (query: AdminTransactionsQuery): Promise<void> => {
++      try {
++        const res = await fetchAdminTransactions(query);
++        if (isMountedRef.current) {
++          setTransactions(res);
++        }
++      } catch (err) {
++        if (!isMountedRef.current) return;
++        const msg =
++          err instanceof Error ? err.message : "فشل تصفية المعاملات المالية";
++        setError(msg);
++        setFeedback({ type: "error", message: msg });
++      }
++    },
++    []
++  );
++
++  return {
++    activeSubTab,
++    setActiveSubTab,
++    overview,
++    gateways,
++    plans,
++    currencies,
++    coupons,
++    transactions,
++    isLoading,
++    isSaving,
++    error,
++    feedback,
++    clearFeedback,
++    setFeedback,
++    setError,
++    toggleGateway,
++    updateGatewayConfig,
++    savePlan,
++    deletePlan,
++    saveQuotas,
++    saveCurrency,
++    createCoupon,
++    toggleCoupon,
++    deleteCoupon,
++    refreshData,
++    filterTransactions,
++  };
++}
+diff --git a/src/features/admin/index.ts b/src/features/admin/index.ts
+index 20b38d8..e9b8b33 100644
+--- a/src/features/admin/index.ts
++++ b/src/features/admin/index.ts
+@@ -1,8 +1,27 @@
+ export * from "./types/admin.types";
+ export * from "./server/admin.guard";
+-export * from "./server/admin-financials.service";
++export {
++  getFinancialOverview,
++  getAdminGateways,
++  getAdminPlans,
++  getAdminCurrencies,
++  getAdminCoupons,
++  getAdminTransactions,
++  logFinancialAudit,
++  updateAdminGateway as serverUpdateAdminGateway,
++  upsertAdminPlan as serverUpsertAdminPlan,
++  deleteAdminPlan as serverDeleteAdminPlan,
++  updateAdminPlanQuotas as serverUpdateAdminPlanQuotas,
++  updateAdminCurrency as serverUpdateAdminCurrency,
++  createAdminCoupon as serverCreateAdminCoupon,
++  toggleAdminCoupon as serverToggleAdminCoupon,
++  deleteAdminCoupon as serverDeleteAdminCoupon,
++} from "./server/admin-financials.service";
++export * as adminFinancialsServer from "./server/admin-financials.service";
+ export * from "./services/admin.defaults";
+ export * from "./services/admin.service";
++export * from "./services/admin-financials.client";
++export * from "./hooks/useAdminFinancials";
+ export * from "./components/AdminStatCards";
+ export * from "./components/AdminUsersTable";
+ export * from "./components/AdminReportsTable";
+diff --git a/src/features/admin/services/admin-financials.client.ts b/src/features/admin/services/admin-financials.client.ts
+new file mode 100644
+index 0000000..e9034c4
+--- /dev/null
++++ b/src/features/admin/services/admin-financials.client.ts
+@@ -0,0 +1,229 @@
++import {
++  FinancialOverviewStats,
++  AdminGatewayDetails,
++  UpdateGatewayInput,
++  AdminSubscriptionPlanItem,
++  UpsertPlanInput,
++  AdminPlanQuotaConfig,
++  AdminCurrencyItem,
++  UpdateCurrencyInput,
++  AdminCouponItem,
++  CreateCouponInput,
++  AdminTransactionsQuery,
++  AdminTransactionsResult,
++} from "../types/admin.types";
++
++/**
++ * Generic JSON API request handler with automatic JSON parsing and robust error extraction.
++ */
++async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
++  const headers = new Headers(init?.headers);
++  if (init?.body && !headers.has("Content-Type")) {
++    headers.set("Content-Type", "application/json");
++  }
++
++  const res = await fetch(url, {
++    ...init,
++    headers,
++  });
++
++  const json = await res.json().catch(() => null);
++
++  if (!res.ok) {
++    const errorMsg = json?.error || res.statusText || "فشلت العملية";
++    throw new Error(errorMsg);
++  }
++
++  if (json && typeof json === "object" && "success" in json && json.success === false) {
++    throw new Error(json.error || "فشلت العملية");
++  }
++
++  if (json && typeof json === "object" && "data" in json && json.data !== undefined) {
++    return json.data as T;
++  }
++
++  return json as T;
++}
++
++/**
++ * 1. Fetch Financial Overview statistics.
++ */
++export async function fetchFinancialOverview(): Promise<FinancialOverviewStats> {
++  return apiRequest<FinancialOverviewStats>("/api/admin/financials/overview", {
++    method: "GET",
++  });
++}
++
++/**
++ * 2. Fetch all configured Payment Gateways.
++ */
++export async function fetchAdminGateways(): Promise<AdminGatewayDetails[]> {
++  return apiRequest<AdminGatewayDetails[]>("/api/admin/financials/gateways", {
++    method: "GET",
++  });
++}
++
++/**
++ * 3. Update or toggle a Payment Gateway.
++ */
++export async function updateAdminGateway(
++  input: UpdateGatewayInput
++): Promise<AdminGatewayDetails> {
++  return apiRequest<AdminGatewayDetails>("/api/admin/financials/gateways", {
++    method: "PUT",
++    body: JSON.stringify(input),
++  });
++}
++
++/**
++ * 4. Fetch all Subscription Plans with multi-currency pricing and quotas.
++ */
++export async function fetchAdminPlans(): Promise<AdminSubscriptionPlanItem[]> {
++  return apiRequest<AdminSubscriptionPlanItem[]>("/api/admin/financials/plans", {
++    method: "GET",
++  });
++}
++
++/**
++ * 5. Create or update a Subscription Plan.
++ */
++export async function upsertAdminPlan(
++  input: UpsertPlanInput
++): Promise<AdminSubscriptionPlanItem> {
++  if (input.id) {
++    return apiRequest<AdminSubscriptionPlanItem>(
++      `/api/admin/financials/plans/${encodeURIComponent(input.id)}`,
++      {
++        method: "PUT",
++        body: JSON.stringify(input),
++      }
++    );
++  }
++
++  return apiRequest<AdminSubscriptionPlanItem>("/api/admin/financials/plans", {
++    method: "POST",
++    body: JSON.stringify(input),
++  });
++}
++
++/**
++ * 6. Delete or deactivate a Subscription Plan.
++ */
++export async function deleteAdminPlan(
++  id: string
++): Promise<{ success: boolean; deactivated?: boolean; message?: string }> {
++  return apiRequest<{ success: boolean; deactivated?: boolean; message?: string }>(
++    `/api/admin/financials/plans/${encodeURIComponent(id)}`,
++    {
++      method: "DELETE",
++    }
++  );
++}
++
++/**
++ * 7. Update plan quota limits and feature toggles.
++ */
++export async function updateAdminPlanQuotas(
++  planId: string,
++  quotas: Partial<AdminPlanQuotaConfig>
++): Promise<unknown> {
++  return apiRequest("/api/admin/financials/quotas", {
++    method: "PUT",
++    body: JSON.stringify({ planId, ...quotas }),
++  });
++}
++
++/**
++ * 8. Fetch all supported currencies and exchange rates.
++ */
++export async function fetchAdminCurrencies(): Promise<AdminCurrencyItem[]> {
++  return apiRequest<AdminCurrencyItem[]>("/api/admin/financials/currencies", {
++    method: "GET",
++  });
++}
++
++/**
++ * 9. Update a currency's exchange rate, status, or auto-detect countries.
++ */
++export async function updateAdminCurrency(
++  code: string,
++  input: UpdateCurrencyInput
++): Promise<AdminCurrencyItem> {
++  return apiRequest<AdminCurrencyItem>("/api/admin/financials/currencies", {
++    method: "PUT",
++    body: JSON.stringify({ ...input, code }),
++  });
++}
++
++/**
++ * 10. Fetch all discount coupons.
++ */
++export async function fetchAdminCoupons(): Promise<AdminCouponItem[]> {
++  return apiRequest<AdminCouponItem[]>("/api/admin/financials/coupons", {
++    method: "GET",
++  });
++}
++
++/**
++ * 11. Create a new discount coupon.
++ */
++export async function createAdminCoupon(
++  input: CreateCouponInput
++): Promise<AdminCouponItem> {
++  return apiRequest<AdminCouponItem>("/api/admin/financials/coupons", {
++    method: "POST",
++    body: JSON.stringify(input),
++  });
++}
++
++/**
++ * 12. Toggle active state of a discount coupon.
++ */
++export async function toggleAdminCoupon(
++  id: string,
++  isActive: boolean
++): Promise<AdminCouponItem> {
++  return apiRequest<AdminCouponItem>(
++    `/api/admin/financials/coupons/${encodeURIComponent(id)}`,
++    {
++      method: "PATCH",
++      body: JSON.stringify({ isActive }),
++    }
++  );
++}
++
++/**
++ * 13. Delete a discount coupon.
++ */
++export async function deleteAdminCoupon(
++  id: string
++): Promise<{ success: boolean; message?: string }> {
++  return apiRequest<{ success: boolean; message?: string }>(
++    `/api/admin/financials/coupons/${encodeURIComponent(id)}`,
++    {
++      method: "DELETE",
++    }
++  );
++}
++
++/**
++ * 14. Fetch paginated admin transactions and invoices.
++ */
++export async function fetchAdminTransactions(
++  query?: AdminTransactionsQuery
++): Promise<AdminTransactionsResult> {
++  const params = new URLSearchParams();
++  if (query?.page !== undefined) params.set("page", String(query.page));
++  if (query?.limit !== undefined) params.set("limit", String(query.limit));
++  if (query?.status) params.set("status", query.status);
++  if (query?.gateway) params.set("gateway", query.gateway);
++
++  const qs = params.toString();
++  const url = qs
++    ? `/api/admin/financials/transactions?${qs}`
++    : "/api/admin/financials/transactions";
++
++  return apiRequest<AdminTransactionsResult>(url, {
++    method: "GET",
++  });
++}
+diff --git a/tests/unit/admin-financials-client.test.ts b/tests/unit/admin-financials-client.test.ts
+new file mode 100644
+index 0000000..622a564
+--- /dev/null
++++ b/tests/unit/admin-financials-client.test.ts
+@@ -0,0 +1,573 @@
++import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
++import React from "react";
++import { renderToStaticMarkup } from "react-dom/server";
++import {
++  fetchFinancialOverview,
++  fetchAdminGateways,
++  updateAdminGateway,
++  fetchAdminPlans,
++  upsertAdminPlan,
++  deleteAdminPlan,
++  updateAdminPlanQuotas,
++  fetchAdminCurrencies,
++  updateAdminCurrency,
++  fetchAdminCoupons,
++  createAdminCoupon,
++  toggleAdminCoupon,
++  deleteAdminCoupon,
++  fetchAdminTransactions,
++} from "@/features/admin/services/admin-financials.client";
++import { useAdminFinancials } from "@/features/admin/hooks/useAdminFinancials";
++import {
++  UpdateGatewayInput,
++  UpsertPlanInput,
++  UpdateCurrencyInput,
++  CreateCouponInput,
++  AdminTransactionsQuery,
++} from "@/features/admin/types/admin.types";
++
++describe("Admin Financials Client Service (admin-financials.client.ts)", () => {
++  const originalFetch = globalThis.fetch;
++
++  beforeEach(() => {
++    vi.restoreAllMocks();
++  });
++
++  afterEach(() => {
++    globalThis.fetch = originalFetch;
++  });
++
++  function mockFetchResponse(status: number, data: unknown, statusText = "OK") {
++    const fn = vi.fn().mockResolvedValue({
++      ok: status >= 200 && status < 300,
++      status,
++      statusText,
++      json: async () => data,
++    });
++    globalThis.fetch = fn;
++    return fn;
++  }
++
++  /* -------------------------------------------------------------------------
++   * 1. Overview
++   * ------------------------------------------------------------------------- */
++  describe("fetchFinancialOverview", () => {
++    it("should issue a GET request to /api/admin/financials/overview and unwrap data", async () => {
++      const mockOverview = {
++        totalGateways: 9,
++        activeGateways: 6,
++        totalPlans: 3,
++        totalCurrencies: 4,
++        totalCoupons: 5,
++        totalInvoices: 120,
++        totalRevenue: 45000,
++      };
++
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockOverview });
++
++      const result = await fetchFinancialOverview();
++
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      const [url, init] = fetchMock.mock.calls[0];
++      expect(url).toBe("/api/admin/financials/overview");
++      expect(init?.method).toBe("GET");
++      expect(result).toEqual(mockOverview);
++    });
++
++    it("should throw a descriptive error when server returns an error JSON payload", async () => {
++      mockFetchResponse(500, { success: false, error: "فشل استرجاع النظرة العامة المالية" });
++
++      await expect(fetchFinancialOverview()).rejects.toThrow(
++        "فشل استرجاع النظرة العامة المالية"
++      );
++    });
++
++    it("should fall back to statusText if error payload is empty", async () => {
++      mockFetchResponse(502, null, "Bad Gateway");
++
++      await expect(fetchFinancialOverview()).rejects.toThrow("Bad Gateway");
++    });
++  });
++
++  /* -------------------------------------------------------------------------
++   * 2. Gateways
++   * ------------------------------------------------------------------------- */
++  describe("fetchAdminGateways", () => {
++    it("should issue a GET request to /api/admin/financials/gateways", async () => {
++      const mockGateways = [
++        { id: "mada", code: "mada", nameAr: "مدى", nameEn: "Mada", isEnabled: true },
++        { id: "apple_pay", code: "apple_pay", nameAr: "أبل باي", nameEn: "Apple Pay", isEnabled: true },
++      ];
++
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockGateways });
++
++      const result = await fetchAdminGateways();
++
++      expect(fetchMock).toHaveBeenCalledWith("/api/admin/financials/gateways", {
++        method: "GET",
++        headers: expect.any(Headers),
++      });
++      expect(result).toEqual(mockGateways);
++    });
++  });
++
++  describe("updateAdminGateway", () => {
++    it("should issue a PUT request with application/json Content-Type and payload", async () => {
++      const input: UpdateGatewayInput = {
++        id: "mada",
++        isEnabled: true,
++        isTestMode: false,
++        publishableKey: "pk_live_mada_123",
++        secretKey: "sk_live_mada_secret",
++        feePercentage: 1.5,
++        feeFixed: 1.0,
++      };
++
++      const mockUpdated = {
++        id: "mada",
++        code: "mada",
++        nameAr: "مدى",
++        nameEn: "Mada",
++        isEnabled: true,
++        isTestMode: false,
++        publishableKey: "pk_live_mada_123",
++        hasSecretKey: true,
++      };
++
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockUpdated });
++
++      const result = await updateAdminGateway(input);
++
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      const [url, init] = fetchMock.mock.calls[0];
++      expect(url).toBe("/api/admin/financials/gateways");
++      expect(init?.method).toBe("PUT");
++      expect(init?.body).toBe(JSON.stringify(input));
++      expect(result).toEqual(mockUpdated);
++    });
++
++    it("should throw an error when API rejects gateway update", async () => {
++      mockFetchResponse(400, { success: false, error: "معرف بوابة الدفع غير صحيح" });
++
++      await expect(
++        updateAdminGateway({ id: "unknown" })
++      ).rejects.toThrow("معرف بوابة الدفع غير صحيح");
++    });
++  });
++
++  /* -------------------------------------------------------------------------
++   * 3. Plans
++   * ------------------------------------------------------------------------- */
++  describe("fetchAdminPlans", () => {
++    it("should issue a GET request to /api/admin/financials/plans", async () => {
++      const mockPlans = [
++        { id: "p1", slug: "free", nameAr: "المجانية", nameEn: "Free", isActive: true },
++        { id: "p2", slug: "pro", nameAr: "المحترفة", nameEn: "Pro", isActive: true },
++      ];
++
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockPlans });
++
++      const result = await fetchAdminPlans();
++      expect(fetchMock).toHaveBeenCalledWith("/api/admin/financials/plans", {
++        method: "GET",
++        headers: expect.any(Headers),
++      });
++      expect(result).toEqual(mockPlans);
++    });
++  });
++
++  describe("upsertAdminPlan", () => {
++    it("should issue a POST request when input.id is omitted (creating new plan)", async () => {
++      const input: UpsertPlanInput = {
++        slug: "enterprise",
++        nameAr: "المؤسسات",
++        nameEn: "Enterprise",
++        isActive: true,
++        prices: [
++          { currency: "SAR", billingCycle: "MONTHLY", amount: 299, isActive: true },
++        ],
++      };
++
++      const mockCreated = { id: "p_ent_1", ...input };
++      const fetchMock = mockFetchResponse(201, { success: true, data: mockCreated });
++
++      const result = await upsertAdminPlan(input);
++
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      const [url, init] = fetchMock.mock.calls[0];
++      expect(url).toBe("/api/admin/financials/plans");
++      expect(init?.method).toBe("POST");
++      expect(init?.body).toBe(JSON.stringify(input));
++      expect(result).toEqual(mockCreated);
++    });
++
++    it("should issue a PUT request with encoded id when input.id is provided", async () => {
++      const input: UpsertPlanInput = {
++        id: "plan-special/1",
++        slug: "pro",
++        nameAr: "المحترفة المحدثة",
++        nameEn: "Pro Updated",
++      };
++
++      const mockUpdated = { ...input };
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockUpdated });
++
++      const result = await upsertAdminPlan(input);
++
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      const [url, init] = fetchMock.mock.calls[0];
++      expect(url).toBe("/api/admin/financials/plans/plan-special%2F1");
++      expect(init?.method).toBe("PUT");
++      expect(init?.body).toBe(JSON.stringify(input));
++      expect(result).toEqual(mockUpdated);
++    });
++  });
++
++  describe("deleteAdminPlan", () => {
++    it("should issue a DELETE request to /api/admin/financials/plans/:id", async () => {
++      const fetchMock = mockFetchResponse(200, {
++        success: true,
++        deactivated: true,
++        message: "تم تعطيل الباقة لوجود مشتركين نشطين",
++      });
++
++      const result = await deleteAdminPlan("plan-pro");
++
++      expect(fetchMock).toHaveBeenCalledWith("/api/admin/financials/plans/plan-pro", {
++        method: "DELETE",
++        headers: expect.any(Headers),
++      });
++      expect(result).toEqual({
++        success: true,
++        deactivated: true,
++        message: "تم تعطيل الباقة لوجود مشتركين نشطين",
++      });
++    });
++  });
++
++  /* -------------------------------------------------------------------------
++   * 4. Quotas
++   * ------------------------------------------------------------------------- */
++  describe("updateAdminPlanQuotas", () => {
++    it("should issue a PUT request to /api/admin/financials/quotas with planId and quotas", async () => {
++      const fetchMock = mockFetchResponse(200, {
++        success: true,
++        data: {
++          planId: "plan-pro",
++          maxLinks: 50,
++          allowCustomDomain: true,
++          storeCommissionRate: 2.5,
++        },
++      });
++
++      const result = await updateAdminPlanQuotas("plan-pro", {
++        maxLinks: 50,
++        allowCustomDomain: true,
++        storeCommissionRate: 2.5,
++      });
++
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      const [url, init] = fetchMock.mock.calls[0];
++      expect(url).toBe("/api/admin/financials/quotas");
++      expect(init?.method).toBe("PUT");
++      expect(JSON.parse(init?.body as string)).toEqual({
++        planId: "plan-pro",
++        maxLinks: 50,
++        allowCustomDomain: true,
++        storeCommissionRate: 2.5,
++      });
++      expect(result).toEqual({
++        planId: "plan-pro",
++        maxLinks: 50,
++        allowCustomDomain: true,
++        storeCommissionRate: 2.5,
++      });
++    });
++  });
++
++  /* -------------------------------------------------------------------------
++   * 5. Currencies
++   * ------------------------------------------------------------------------- */
++  describe("fetchAdminCurrencies", () => {
++    it("should issue a GET request to /api/admin/financials/currencies", async () => {
++      const mockCurrencies = [
++        { code: "SAR", symbol: "ر.س", exchangeRateToUSD: 3.75, isBaseCurrency: true },
++        { code: "USD", symbol: "$", exchangeRateToUSD: 1.0, isBaseCurrency: false },
++      ];
++
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockCurrencies });
++
++      const result = await fetchAdminCurrencies();
++      expect(fetchMock).toHaveBeenCalledWith("/api/admin/financials/currencies", {
++        method: "GET",
++        headers: expect.any(Headers),
++      });
++      expect(result).toEqual(mockCurrencies);
++    });
++  });
++
++  describe("updateAdminCurrency", () => {
++    it("should issue a PUT request to /api/admin/financials/currencies with code and properties", async () => {
++      const input: UpdateCurrencyInput = {
++        code: "AED",
++        exchangeRateToUSD: 3.67,
++        isActive: true,
++        autoDetectCountries: ["AE"],
++      };
++
++      const mockUpdated = { ...input, symbol: "د.إ", nameAr: "درهم إماراتي" };
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockUpdated });
++
++      const result = await updateAdminCurrency("AED", input);
++
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      const [url, init] = fetchMock.mock.calls[0];
++      expect(url).toBe("/api/admin/financials/currencies");
++      expect(init?.method).toBe("PUT");
++      expect(JSON.parse(init?.body as string)).toEqual({
++        code: "AED",
++        exchangeRateToUSD: 3.67,
++        isActive: true,
++        autoDetectCountries: ["AE"],
++      });
++      expect(result).toEqual(mockUpdated);
++    });
++  });
++
++  /* -------------------------------------------------------------------------
++   * 6. Coupons
++   * ------------------------------------------------------------------------- */
++  describe("fetchAdminCoupons", () => {
++    it("should issue a GET request to /api/admin/financials/coupons", async () => {
++      const mockCoupons = [
++        { id: "c1", code: "LAUNCH50", discountType: "PERCENTAGE", discountValue: 50, isActive: true },
++      ];
++
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockCoupons });
++
++      const result = await fetchAdminCoupons();
++      expect(fetchMock).toHaveBeenCalledWith("/api/admin/financials/coupons", {
++        method: "GET",
++        headers: expect.any(Headers),
++      });
++      expect(result).toEqual(mockCoupons);
++    });
++  });
++
++  describe("createAdminCoupon", () => {
++    it("should issue a POST request to /api/admin/financials/coupons with coupon data", async () => {
++      const input: CreateCouponInput = {
++        code: "PROMO20",
++        discountType: "PERCENTAGE",
++        discountValue: 20,
++        maxUses: 100,
++        applicablePlanSlugs: ["pro"],
++      };
++
++      const mockCreated = { id: "coup_new", ...input, usedCount: 0, isActive: true };
++      const fetchMock = mockFetchResponse(201, { success: true, data: mockCreated });
++
++      const result = await createAdminCoupon(input);
++
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      const [url, init] = fetchMock.mock.calls[0];
++      expect(url).toBe("/api/admin/financials/coupons");
++      expect(init?.method).toBe("POST");
++      expect(init?.body).toBe(JSON.stringify(input));
++      expect(result).toEqual(mockCreated);
++    });
++  });
++
++  describe("toggleAdminCoupon", () => {
++    it("should issue a PATCH request to /api/admin/financials/coupons/:id with isActive boolean", async () => {
++      const mockUpdated = { id: "coup_1", code: "SAVE10", isActive: false };
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockUpdated });
++
++      const result = await toggleAdminCoupon("coup_1", false);
++
++      expect(fetchMock).toHaveBeenCalledWith("/api/admin/financials/coupons/coup_1", {
++        method: "PATCH",
++        body: JSON.stringify({ isActive: false }),
++        headers: expect.any(Headers),
++      });
++      expect(result).toEqual(mockUpdated);
++    });
++  });
++
++  describe("deleteAdminCoupon", () => {
++    it("should issue a DELETE request to /api/admin/financials/coupons/:id", async () => {
++      const fetchMock = mockFetchResponse(200, {
++        success: true,
++        data: { success: true, message: "تم حذف الكوبون بنجاح" },
++      });
++
++      const result = await deleteAdminCoupon("coup_1");
++
++      expect(fetchMock).toHaveBeenCalledWith("/api/admin/financials/coupons/coup_1", {
++        method: "DELETE",
++        headers: expect.any(Headers),
++      });
++      expect(result).toEqual({ success: true, message: "تم حذف الكوبون بنجاح" });
++    });
++  });
++
++  /* -------------------------------------------------------------------------
++   * 7. Transactions
++   * ------------------------------------------------------------------------- */
++  describe("fetchAdminTransactions", () => {
++    it("should issue a GET request to /api/admin/financials/transactions without params when omitted", async () => {
++      const mockResult = {
++        items: [],
++        total: 0,
++        page: 1,
++        limit: 20,
++        totalPages: 0,
++      };
++
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockResult });
++
++      const result = await fetchAdminTransactions();
++
++      expect(fetchMock).toHaveBeenCalledWith("/api/admin/financials/transactions", {
++        method: "GET",
++        headers: expect.any(Headers),
++      });
++      expect(result).toEqual(mockResult);
++    });
++
++    it("should correctly format query string with page, limit, status, and gateway", async () => {
++      const query: AdminTransactionsQuery = {
++        page: 2,
++        limit: 15,
++        status: "COMPLETED",
++        gateway: "mada",
++      };
++
++      const mockResult = {
++        items: [{ id: "tx_1", invoiceNumber: "INV-001", amountTotal: 99 }],
++        total: 1,
++        page: 2,
++        limit: 15,
++        totalPages: 1,
++      };
++
++      const fetchMock = mockFetchResponse(200, { success: true, data: mockResult });
++
++      const result = await fetchAdminTransactions(query);
++
++      expect(fetchMock).toHaveBeenCalledTimes(1);
++      const [url] = fetchMock.mock.calls[0];
++      expect(url).toBe(
++        "/api/admin/financials/transactions?page=2&limit=15&status=COMPLETED&gateway=mada"
++      );
++      expect(result).toEqual(mockResult);
++    });
++  });
++
++  /* -------------------------------------------------------------------------
++   * 8. Response Handling Edge Cases
++   * ------------------------------------------------------------------------- */
++  describe("Response parsing edge cases", () => {
++    it("should throw error if response has success: false even with 200 OK", async () => {
++      mockFetchResponse(200, { success: false, error: "فشل مصادقة الجلسة" });
++
++      await expect(fetchFinancialOverview()).rejects.toThrow("فشل مصادقة الجلسة");
++    });
++
++    it("should return raw JSON when data property is undefined", async () => {
++      const customPayload = { result: "ok", count: 12 };
++      mockFetchResponse(200, customPayload);
++
++      const res = await deleteAdminPlan("test-p");
++      expect(res).toEqual(customPayload);
++    });
++  });
++});
++
++describe("Admin Financials React Hook (useAdminFinancials)", () => {
++  it("should mount and provide initial state defaults", () => {
++    let hookResult: ReturnType<typeof useAdminFinancials> | undefined;
++
++    function TestComponent() {
++      hookResult = useAdminFinancials("quotas");
++      return React.createElement(
++        "div",
++        { "data-testid": "test-hook" },
++        React.createElement("span", { "data-testid": "tab" }, hookResult.activeSubTab),
++        React.createElement("span", { "data-testid": "loading" }, String(hookResult.isLoading)),
++        React.createElement("span", { "data-testid": "saving" }, String(hookResult.isSaving)),
++        React.createElement("span", { "data-testid": "gateways-count" }, hookResult.gateways.length)
++      );
++    }
++
++    const html = renderToStaticMarkup(React.createElement(TestComponent));
++
++    expect(html).toContain('data-testid="tab">quotas<');
++    expect(html).toContain('data-testid="loading">true<');
++    expect(html).toContain('data-testid="saving">false<');
++    expect(html).toContain('data-testid="gateways-count">0<');
++
++    const result = hookResult as ReturnType<typeof useAdminFinancials>;
++    expect(result).toBeDefined();
++    expect(result.activeSubTab).toBe("quotas");
++    expect(result.overview).toBeNull();
++    expect(result.gateways).toEqual([]);
++    expect(result.plans).toEqual([]);
++    expect(result.currencies).toEqual([]);
++    expect(result.coupons).toEqual([]);
++    expect(result.transactions).toBeNull();
++    expect(result.error).toBeNull();
++    expect(result.feedback).toBeNull();
++
++    // Verify all mutation methods exist and are functions
++    expect(typeof result.toggleGateway).toBe("function");
++    expect(typeof result.updateGatewayConfig).toBe("function");
++    expect(typeof result.savePlan).toBe("function");
++    expect(typeof result.deletePlan).toBe("function");
++    expect(typeof result.saveQuotas).toBe("function");
++    expect(typeof result.saveCurrency).toBe("function");
++    expect(typeof result.createCoupon).toBe("function");
++    expect(typeof result.toggleCoupon).toBe("function");
++    expect(typeof result.deleteCoupon).toBe("function");
++    expect(typeof result.refreshData).toBe("function");
++    expect(typeof result.filterTransactions).toBe("function");
++    expect(typeof result.clearFeedback).toBe("function");
++  });
++
++  it("should default activeSubTab to 'gateways' when no initialSubTab is provided", () => {
++    let hookResult: ReturnType<typeof useAdminFinancials> | undefined;
++
++    function TestComponent() {
++      hookResult = useAdminFinancials();
++      return React.createElement("div", null, hookResult.activeSubTab);
++    }
++
++    const html = renderToStaticMarkup(React.createElement(TestComponent));
++
++    const result = hookResult as ReturnType<typeof useAdminFinancials>;
++    expect(html).toContain("gateways");
++    expect(result.activeSubTab).toBe("gateways");
++  });
++
++  it("should return false when toggling unknown gateway or coupon", async () => {
++    let hookResult: ReturnType<typeof useAdminFinancials> | undefined;
++
++    function TestComponent() {
++      hookResult = useAdminFinancials();
++      return React.createElement("div", null, hookResult.activeSubTab);
++    }
++
++    renderToStaticMarkup(React.createElement(TestComponent));
++
++    const result = hookResult as ReturnType<typeof useAdminFinancials>;
++    expect(result).toBeDefined();
++    const gatewayToggleRes = await result.toggleGateway("unknown-gateway");
++    expect(gatewayToggleRes).toBe(false);
++
++    const couponToggleRes = await result.toggleCoupon("unknown-coupon");
++    expect(couponToggleRes).toBe(false);
++
++    result.setFeedback({ type: "success", message: "Test message" });
++    result.clearFeedback();
++  });
++});

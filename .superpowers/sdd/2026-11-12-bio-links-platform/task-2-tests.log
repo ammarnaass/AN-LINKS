@@ -1,0 +1,12 @@
+
+ RUN  v3.2.7 /home/ammar/AN LINKS
+
+ ✓ tests/unit/bot-detector.test.ts (6 tests) 16ms
+ ✓ tests/unit/url-sanitizer.test.ts (6 tests) 13ms
+ ✓ tests/unit/reserved-usernames.test.ts (3 tests) 12ms
+
+ Test Files  3 passed (3)
+      Tests  15 passed (15)
+   Start at  06:26:45
+   Duration  1.23s (transform 204ms, setup 0ms, collect 297ms, tests 41ms, environment 2ms, prepare 893ms)
+
