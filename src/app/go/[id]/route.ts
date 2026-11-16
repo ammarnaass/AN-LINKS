@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { recordLinkClick } from "@/lib/tracking-service";
+import { prisma } from "@/shared/db";
+import { recordLinkClick } from "@/features/analytics/services/tracking.service";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -17,21 +17,30 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const link = await prisma.link.findUnique({
       where: { id },
       include: {
-        user: {
-          select: { isSuspended: true },
-        },
+        user: { select: { isSuspended: true } },
+        platform: { select: { isEnabled: true } },
       },
     });
 
-    if (!link || !link.isActive || link.user?.isSuspended) {
+    if (!link || !link.isActive || link.isArchived || link.user?.isSuspended) {
       return NextResponse.redirect(new URL("/not-found", request.url));
     }
 
+    const rawCountry = request.headers.get("cf-ipcountry") || request.headers.get("x-vercel-ip-country");
+    const country = (rawCountry && rawCountry !== "XX" && rawCountry !== "T1") ? rawCountry.toUpperCase().trim() : null;
+    const city = request.headers.get("x-vercel-ip-city") || null;
     const userAgent = request.headers.get("user-agent");
-    // Record click without blocking redirect execution
-    recordLinkClick(link.id, userAgent, request.headers).catch(() => {});
+    const referer = request.headers.get("referer");
 
-    // 302 Temporary Redirect to target destination
+    // Record click asynchronously without blocking redirect execution
+    recordLinkClick(link.id, userAgent, request.headers, {
+      country,
+      city,
+      platformId: link.platformId,
+      referer,
+    }).catch(() => {});
+
+    // 302 Temporary Redirect to target destination (policy: do not block if platform.isEnabled === false)
     return NextResponse.redirect(new URL(link.url), 302);
   } catch (error) {
     console.error("Redirect error:", error);
