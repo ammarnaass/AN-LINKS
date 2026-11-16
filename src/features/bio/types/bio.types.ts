@@ -1,3 +1,10 @@
+export type ButtonStyle = "filled" | "glass" | "soft" | "outline";
+export type ButtonShadow = "none" | "soft" | "strong" | "glow";
+export type BorderRadius = "rounded-none" | "rounded-md" | "rounded-xl" | "rounded-full";
+export type FontFamily = "Cairo" | "Tajawal" | "IBMPlex" | "Almarai" | "ReadexPro";
+export type BackgroundType = "THEME" | "SOLID" | "GRADIENT";
+export type SocialPosition = "top" | "bottom";
+
 export interface ProfileData {
   displayName: string;
   bio?: string | null;
@@ -7,6 +14,10 @@ export interface ProfileData {
   buttonStyle?: string | null;
   borderRadius?: string | null;
   font?: string | null;
+  backgroundType?: string | null;
+  customBackground?: string | null;
+  buttonShadow?: string | null;
+  socialPosition?: string | null;
 }
 
 export interface SocialItem {

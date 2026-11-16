@@ -27,20 +27,24 @@ model User {
 }
 
 model Profile {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  displayName  String
-  bio          String?
-  avatarUrl    String?
-  phone        String?
-  seoIndexing  Boolean  @default(true)
-  themeKey     String   @default("default")
-  accentColor  String   @default("#000000")
-  buttonStyle  String   @default("filled")
-  borderRadius String   @default("rounded-xl")
-  font         String   @default("Cairo")
-  isPublished  Boolean  @default(true)
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName      String
+  bio              String?
+  avatarUrl        String?
+  phone            String?
+  seoIndexing      Boolean  @default(true)
+  themeKey         String   @default("layanDark")
+  accentColor      String   @default("#4edea3")
+  buttonStyle      String   @default("filled")
+  borderRadius     String   @default("rounded-xl")
+  font             String   @default("Cairo")
+  backgroundType   String   @default("THEME")
+  customBackground String?
+  buttonShadow     String   @default("none")
+  socialPosition   String   @default("top")
+  isPublished      Boolean  @default(true)
 }
 
 enum PlatformCategory {
