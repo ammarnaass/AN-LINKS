@@ -50,6 +50,7 @@ export function LinkEditor({ links, onLinksChange, filter = "all" }: LinkEditorP
       <LinkHealthBanner
         isAdding={isAdding}
         onToggleAdd={() => setIsAdding(!isAdding)}
+        links={links}
       />
 
       {isAdding && (

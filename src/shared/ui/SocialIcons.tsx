@@ -6,15 +6,7 @@ interface IconProps {
 
 export function InstagramIcon({ className = "w-4 h-4" }: IconProps) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
       <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
       <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
@@ -41,11 +33,7 @@ export function YoutubeIcon({ className = "w-4 h-4" }: IconProps) {
 export function GithubIcon({ className = "w-4 h-4" }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-      />
+      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
     </svg>
   );
 }
@@ -90,17 +78,89 @@ export function TikTokIcon({ className = "w-4 h-4" }: IconProps) {
   );
 }
 
+export function SnapchatIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12.16 2.05c-3.78 0-6.13 2.82-6.13 5.48 0 1.25.43 2.45.43 2.45s-.45.18-.88.24c-.45.06-.9.37-.92.83-.02.39.26.7.67.76.75.12 1.25.7 1.25.7s-.64 1.76-1.58 2.37c-.7.46-1.52.54-1.95 1.28-.27.47-.1 1.05.41 1.28.9.4 2.14-.14 3.12.35.63.31 1.05 1.07 1.83 1.15.7.07 1.28-.43 2.04-.43.76 0 1.34.5 2.04.43.78-.08 1.2-.84 1.83-1.15.98-.49 2.22.05 3.12-.35.51-.23.68-.81.41-1.28-.43-.74-1.25-.82-1.95-1.28-.94-.61-1.58-2.37-1.58-2.37s.5-.58 1.25-.7c.41-.06.69-.37.67-.76-.02-.46-.47-.77-.92-.83-.43-.06-.88-.24-.88-.24s.43-1.2.43-2.45c0-2.66-2.35-5.48-6.13-5.48z" />
+    </svg>
+  );
+}
+
+export function SpotifyIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.627.627 0 0 1-.86.208c-2.358-1.442-5.328-1.768-8.825-.968a.627.627 0 1 1-.278-1.222c3.823-.873 7.106-.505 9.755 1.122a.627.627 0 0 1 .208.86zm1.226-2.723a.784.784 0 0 1-1.078.258c-2.698-1.658-6.812-2.14-10.003-1.171a.785.785 0 0 1-.456-1.5c3.644-1.106 8.192-.572 11.279 1.334a.785.785 0 0 1 .258 1.079zm.106-2.835C14.692 8.95 9.375 8.775 6.297 9.71a.94.94 0 1 1-.55-1.801c3.526-1.07 9.409-.864 13.197 1.385a.941.941 0 0 1-.99 1.602z"/>
+    </svg>
+  );
+}
+
+export function AppleMusicIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.75 5.5v5.75a2.5 2.5 0 1 1-1.5-2.29V8.6l-5 1.25v4.9a2.5 2.5 0 1 1-1.5-2.29V8.25a1 1 0 0 1 .76-.97l6.5-1.63a1 1 0 0 1 1.24.85z"/>
+    </svg>
+  );
+}
+
+export function SoundcloudIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M11.56 8.87v9.06h8.21c2.33 0 4.23-1.89 4.23-4.22 0-2.22-1.72-4.04-3.9-4.21-.36-2.58-2.56-4.57-5.23-4.57-1.19 0-2.3.4-3.18 1.08-.04.03-.09.07-.13.11v2.75zm-1.88.94c-.23 0-.42.19-.42.42v7.71c0 .23.19.42.42.42s.42-.19.42-.42v-7.71c0-.23-.19-.42-.42-.42zm-1.88.85c-.23 0-.42.19-.42.42v6.86c0 .23.19.42.42.42s.42-.19.42-.42v-6.86c0-.23-.19-.42-.42-.42zm-1.88.95c-.23 0-.42.19-.42.42v5.91c0 .23.19.42.42.42s.42-.19.42-.42V12c0-.23-.19-.42-.42-.42zm-1.88 1.34c-.23 0-.42.19-.42.42v4.57c0 .23.19.42.42.42s.42-.19.42-.42v-4.57c0-.23-.19-.42-.42-.42zm-1.88 1.05c-.23 0-.42.19-.42.42v3.52c0 .23.19.42.42.42s.42-.19.42-.42v-3.52c0-.23-.19-.42-.42-.42z"/>
+    </svg>
+  );
+}
+
+export function AnghamiIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c2.21 0 4 1.79 4 4 0 1.2-.53 2.27-1.37 3L17 15.5c-1.28 1.55-3.21 2.5-5 2.5-3.31 0-6-2.69-6-6 0-3.31 2.69-6 6-6zm0 2.5a3.5 3.5 0 0 0-3.5 3.5c0 1.93 1.57 3.5 3.5 3.5 1.15 0 2.17-.56 2.8-1.42l-1.57-1.31A1.75 1.75 0 0 1 12 14a2 2 0 1 1 2-2h-2V8.5z"/>
+    </svg>
+  );
+}
+
+export function SallaIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h6v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z"/>
+    </svg>
+  );
+}
+
+export function ZidIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M4 4h16v3.2l-9.8 10.4H20V20H4v-3.2l9.8-10.4H4V4z"/>
+    </svg>
+  );
+}
+
+export function DiscordIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+    </svg>
+  );
+}
+
+export function TwitchIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M2.149 0l-1.612 4.119v16.036h5.431v3.845h3.846l3.846-3.845h4.615l5.725-5.727V0H2.149zm19.462 13.432l-3.385 3.385h-5.128l-3.385 3.385v-3.385H5.431V2.149h16.18v11.283zM16.487 5.769h-2.154v6.462h2.154V5.769zm-5.385 0H8.948v6.462h2.154V5.769z"/>
+    </svg>
+  );
+}
+
+export function PinterestIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
+    </svg>
+  );
+}
+
 export function GenericLinkIcon({ className = "w-4 h-4" }: IconProps) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <circle cx="12" cy="12" r="10" />
       <line x1="2" x2="22" y1="12" y2="12" />
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -119,7 +179,26 @@ export const SOCIAL_ICON_MAP: Record<string, React.ComponentType<{ className?: s
   telegram: TelegramIcon,
   whatsapp: WhatsappIcon,
   tiktok: TikTokIcon,
+  snapchat: SnapchatIcon,
+  spotify: SpotifyIcon,
+  "apple-music": AppleMusicIcon,
+  applemusic: AppleMusicIcon,
+  soundcloud: SoundcloudIcon,
+  anghami: AnghamiIcon,
+  salla: SallaIcon,
+  zid: ZidIcon,
+  discord: DiscordIcon,
+  twitch: TwitchIcon,
+  pinterest: PinterestIcon,
+  custom: GenericLinkIcon,
+  other: GenericLinkIcon,
 };
+
+export function getSocialIcon(network: string): React.ComponentType<{ className?: string }> {
+  if (!network) return GenericLinkIcon;
+  const key = network.toLowerCase().trim();
+  return SOCIAL_ICON_MAP[key] || GenericLinkIcon;
+}
 
 export function SocialIcons({
   network,
@@ -128,7 +207,6 @@ export function SocialIcons({
   network: string;
   className?: string;
 }) {
-  const IconComponent = SOCIAL_ICON_MAP[network.toLowerCase()] || GenericLinkIcon;
+  const IconComponent = getSocialIcon(network);
   return <IconComponent className={className} />;
 }
-

@@ -1,6 +1,6 @@
 import React from "react";
 import { THEMES } from "@/features/appearance";
-import { SOCIAL_ICON_MAP, GenericLinkIcon } from "@/shared/ui";
+import { getSocialIcon } from "@/shared/ui";
 import { QrCode, Share2, CheckCircle2, MapPin } from "lucide-react";
 import { SocialItem } from "../types/bio.types";
 
@@ -13,6 +13,7 @@ interface ProfileCardProps {
   avatarUrl?: string | null;
   themeKey?: string;
   socials?: SocialItem[];
+  linksCount?: number;
   isPreview?: boolean;
   onOpenQr?: () => void;
   onOpenShare?: () => void;
@@ -25,6 +26,7 @@ export function ProfileCard({
   avatarUrl,
   themeKey = "default",
   socials = [],
+  linksCount,
   isPreview = false,
   onOpenQr,
   onOpenShare,
@@ -113,28 +115,29 @@ export function ProfileCard({
         </p>
       )}
 
-      {/* Quick Stats Bar */}
-      <div className="grid grid-cols-3 w-full bg-surface-container/60 rounded-xl p-2.5 mb-6 border border-white/5 divide-x divide-white/5 text-center shadow-xs">
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-bold text-primary">250K+</span>
-          <span className="text-[10px] text-on-surface-variant">متابع رقمي</span>
+      {/* Real Stats Bar (Zero-Mock) */}
+      {(linksCount !== undefined || socials.length > 0) && (
+        <div className="flex items-center justify-center gap-6 w-full bg-surface-container/60 rounded-xl p-2.5 mb-6 border border-white/5 text-center shadow-xs">
+          {linksCount !== undefined && (
+            <div className="flex flex-col items-center">
+              <span className="text-sm font-bold text-primary">{linksCount.toLocaleString("ar-SA")}</span>
+              <span className="text-[10px] text-on-surface-variant">رابط نشط</span>
+            </div>
+          )}
+          {socials.length > 0 && (
+            <div className="flex flex-col items-center">
+              <span className="text-sm font-bold text-tertiary">{socials.length.toLocaleString("ar-SA")}</span>
+              <span className="text-[10px] text-on-surface-variant">منصة تواصل</span>
+            </div>
+          )}
         </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-bold text-tertiary">14+</span>
-          <span className="text-[10px] text-on-surface-variant">مشروع ذكي</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-bold text-secondary">25K</span>
-          <span className="text-[10px] text-on-surface-variant">مشترك النشرة</span>
-        </div>
-      </div>
+      )}
 
       {/* Social Channels Row */}
       {socials.length > 0 && (
         <div className="flex flex-wrap items-center justify-center gap-2.5 mb-6">
           {socials.map((social) => {
-            const IconComponent =
-              SOCIAL_ICON_MAP[social.network.toLowerCase()] || GenericLinkIcon;
+            const IconComponent = getSocialIcon(social.network);
 
             const content = (
               <div
@@ -155,7 +158,7 @@ export function ProfileCard({
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block"
+                aria-label={`زيارة ${social.network}`}
               >
                 {content}
               </a>
@@ -166,4 +169,3 @@ export function ProfileCard({
     </div>
   );
 }
-

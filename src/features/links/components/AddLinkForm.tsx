@@ -5,6 +5,8 @@ import { AlertCircle } from "lucide-react";
 import { CATEGORIES } from "../constants/categories";
 import { validateLinkInput } from "../validators/link.validator";
 import { LinkData } from "../types/links.types";
+import { detectPlatform } from "../services/platform-detector";
+import { getSocialIcon } from "@/shared/ui";
 
 interface AddLinkFormProps {
   onAdd: (newLink: LinkData) => void;
@@ -18,6 +20,16 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
   const [newCategory, setNewCategory] = useState("link");
   const [error, setError] = useState<string | null>(null);
 
+  const detectedPlatform = detectPlatform(newUrl);
+
+  const handleUrlChange = (val: string) => {
+    setNewUrl(val);
+    const detected = detectPlatform(val);
+    if (detected && !newTitle.trim()) {
+      setNewTitle(detected.nameAr);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -28,6 +40,8 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
       return;
     }
 
+    const detected = detectPlatform(validation.normalizedUrl);
+
     const newLink: LinkData = {
       id: `link-${Date.now()}`,
       title: validation.title!,
@@ -35,11 +49,15 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
       isActive: true,
       position: existingCount,
       category: newCategory,
+      platformId: detected?.slug || null,
       clicks: 0,
+      clicksCount: 0,
     };
 
     onAdd(newLink);
   };
+
+  const PlatformIcon = detectedPlatform ? getSocialIcon(detectedPlatform.slug) : null;
 
   return (
     <form
@@ -89,12 +107,28 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
             type="text"
             placeholder="store.example.com"
             value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
+            onChange={(e) => handleUrlChange(e.target.value)}
             dir="ltr"
             className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-high border border-outline-variant/40 text-on-surface placeholder-on-surface-variant/50 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary text-right"
           />
         </div>
       </div>
+
+      {detectedPlatform && (
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-high border border-outline-variant/30 text-xs text-on-surface">
+          <span
+            className="w-2.5 h-2.5 rounded-full shrink-0"
+            style={{ backgroundColor: detectedPlatform.brandColor }}
+          />
+          {PlatformIcon && <PlatformIcon className="w-4 h-4 shrink-0 text-on-surface" />}
+          <span className="font-semibold text-primary">
+            تم التعرف على المنصة: {detectedPlatform.nameAr}
+          </span>
+          <span className="text-[11px] text-on-surface-variant font-mono">
+            ({detectedPlatform.slug})
+          </span>
+        </div>
+      )}
 
       <div>
         <label className="block text-xs font-medium text-on-surface-variant mb-1.5">
@@ -129,4 +163,3 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
     </form>
   );
 }
-

@@ -1,39 +1,82 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { SocialItem } from "../types/links.types";
-import { SOCIAL_ICON_MAP } from "@/shared/ui";
+import { SocialItem, PlatformDTO } from "../types/links.types";
+import { SOCIAL_ICON_MAP, GenericLinkIcon, getSocialIcon } from "@/shared/ui";
 
 interface SocialLinksEditorProps {
   socials: SocialItem[];
   onSocialsChange: (newSocials: SocialItem[]) => void;
 }
 
-const AVAILABLE_NETWORKS = [
-  { id: "instagram", name: "إنستغرام", placeholder: "https://instagram.com/username" },
-  { id: "x", name: "منصة إكس", placeholder: "https://x.com/username" },
-  { id: "youtube", name: "يوتيوب", placeholder: "https://youtube.com/@channel" },
-  { id: "tiktok", name: "تيك توك", placeholder: "https://tiktok.com/@username" },
-  { id: "whatsapp", name: "واتساب", placeholder: "https://wa.me/966xxxxxxxxx" },
-  { id: "telegram", name: "تيليجرام", placeholder: "https://t.me/username" },
-  { id: "linkedin", name: "لينكد إن", placeholder: "https://linkedin.com/in/username" },
-  { id: "github", name: "جيت هاب", placeholder: "https://github.com/username" },
+interface NetworkConfig {
+  id: string;
+  name: string;
+  placeholder: string;
+  brandColor?: string;
+}
+
+const DEFAULT_NETWORKS: NetworkConfig[] = [
+  { id: "instagram", name: "إنستغرام", placeholder: "https://instagram.com/username", brandColor: "#E1306C" },
+  { id: "x", name: "منصة إكس", placeholder: "https://x.com/username", brandColor: "#000000" },
+  { id: "youtube", name: "يوتيوب", placeholder: "https://youtube.com/@channel", brandColor: "#FF0000" },
+  { id: "tiktok", name: "تيك توك", placeholder: "https://tiktok.com/@username", brandColor: "#000000" },
+  { id: "snapchat", name: "سناب شات", placeholder: "https://snapchat.com/add/username", brandColor: "#FFFC00" },
+  { id: "whatsapp", name: "واتساب", placeholder: "https://wa.me/966500000000", brandColor: "#25D366" },
+  { id: "telegram", name: "تيليجرام", placeholder: "https://t.me/username", brandColor: "#0088CC" },
+  { id: "linkedin", name: "لينكد إن", placeholder: "https://linkedin.com/in/username", brandColor: "#0A66C2" },
+  { id: "github", name: "جيت هاب", placeholder: "https://github.com/username", brandColor: "#24292E" },
+  { id: "spotify", name: "سبوتيفاي", placeholder: "https://open.spotify.com/artist/...", brandColor: "#1DB954" },
+  { id: "apple-music", name: "أبل ميوزك", placeholder: "https://music.apple.com/artist/...", brandColor: "#FA2D48" },
+  { id: "soundcloud", name: "ساوند كلاود", placeholder: "https://soundcloud.com/artist", brandColor: "#FF5500" },
+  { id: "anghami", name: "أنغامي", placeholder: "https://play.anghami.com/artist/...", brandColor: "#7928CA" },
+  { id: "salla", name: "سلة", placeholder: "https://salla.sa/mystore", brandColor: "#00B4D8" },
+  { id: "zid", name: "زد", placeholder: "https://zid.store/mystore", brandColor: "#6C5CE7" },
+  { id: "discord", name: "ديسكورد", placeholder: "https://discord.gg/inviteCode", brandColor: "#5865F2" },
+  { id: "twitch", name: "تويتش", placeholder: "https://twitch.tv/channel", brandColor: "#9146FF" },
+  { id: "facebook", name: "فيسبوك", placeholder: "https://facebook.com/username", brandColor: "#1877F2" },
+  { id: "pinterest", name: "بينترست", placeholder: "https://pinterest.com/username", brandColor: "#E60023" },
+  { id: "custom", name: "رابط مخصص", placeholder: "https://example.com", brandColor: "#4EDEA3" },
 ];
 
 export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEditorProps) {
-  const [selectedNetwork, setSelectedNetwork] = useState(AVAILABLE_NETWORKS[0].id);
+  const [networks, setNetworks] = useState<NetworkConfig[]>(DEFAULT_NETWORKS);
+  const [selectedNetwork, setSelectedNetwork] = useState(DEFAULT_NETWORKS[0].id);
   const [networkUrl, setNetworkUrl] = useState("");
   const [isReordering, setIsReordering] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/platforms")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
+      .then((data: PlatformDTO[]) => {
+        if (!active || !Array.isArray(data) || data.length === 0) return;
+        setNetworks(
+          data.map((p) => ({
+            id: p.slug,
+            name: p.nameAr,
+            placeholder: p.urlPlaceholder || `https://${p.slug}.com/...`,
+            brandColor: p.brandColor,
+          }))
+        );
+      })
+      .catch(() => {
+        // Fallback gracefully to default networks
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleSelectNetwork = (netId: string) => {
     setSelectedNetwork(netId);
     const existing = socials.find((s) => s.network.toLowerCase() === netId.toLowerCase());
-    if (existing) {
-      setNetworkUrl(existing.url);
-    } else {
-      setNetworkUrl("");
-    }
+    setNetworkUrl(existing ? existing.url : "");
   };
 
   const handleAddSocial = (e: React.FormEvent) => {
@@ -49,15 +92,19 @@ export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEdito
       (s) => s.network.toLowerCase() === selectedNetwork.toLowerCase()
     );
 
+    const currentNet = networks.find((n) => n.id === selectedNetwork);
+
     if (existingIndex >= 0) {
       const updated = [...socials];
       updated[existingIndex].url = cleanUrl;
+      updated[existingIndex].platformId = currentNet?.id || selectedNetwork;
       onSocialsChange(updated);
     } else {
       const newSocial: SocialItem = {
         id: `social-${Date.now()}`,
         network: selectedNetwork,
         url: cleanUrl,
+        platformId: currentNet?.id || selectedNetwork,
       };
       onSocialsChange([...socials, newSocial]);
     }
@@ -67,7 +114,7 @@ export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEdito
     onSocialsChange(socials.filter((s) => s.id !== id));
   };
 
-  const currentNetObj = AVAILABLE_NETWORKS.find((n) => n.id === selectedNetwork) || AVAILABLE_NETWORKS[0];
+  const currentNetObj = networks.find((n) => n.id === selectedNetwork) || networks[0];
 
   return (
     <div className="space-y-4">
@@ -75,7 +122,7 @@ export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEdito
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-[20px]">hub</span>
-            <h3 className="font-bold text-on-surface text-base">شبكات التواصل السريعة</h3>
+            <h3 className="font-bold text-on-surface text-base">شبكات التواصل والمنصات</h3>
             <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-xs">
               {`${socials.length} منصات متصلة`}
             </span>
@@ -90,11 +137,11 @@ export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEdito
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 pt-1">
-          {AVAILABLE_NETWORKS.map((net) => {
-            const isConnected = socials.some((s) => s.network.toLowerCase() === net.id);
-            const isSelected = selectedNetwork === net.id;
-            const Icon = SOCIAL_ICON_MAP[net.id] || SOCIAL_ICON_MAP.other;
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2 pt-1 max-h-72 overflow-y-auto p-1">
+          {networks.map((net) => {
+            const isConnected = socials.some((s) => s.network.toLowerCase() === net.id.toLowerCase());
+            const isSelected = selectedNetwork.toLowerCase() === net.id.toLowerCase();
+            const Icon = SOCIAL_ICON_MAP[net.id.toLowerCase()] || GenericLinkIcon;
 
             return (
               <button
@@ -107,17 +154,22 @@ export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEdito
                     : "bg-surface-container border-outline-variant/20 hover:bg-surface-container-high hover:border-outline-variant/40"
                 }`}
               >
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 transition-transform ${
-                  isSelected ? "scale-110" : ""
-                }`}>
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 transition-transform ${
+                    isSelected ? "scale-110" : ""
+                  }`}
+                  style={net.brandColor ? { color: net.brandColor } : undefined}
+                >
                   <Icon className="w-5 h-5" />
                 </div>
                 <span className="text-xs font-medium text-on-surface truncate w-full text-center">
                   {net.name}
                 </span>
-                <span className={`text-[10px] mt-0.5 font-semibold ${
-                  isConnected ? "text-primary" : "text-on-surface-variant/50"
-                }`}>
+                <span
+                  className={`text-[10px] mt-0.5 font-semibold ${
+                    isConnected ? "text-primary" : "text-on-surface-variant/50"
+                  }`}
+                >
                   {isConnected ? "نشط ✓" : "+ إضافة"}
                 </span>
               </button>
@@ -135,11 +187,11 @@ export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEdito
             <span className="material-symbols-outlined text-primary text-[18px]">edit_link</span>
             <span>تحديث رابط: {currentNetObj.name}</span>
           </span>
-          {socials.some((s) => s.network === selectedNetwork) && (
+          {socials.some((s) => s.network.toLowerCase() === selectedNetwork.toLowerCase()) && (
             <button
               type="button"
               onClick={() => {
-                const item = socials.find((s) => s.network === selectedNetwork);
+                const item = socials.find((s) => s.network.toLowerCase() === selectedNetwork.toLowerCase());
                 if (item) handleDelete(item.id);
                 setNetworkUrl("");
               }}
@@ -172,4 +224,3 @@ export function SocialLinksEditor({ socials, onSocialsChange }: SocialLinksEdito
     </div>
   );
 }
-

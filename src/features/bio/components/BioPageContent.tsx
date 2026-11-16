@@ -62,6 +62,7 @@ export function BioPageContent({
           avatarUrl={profile.avatarUrl}
           themeKey={themeKey}
           socials={socials}
+          linksCount={links.length}
           isPreview={isPreview}
           onOpenQr={() => setIsQrOpen(true)}
           onOpenShare={() => setIsQrOpen(true)}
