@@ -15,6 +15,7 @@ export * from "./components/AdminSettingsTab";
 export * from "./components/AdminReportsTab";
 export * from "./components/AdminSessionsTab";
 export * from "./components/AdminSidebar";
+export * from "./components/sidebar";
 export * from "./components/AdminSidebarPullHandle";
 export * from "./components/payments/AdminFinancialsContainer";
 export * from "./components/payments/tabs/GatewaysSubTab";
