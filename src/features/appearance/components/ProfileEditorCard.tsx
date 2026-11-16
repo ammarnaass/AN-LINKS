@@ -11,6 +11,8 @@ interface ProfileEditorCardProps {
 }
 
 export function ProfileEditorCard({ profile, currentTheme, onChange }: ProfileEditorCardProps) {
+  const initialLetter = (profile.displayName?.trim()?.charAt(0) || "ر").toUpperCase();
+
   return (
     <section className="bg-surface-container-low rounded-2xl p-6 shadow-xl border border-outline-variant/30 space-y-5">
       <div className="flex items-center justify-between pb-4 border-b border-surface-container-highest/60">
@@ -30,11 +32,17 @@ export function ProfileEditorCard({ profile, currentTheme, onChange }: ProfileEd
 
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
         <div className="relative group">
-          <img
-            src={profile.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"}
-            alt={profile.displayName}
-            className="w-20 h-20 rounded-full object-cover shadow-[0_0_24px_rgba(78,222,163,0.25)] ring-2 ring-primary/40"
-          />
+          {profile.avatarUrl ? (
+            <img
+              src={profile.avatarUrl}
+              alt={profile.displayName || "صورة المستخدم"}
+              className="w-20 h-20 rounded-full object-cover shadow-[0_0_24px_rgba(78,222,163,0.25)] ring-2 ring-primary/40"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center font-bold text-2xl shadow-[0_0_24px_rgba(78,222,163,0.25)] ring-2 ring-primary/40 select-none">
+              {initialLetter}
+            </div>
+          )}
           <span className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-md">
             <span className="material-symbols-outlined text-[13px]">photo_camera</span>
           </span>

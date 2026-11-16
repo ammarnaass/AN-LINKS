@@ -5,7 +5,7 @@ import { ThemeCustomizer } from "@/features/appearance";
 import { usePreview } from "@/features/dashboard";
 import { PhoneMockup } from "@/shared/ui/phone/PhoneMockup";
 import { AppButton, AppBadge } from "@/shared/ui";
-import { Check, Save, Smartphone, ExternalLink, Sparkles } from "lucide-react";
+import { Check, Save, Smartphone, ExternalLink, X } from "lucide-react";
 import { ProfileData } from "@/features/appearance/types/appearance.types";
 
 export default function AppearancePage() {
@@ -13,46 +13,78 @@ export default function AppearancePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [lastAutoSaved, setLastAutoSaved] = useState<string | null>(null);
-  const isFirstRender = useRef(true);
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
 
-  // Auto-save logic debounced 600ms
+  const isFirstRender = useRef(true);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const getProfilePayload = () => ({
+    displayName: preview.displayName,
+    bio: preview.bio,
+    avatarUrl: preview.avatarUrl,
+    themeKey: preview.themeKey,
+    accentColor: preview.accentColor,
+    buttonStyle: preview.buttonStyle,
+    borderRadius: preview.borderRadius,
+    font: preview.font,
+    backgroundType: preview.backgroundType,
+    customBackground: preview.customBackground,
+    buttonShadow: preview.buttonShadow,
+    socialPosition: preview.socialPosition,
+  });
+
+  // Auto-save logic debounced 600ms with AbortController
   useEffect(() => {
+    if (!preview.isLoaded) return;
+
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
 
-    const timer = setTimeout(async () => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(async () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
         setIsSaving(true);
         const res = await fetch("/api/profile", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            displayName: preview.displayName,
-            bio: preview.bio,
-            avatarUrl: preview.avatarUrl,
-            themeKey: preview.themeKey,
-            accentColor: preview.accentColor,
-            buttonStyle: preview.buttonStyle,
-            borderRadius: preview.borderRadius,
-            font: preview.font,
-          }),
+          body: JSON.stringify(getProfilePayload()),
+          signal: controller.signal,
         });
         if (res.ok) {
           const now = new Date();
           const timeStr = now.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
           setLastAutoSaved(`محفوظ تلقائياً ${timeStr}`);
         }
-      } catch (err) {
-        console.error("Auto-save failed", err);
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== "AbortError") {
+          console.error("Auto-save failed", err);
+        }
       } finally {
-        setIsSaving(false);
+        if (abortControllerRef.current === controller) {
+          setIsSaving(false);
+        }
       }
     }, 600);
 
-    return () => clearTimeout(timer);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, [
+    preview.isLoaded,
     preview.themeKey,
     preview.accentColor,
     preview.buttonStyle,
@@ -61,31 +93,46 @@ export default function AppearancePage() {
     preview.displayName,
     preview.bio,
     preview.avatarUrl,
+    preview.backgroundType,
+    preview.customBackground,
+    preview.buttonShadow,
+    preview.socialPosition,
   ]);
 
   const handleManualSave = async () => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsSaving(true);
     try {
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          displayName: preview.displayName,
-          bio: preview.bio,
-          avatarUrl: preview.avatarUrl,
-          themeKey: preview.themeKey,
-          accentColor: preview.accentColor,
-          buttonStyle: preview.buttonStyle,
-          borderRadius: preview.borderRadius,
-          font: preview.font,
-        }),
+        body: JSON.stringify(getProfilePayload()),
+        signal: controller.signal,
       });
       if (res.ok) {
         setSavedSuccess(true);
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
+        setLastAutoSaved(`محفوظ ${timeStr}`);
         setTimeout(() => setSavedSuccess(false), 2500);
       }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name !== "AbortError") {
+        console.error("Manual save failed", err);
+      }
     } finally {
-      setIsSaving(false);
+      if (abortControllerRef.current === controller) {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -96,9 +143,13 @@ export default function AppearancePage() {
       avatarUrl: newProfile.avatarUrl || undefined,
       themeKey: newProfile.themeKey || "layanDark",
       accentColor: newProfile.accentColor || "#4edea3",
-      buttonStyle: (newProfile.buttonStyle as any) || "filled",
-      borderRadius: (newProfile.borderRadius as any) || "rounded-xl",
+      buttonStyle: newProfile.buttonStyle || "filled",
+      borderRadius: newProfile.borderRadius || "rounded-xl",
       font: newProfile.font || "Cairo",
+      backgroundType: newProfile.backgroundType || "THEME",
+      customBackground: newProfile.customBackground !== undefined ? newProfile.customBackground : null,
+      buttonShadow: newProfile.buttonShadow || "none",
+      socialPosition: newProfile.socialPosition || "top",
     });
   };
 
@@ -124,6 +175,16 @@ export default function AppearancePage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Mobile Preview Toggle Button (< 1024px) */}
+          <button
+            type="button"
+            onClick={() => setShowMobilePreview(!showMobilePreview)}
+            className="lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-high border border-outline-variant/30 text-on-surface text-xs font-semibold shadow-sm hover:bg-surface-container"
+          >
+            <Smartphone className="w-4 h-4 text-primary" />
+            <span>معاينة الهاتف</span>
+          </button>
+
           <AppButton
             variant="primary"
             size="md"
@@ -149,12 +210,17 @@ export default function AppearancePage() {
               buttonStyle: preview.buttonStyle,
               borderRadius: preview.borderRadius,
               font: preview.font,
+              backgroundType: preview.backgroundType,
+              customBackground: preview.customBackground,
+              buttonShadow: preview.buttonShadow,
+              socialPosition: preview.socialPosition,
             }}
             onProfileChange={handleProfileChange}
           />
         </div>
 
-        <div className="lg:col-span-5 flex justify-center sticky top-24">
+        {/* Desktop Sticky Live Phone Mockup */}
+        <div className="hidden lg:flex lg:col-span-5 justify-center sticky top-24">
           <div className="flex flex-col items-center">
             <div className="w-full max-w-[340px] mb-3 flex items-center justify-between px-2 text-xs">
               <div className="flex items-center gap-1.5 font-medium text-on-surface-variant">
@@ -184,12 +250,56 @@ export default function AppearancePage() {
               buttonStyle={preview.buttonStyle}
               borderRadius={preview.borderRadius}
               font={preview.font}
+              backgroundType={preview.backgroundType}
+              customBackground={preview.customBackground}
+              buttonShadow={preview.buttonShadow}
+              socialPosition={preview.socialPosition}
               links={preview.links}
               socials={preview.socials}
             />
           </div>
         </div>
       </div>
+
+      {/* Mobile Drawer/Modal for Phone Preview (< 1024px) */}
+      {showMobilePreview && (
+        <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end bg-black/70 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-surface-container-low border border-outline-variant/30 rounded-3xl p-4 max-h-[92vh] overflow-y-auto flex flex-col items-center relative">
+            <div className="w-full flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+              <div className="flex items-center gap-1.5 font-bold text-sm text-on-surface">
+                <Smartphone className="w-4 h-4 text-primary" />
+                <span>معاينة الجوال الحية</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobilePreview(false)}
+                className="p-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-on-surface"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <PhoneMockup
+              showFloatingCards={false}
+              username={preview.username}
+              displayName={preview.displayName}
+              bio={preview.bio}
+              avatarUrl={preview.avatarUrl}
+              themeKey={preview.themeKey}
+              accentColor={preview.accentColor}
+              buttonStyle={preview.buttonStyle}
+              borderRadius={preview.borderRadius}
+              font={preview.font}
+              backgroundType={preview.backgroundType}
+              customBackground={preview.customBackground}
+              buttonShadow={preview.buttonShadow}
+              socialPosition={preview.socialPosition}
+              links={preview.links}
+              socials={preview.socials}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
