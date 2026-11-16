@@ -1,6 +1,46 @@
 import type { Metadata } from "next";
+import {
+  Cairo,
+  Tajawal,
+  IBM_Plex_Sans_Arabic,
+  Almarai,
+  Readex_Pro,
+} from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/features/auth";
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-cairo",
+});
+
+const tajawal = Tajawal({
+  subsets: ["arabic"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+  variable: "--font-tajawal",
+});
+
+const ibmPlex = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-plex",
+});
+
+const almarai = Almarai({
+  subsets: ["arabic"],
+  weight: ["300", "400", "700", "800"],
+  display: "swap",
+  variable: "--font-almarai",
+});
+
+const readex = Readex_Pro({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-readex",
+});
 
 export const metadata: Metadata = {
   title: "AN LINKS | أسرع منصة لروابط الـ Bio بالعربية",
@@ -13,7 +53,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className="dark" suppressHydrationWarning>
+    <html
+      lang="ar"
+      dir="rtl"
+      className={`dark ${cairo.variable} ${tajawal.variable} ${ibmPlex.variable} ${almarai.variable} ${readex.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -35,10 +80,6 @@ export default function RootLayout({
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
           rel="stylesheet"

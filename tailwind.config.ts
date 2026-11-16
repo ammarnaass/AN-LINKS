@@ -42,8 +42,11 @@ const config: Config = {
       },
       fontFamily: {
         cairo: ["var(--font-cairo)", "Cairo", "sans-serif"],
-        plex: ["'IBM Plex Sans Arabic'", "'IBM Plex Sans'", "var(--font-cairo)", "sans-serif"],
-        sans: ["'IBM Plex Sans Arabic'", "'Cairo'", "system-ui", "sans-serif"],
+        tajawal: ["var(--font-tajawal)", "Tajawal", "sans-serif"],
+        plex: ["var(--font-plex)", "'IBM Plex Sans Arabic'", "sans-serif"],
+        almarai: ["var(--font-almarai)", "Almarai", "sans-serif"],
+        readex: ["var(--font-readex)", "'Readex Pro'", "sans-serif"],
+        sans: ["var(--font-plex)", "var(--font-cairo)", "system-ui", "sans-serif"],
       },
     },
   },

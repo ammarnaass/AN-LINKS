@@ -6,4 +6,5 @@ export * from "./components/ButtonAndRadiusPicker";
 export * from "./components/FontPicker";
 export * from "./components/ThemeCustomizer";
 export * from "./utils/sanitizer";
+export * from "./utils/theme-resolver";
 
