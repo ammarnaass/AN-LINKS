@@ -1,50 +1,33 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowLeft, Globe } from "lucide-react";
-import { THEMES, BUTTON_STYLES } from "@/features/appearance";
+import { THEMES, BUTTON_STYLES, BUTTON_SHADOWS, BORDER_RADIUS_MAP } from "@/features/appearance";
 import { LinkItem } from "../types/bio.types";
 
 export type { LinkItem };
 
-interface LinkButtonProps {
+export interface LinkButtonProps {
   link: LinkItem;
   themeKey?: string;
   buttonStyle?: string | null;
   borderRadius?: string | null;
   accentColor?: string | null;
+  buttonShadow?: string | null;
+  buttonClass?: string;
   isPreview?: boolean;
   highlightBadge?: string | null;
 }
 
-export function LinkButton({
+function LinkInner({
   link,
-  themeKey = "default",
-  buttonStyle,
-  borderRadius,
-  accentColor,
-  isPreview = false,
   highlightBadge,
-}: LinkButtonProps) {
-  const effectiveButtonStyle = buttonStyle || "filled";
-  const effectiveBorderRadius = borderRadius || "rounded-xl";
-  const theme = THEMES[themeKey] || THEMES.default;
-  const styleModifier = BUTTON_STYLES[effectiveButtonStyle] || "";
-  const href = isPreview ? "#" : `/go/${link.id}`;
-
-  const customStyle: React.CSSProperties = {};
-  if (accentColor && effectiveButtonStyle === "filled") {
-    customStyle.borderColor = accentColor;
-  }
-
-  const content = (
-    <div
-      className={`group relative w-full p-4 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-0.5 active:scale-[0.99] overflow-hidden shadow-lg border border-white/5 ${theme.buttonClass} ${borderRadius} ${styleModifier}`}
-      style={customStyle}
-    >
-      {/* Shimmer Glow Underlay */}
+}: {
+  link: LinkItem;
+  highlightBadge?: string | null;
+}) {
+  return (
+    <>
       <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary-container/20 to-transparent opacity-40 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
-      {/* Title & Icon */}
       <div className="relative flex items-center gap-3.5 min-w-0 z-10">
         <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary-container/80 text-on-primary-container flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
           <Globe className="w-5 h-5" />
@@ -65,24 +48,63 @@ export function LinkButton({
           </span>
         </div>
       </div>
-
-      {/* Forward Arrow Indicator */}
       <div className="relative z-10 w-8 h-8 rounded-full bg-surface-container/80 flex items-center justify-center text-primary group-hover:-translate-x-1 transition-transform shrink-0">
         <ArrowLeft className="w-4 h-4" />
       </div>
+    </>
+  );
+}
+
+function resolveLinkStyles(
+  buttonStyle?: string | null,
+  borderRadius?: string | null,
+  themeKey?: string,
+  buttonShadow?: string | null,
+  buttonClass?: string
+) {
+  const effectiveButtonStyle = buttonStyle || "filled";
+  const effectiveBorderRadius = borderRadius || "rounded-xl";
+  const resolvedRadius = BORDER_RADIUS_MAP[effectiveBorderRadius] || effectiveBorderRadius;
+  const theme = THEMES[themeKey || "layanDark"] || THEMES.layanDark;
+  const styleModifier = BUTTON_STYLES[effectiveButtonStyle] || BUTTON_STYLES.filled;
+  const shadowModifier = BUTTON_SHADOWS[buttonShadow || "none"] || BUTTON_SHADOWS.none;
+  const resolvedButtonClass = (buttonClass || `${theme.buttonClass} ${styleModifier} ${shadowModifier}`).trim();
+  return { effectiveButtonStyle, resolvedRadius, resolvedButtonClass };
+}
+
+export function LinkButton({
+  link,
+  themeKey = "layanDark",
+  buttonStyle,
+  borderRadius,
+  accentColor,
+  buttonShadow,
+  buttonClass,
+  isPreview = false,
+  highlightBadge,
+}: LinkButtonProps) {
+  const { effectiveButtonStyle, resolvedRadius, resolvedButtonClass } =
+    resolveLinkStyles(buttonStyle, borderRadius, themeKey, buttonShadow, buttonClass);
+  const customStyle: React.CSSProperties =
+    accentColor && effectiveButtonStyle === "filled" ? { borderColor: accentColor } : {};
+
+  const content = (
+    <div
+      className={`group relative w-full p-4 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-0.5 active:scale-[0.99] overflow-hidden border border-white/5 ${resolvedRadius} ${resolvedButtonClass}`}
+      style={customStyle}
+    >
+      <LinkInner link={link} highlightBadge={highlightBadge} />
     </div>
   );
 
-  if (isPreview) {
-    return <div className="w-full cursor-pointer">{content}</div>;
-  }
+  if (isPreview) return <div className="w-full cursor-pointer">{content}</div>;
 
   return (
     <Link
-      href={href}
+      href={`/go/${link.id}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-xl"
+      className={`block w-full focus:outline-none focus:ring-2 focus:ring-primary ${resolvedRadius}`}
     >
       {content}
     </Link>
