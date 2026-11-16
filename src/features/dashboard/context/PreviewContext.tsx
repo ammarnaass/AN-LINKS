@@ -20,12 +20,17 @@ export interface PreviewState {
   username: string;
   displayName: string;
   bio: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   themeKey: string;
   accentColor: string;
-  buttonStyle: "filled" | "outline" | "soft" | "shadow";
-  borderRadius: "rounded-none" | "rounded-lg" | "rounded-xl" | "rounded-full";
+  buttonStyle: string;
+  buttonShadow: string;
+  borderRadius: string;
   font: string;
+  backgroundType: string;
+  customBackground: string | null;
+  socialPosition: string;
+  isLoaded: boolean;
   links: PreviewLinkItem[];
   socials: PreviewSocialItem[];
 }
@@ -41,12 +46,17 @@ const DEFAULT_PREVIEW: PreviewState = {
   username: "creator",
   displayName: "صانع محتوى",
   bio: "أهلاً بكم في صفحتي الشخصية على منصة روابط",
-  avatarUrl: undefined,
-  themeKey: "default",
+  avatarUrl: null,
+  themeKey: "layanDark",
   accentColor: "#4edea3",
   buttonStyle: "filled",
+  buttonShadow: "none",
   borderRadius: "rounded-xl",
   font: "Cairo",
+  backgroundType: "THEME",
+  customBackground: null,
+  socialPosition: "top",
+  isLoaded: false,
   links: [],
   socials: [],
 };
@@ -63,6 +73,7 @@ export function PreviewProvider({
   const [preview, setPreview] = useState<PreviewState>({
     ...DEFAULT_PREVIEW,
     ...initialData,
+    isLoaded: Boolean(initialData),
   });
 
   useEffect(() => {
@@ -82,14 +93,26 @@ export function PreviewProvider({
             themeKey: p.profile.themeKey || prev.themeKey,
             accentColor: p.profile.accentColor || prev.accentColor,
             buttonStyle: p.profile.buttonStyle || prev.buttonStyle,
+            buttonShadow: p.profile.buttonShadow || prev.buttonShadow,
             borderRadius: p.profile.borderRadius || prev.borderRadius,
             font: p.profile.font || prev.font,
+            backgroundType: p.profile.backgroundType || prev.backgroundType,
+            customBackground:
+              p.profile.customBackground !== undefined
+                ? p.profile.customBackground
+                : prev.customBackground,
+            socialPosition: p.profile.socialPosition || prev.socialPosition,
             links: l?.links || [],
             socials: l?.socials || [],
+            isLoaded: true,
           }));
+        } else {
+          setPreview((prev) => ({ ...prev, isLoaded: true }));
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setPreview((prev) => ({ ...prev, isLoaded: true }));
+      });
   }, [initialData]);
 
   const updateProfile = useCallback((partial: Partial<PreviewState>) => {

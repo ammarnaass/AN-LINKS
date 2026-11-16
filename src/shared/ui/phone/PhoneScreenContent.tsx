@@ -1,6 +1,7 @@
 import React from "react";
 import { CheckCircle2, ExternalLink, Sparkles } from "lucide-react";
 import { SocialIcons } from "../SocialIcons";
+import { resolveThemeStyles, BORDER_RADIUS_MAP } from "@/features/appearance";
 
 export interface PhoneScreenContentProps {
   displayName?: string;
@@ -14,85 +15,131 @@ export interface PhoneScreenContentProps {
   buttonStyle?: string | null;
   borderRadius?: string | null;
   font?: string | null;
+  backgroundType?: string | null;
+  customBackground?: string | null;
+  buttonShadow?: string | null;
+  socialPosition?: string | null;
 }
 
-const DEFAULT_LINKS = [
-  { id: "1", title: "متجري الرقمي - قوالب وتطبيقات", url: "https://store.anlinks.dev", isActive: true },
-  { id: "2", title: "قناتي على يوتيوب - أحدث حلقة", url: "https://youtube.com", isActive: true },
-  { id: "3", title: "حجز استشارة خاصة عبر واتساب", url: "https://wa.me", isActive: true },
-];
-
-const DEFAULT_SOCIALS = [
-  { network: "x", url: "https://x.com" },
-  { network: "youtube", url: "https://youtube.com" },
-  { network: "github", url: "https://github.com" },
-  { network: "instagram", url: "https://instagram.com" },
-];
-
 export function PhoneScreenContent({
-  displayName = "فيصل الشمري",
-  username = "faisal_client",
-  bio = "صانع محتوى تقني وتجارة رقمية 🚀 | روابطي ومتاجري الرسمية",
-  avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
-  links = DEFAULT_LINKS,
-  socials = DEFAULT_SOCIALS,
+  displayName,
+  username,
+  bio,
+  avatarUrl,
+  links = [],
+  socials = [],
+  themeKey,
+  accentColor,
+  buttonStyle,
   borderRadius = "rounded-xl",
+  font,
+  backgroundType,
+  customBackground,
+  buttonShadow,
+  socialPosition = "top",
 }: PhoneScreenContentProps) {
-  const activeLinks = links.filter((l) => l.isActive !== false);
+  const styles = resolveThemeStyles({
+    themeKey,
+    accentColor,
+    buttonStyle,
+    borderRadius,
+    font,
+    backgroundType,
+    customBackground,
+    buttonShadow,
+  });
+
+  const activeLinks = (links || []).filter((l) => l.isActive !== false);
+  const initialLetter = (displayName?.trim()?.charAt(0) || username?.trim()?.charAt(0) || "ر").toUpperCase();
+  const resolvedRadius = BORDER_RADIUS_MAP[borderRadius || "rounded-xl"] || borderRadius || "rounded-xl";
+
+  const socialIconsBar = socials && socials.length > 0 ? (
+    <div className="flex items-center justify-center flex-wrap gap-2 my-2.5 p-2 bg-surface-container/70 rounded-full border border-white/5">
+      {socials.map((s, idx) => (
+        <span
+          key={idx}
+          className={`w-7 h-7 rounded-full flex items-center justify-center ${styles.socialIconClass || "text-on-surface-variant"}`}
+        >
+          <SocialIcons network={s.network} className="w-3.5 h-3.5" />
+        </span>
+      ))}
+    </div>
+  ) : null;
 
   return (
-    <div className="flex-1 w-full px-5 py-3 flex flex-col items-center justify-between text-center overflow-y-auto no-scrollbar font-cairo">
-      {/* Profile Header */}
-      <div className="flex flex-col items-center w-full">
-        <div className="relative mb-3">
-          <div className="w-20 h-20 rounded-full ring-2 ring-primary/40 p-1 bg-surface-container-high overflow-hidden shadow-lg">
-            <img
-              src={avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"}
-              alt={displayName || "المستخدم"}
-              className="w-full h-full object-cover rounded-full"
-              loading="lazy"
-            />
+    <div
+      className={`w-full h-full min-h-full flex flex-col items-center justify-between px-4 pt-12 pb-6 select-none overflow-y-auto no-scrollbar ${styles.backgroundClass} ${styles.fontClass}`}
+      style={styles.backgroundStyle}
+    >
+      <div className="w-full flex flex-col items-center">
+        {/* Profile Header */}
+        <div className="flex flex-col items-center w-full">
+          <div className="relative mb-3">
+            <div className="w-20 h-20 rounded-full ring-2 ring-primary/40 p-1 bg-surface-container-high overflow-hidden shadow-lg flex items-center justify-center">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={displayName || username || "المستخدم"}
+                  className="w-full h-full object-cover rounded-full"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center font-bold text-2xl select-none">
+                  {initialLetter}
+                </div>
+              )}
+            </div>
+            <div className="absolute -bottom-1 -right-1 bg-primary text-on-primary rounded-full p-0.5 shadow">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
           </div>
-          <div className="absolute -bottom-1 -right-1 bg-primary text-on-primary rounded-full p-0.5 shadow">
-            <CheckCircle2 className="w-4 h-4" />
-          </div>
+
+          <h3 className={`font-bold text-base flex items-center gap-1.5 mb-0.5 ${styles.textPrimaryClass}`}>
+            <span>{displayName || username || "مستخدم منصة روابط"}</span>
+          </h3>
+          {username && (
+            <p className={`text-xs font-semibold mb-2 ${styles.textSecondaryClass}`} dir="ltr">
+              @{username}
+            </p>
+          )}
+          {bio && (
+            <p className={`text-xs max-w-[240px] leading-relaxed mb-3 text-center ${styles.textSecondaryClass}`}>
+              {bio}
+            </p>
+          )}
         </div>
 
-        <h3 className="font-bold text-base text-on-surface flex items-center gap-1.5 mb-0.5">
-          <span>{displayName || "مستخدم منصة روابط"}</span>
-        </h3>
-        <p className="text-xs text-primary font-semibold mb-2" dir="ltr">
-          @{username || "user"}
-        </p>
-        {bio && (
-          <p className="text-xs text-on-surface-variant max-w-[240px] leading-relaxed mb-4">
-            {bio}
-          </p>
+        {/* Top Socials */}
+        {socialPosition !== "bottom" && socialIconsBar}
+
+        {/* Dynamic Links List or Empty State */}
+        {activeLinks.length > 0 ? (
+          <div className="w-full flex flex-col gap-2.5 my-2">
+            {activeLinks.map((link) => (
+              <div
+                key={link.id}
+                style={styles.buttonStyleProps}
+                className={`w-full p-3 ${resolvedRadius} ${styles.buttonClass} flex items-center justify-between transition-all text-xs font-semibold`}
+              >
+                <span className="truncate pr-1">{link.title}</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-70 shrink-0" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="w-full text-center py-6 px-4 rounded-xl bg-surface-container-low/60 border border-dashed border-outline-variant/40 my-2">
+            <p className="text-xs text-on-surface-variant font-medium">
+              لا توجد روابط منشورة حالياً
+            </p>
+          </div>
         )}
 
-        {/* Social Icons Bar */}
-        <div className="flex items-center justify-center gap-2 mb-4 p-2 bg-surface-container/70 rounded-full border border-white/5">
-          {socials.map((s, idx) => (
-            <SocialIcons key={idx} network={s.network} className="w-3.5 h-3.5 text-on-surface-variant" />
-          ))}
-        </div>
-      </div>
-
-      {/* Dynamic Links List */}
-      <div className="w-full flex flex-col gap-2.5 my-2">
-        {activeLinks.map((link) => (
-          <div
-            key={link.id}
-            className={`w-full p-3 ${borderRadius || "rounded-xl"} bg-surface-container border border-outline-variant/30 text-on-surface flex items-center justify-between transition-all hover:border-primary/40 hover:bg-surface-container-high text-xs font-semibold shadow-xs`}
-          >
-            <span className="truncate pr-1">{link.title}</span>
-            <ExternalLink className="w-3.5 h-3.5 text-outline shrink-0" />
-          </div>
-        ))}
+        {/* Bottom Socials */}
+        {socialPosition === "bottom" && socialIconsBar}
       </div>
 
       {/* Footer Branding */}
-      <div className="pt-3 pb-1 flex items-center gap-1 text-[11px] text-outline">
+      <div className="pt-4 pb-1 flex items-center gap-1 text-[11px] text-outline mt-auto shrink-0">
         <Sparkles className="w-3 h-3 text-primary" />
         <span>مدعوم بواسطة روابط | AN LINKS</span>
       </div>

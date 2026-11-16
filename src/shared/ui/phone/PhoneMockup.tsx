@@ -19,7 +19,9 @@ export function PhoneMockup({
       {showFloatingCards && <FloatingMetricCards />}
 
       <PhoneChassis>
-        <PhoneDynamicIsland />
+        <div className="absolute top-0 inset-x-0 z-20 pointer-events-none">
+          <PhoneDynamicIsland />
+        </div>
         <PhoneScreenContent {...screenProps} />
       </PhoneChassis>
     </div>
@@ -30,4 +32,3 @@ export * from "./PhoneChassis";
 export * from "./PhoneDynamicIsland";
 export * from "./PhoneScreenContent";
 export * from "./FloatingMetricCards";
-

@@ -22,11 +22,10 @@ export function PhoneChassis({ children, className = "" }: PhoneChassisProps) {
         {children}
 
         {/* Home Indicator bar */}
-        <div className="w-full pb-2 flex justify-center shrink-0 z-30">
+        <div className="absolute bottom-1.5 inset-x-0 flex justify-center pointer-events-none z-30">
           <div className="w-32 h-1 bg-on-surface/30 rounded-full" />
         </div>
       </div>
     </div>
   );
 }
-
