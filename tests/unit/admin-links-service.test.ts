@@ -193,6 +193,85 @@ describe("Admin Links & Platforms Service and API Routes", () => {
       expect(result.items[0].isPinned).toBe(true);
     });
 
+    it("should build correct Prisma where clauses for diverse filter combinations", async () => {
+      vi.mocked(prisma.link.count).mockResolvedValue(0);
+      vi.mocked(prisma.link.findMany).mockResolvedValue([]);
+
+      // 1. Filter: status "active" and specific platformId
+      await getAdminLinks({ platformId: "plat-yt", status: "active" });
+      expect(prisma.link.findMany).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            platformId: "plat-yt",
+            isActive: true,
+            isArchived: false,
+          }),
+        })
+      );
+
+      // 2. Filter: status "inactive" with platformId "all"
+      await getAdminLinks({ platformId: "all", status: "inactive" });
+      expect(prisma.link.findMany).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            isActive: false,
+          }),
+        })
+      );
+      // Ensure platformId was omitted from where when "all"
+      const lastCallWhere = vi.mocked(prisma.link.findMany).mock.calls.at(-1)?.[0]?.where as any;
+      expect(lastCallWhere.platformId).toBeUndefined();
+
+      // 3. Filter: status "archived" and search
+      await getAdminLinks({ status: "archived", search: "  creator@test.com  " });
+      expect(prisma.link.findMany).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            isArchived: true,
+            OR: expect.arrayContaining([
+              { title: { contains: "creator@test.com", mode: "insensitive" } },
+              { url: { contains: "creator@test.com", mode: "insensitive" } },
+              { user: { username: { contains: "creator@test.com", mode: "insensitive" } } },
+              { user: { email: { contains: "creator@test.com", mode: "insensitive" } } },
+              { user: { profile: { displayName: { contains: "creator@test.com", mode: "insensitive" } } } },
+            ]),
+          }),
+        })
+      );
+    });
+
+    it("should enforce pagination bounds and calculate skip & totalPages correctly", async () => {
+      vi.mocked(prisma.link.count).mockResolvedValue(45);
+      vi.mocked(prisma.link.findMany).mockResolvedValue([]);
+
+      // Case A: Negative page and excessive limit (> 100)
+      const resA = await getAdminLinks({ page: -5, limit: 500 });
+      expect(resA.page).toBe(1);
+      expect(prisma.link.findMany).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          skip: 0,
+          take: 100, // Clamped to 100 max
+        })
+      );
+      expect(resA.totalPages).toBe(1); // 45 / 100 = 1 page
+
+      // Case B: page 3 with limit 10
+      const resB = await getAdminLinks({ page: 3, limit: 10 });
+      expect(resB.page).toBe(3);
+      expect(prisma.link.findMany).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          skip: 20, // (3 - 1) * 10
+          take: 10,
+        })
+      );
+      expect(resB.totalPages).toBe(5); // Math.ceil(45 / 10) = 5
+
+      // Case C: zero total items should return totalPages 1
+      vi.mocked(prisma.link.count).mockResolvedValueOnce(0);
+      const resC = await getAdminLinks({ page: 1, limit: 20 });
+      expect(resC.totalPages).toBe(1);
+    });
+
     it("should update admin link status (pin, archive, active)", async () => {
       vi.mocked(prisma.link.update).mockResolvedValueOnce({
         id: "link-1",

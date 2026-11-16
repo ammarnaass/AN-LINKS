@@ -395,5 +395,63 @@ describe("Link Tracking & Atomic Redirection Integration Tests (Task 3)", () => 
         "https://disabledplatform.com/@user/hello"
       );
     });
+
+    it("SCHEMA POLICY: should preserve creator links and set platformId to null on platform deletion (SetNull)", async () => {
+      // 1. Create a transient platform
+      const tempPlatform = await prisma.platform.create({
+        data: {
+          slug: `transient_${Date.now()}`,
+          nameAr: "منصة مؤقتة",
+          nameEn: "Transient Platform",
+          category: "COMMERCE",
+          defaultIcon: "shopping-bag",
+          brandColor: "#778899",
+          domainPattern: "transient.shop",
+          urlPlaceholder: "https://transient.shop/@user",
+          isEnabled: true,
+        },
+      });
+
+      // 2. Create a link tied to this platform
+      const tiedLink = await prisma.link.create({
+        data: {
+          userId: testUserId,
+          platformId: tempPlatform.id,
+          title: "Tied Link to Transient Platform",
+          url: "https://transient.shop/@user/store",
+          isActive: true,
+          isArchived: false,
+          clicksCount: 0,
+        },
+      });
+
+      expect(tiedLink.platformId).toBe(tempPlatform.id);
+
+      // 3. Delete the platform from database
+      await prisma.platform.delete({
+        where: { id: tempPlatform.id },
+      });
+
+      // 4. Verify link was NOT deleted, but platformId was set to null (onDelete: SetNull)
+      const survivingLink = await prisma.link.findUnique({
+        where: { id: tiedLink.id },
+      });
+
+      expect(survivingLink).toBeDefined();
+      expect(survivingLink?.id).toBe(tiedLink.id);
+      expect(survivingLink?.platformId).toBeNull();
+
+      // 5. Verify redirection still works seamlessly even with platformId = null
+      const request = new NextRequest(`http://localhost:3000/go/${tiedLink.id}`);
+      const response = await handleGoRedirect(request, {
+        params: Promise.resolve({ id: tiedLink.id }),
+      });
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get("location")).toBe("https://transient.shop/@user/store");
+
+      // Clean up the tied link
+      await prisma.link.delete({ where: { id: tiedLink.id } });
+    });
   });
 });

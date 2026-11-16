@@ -9,14 +9,14 @@ export interface DeviceInfo {
 }
 
 export function detectDevice(ua: string): DeviceType {
-  if (/(ipad|tablet|(android(?!.*mobile))|playbook|silk)/i.test(ua)) {
+  if (/(ipad|tablet|playbook|silk)/i.test(ua)) {
     return "TABLET";
   }
   if (/(mobi|iphone|ipod|blackberry|opera mini|iemobile|wpdesktop)/i.test(ua)) {
     return "MOBILE";
   }
   if (/android/i.test(ua)) {
-    return "MOBILE";
+    return "TABLET";
   }
   if (/(windows|macintosh|mac os x|linux|cros)/i.test(ua)) {
     return "DESKTOP";
@@ -31,7 +31,7 @@ export function detectOS(ua: string): OSType {
   if (/android/i.test(ua)) {
     return "Android";
   }
-  if (/(windows nt|win32|win64)/i.test(ua)) {
+  if (/(windows nt|win32|win64|windows phone)/i.test(ua)) {
     return "Windows";
   }
   if (/(macintosh|mac os x)/i.test(ua)) {

@@ -89,17 +89,73 @@ describe("Device Detector Utility", () => {
       os: "Other",
       browser: "Other",
     });
+    expect(parseUserAgent("\t\n\r  ")).toEqual({
+      device: "UNKNOWN",
+      os: "Other",
+      browser: "Other",
+    });
     expect(parseUserAgent(undefined)).toEqual({
+      device: "UNKNOWN",
+      os: "Other",
+      browser: "Other",
+    });
+    expect(parseUserAgent("unknown-raw-token-123")).toEqual({
       device: "UNKNOWN",
       os: "Other",
       browser: "Other",
     });
   });
 
-  it("should detect custom or bot agents gracefully", () => {
-    expect(detectDevice("Googlebot/2.1 (+http://www.google.com/bot.html)")).toBe("UNKNOWN");
-    expect(detectOS("CustomBot 1.0")).toBe("Other");
-    expect(detectBrowser("CustomBot 1.0")).toBe("Other");
+  it("should distinguish tablets vs mobile phones accurately", () => {
+    // Amazon Kindle Silk tablet
+    const silkTabletUA =
+      "Mozilla/5.0 (Linux; U; Android 9; en-us; KFMAWI Build/PS7312) AppleWebKit/537.36 (KHTML, like Gecko) Silk/95.2.1 like Chrome/95.0.4638.74 Safari/537.36";
+    const silkInfo = parseUserAgent(silkTabletUA);
+    expect(silkInfo.device).toBe("TABLET");
+    expect(silkInfo.os).toBe("Android");
+
+    // BlackBerry Playbook tablet
+    const playbookUA =
+      "Mozilla/5.0 (PlayBook; U; RIM Tablet OS 2.1.0; en-US) AppleWebKit/536.2+ (KHTML, like Gecko) Version/7.2.1.0 Safari/536.2+";
+    expect(detectDevice(playbookUA)).toBe("TABLET");
+
+    // Generic tablet token
+    const genericTabletUA = "Mozilla/5.0 (Tablet; rv:26.0) Gecko/26.0 Firefox/26.0";
+    expect(detectDevice(genericTabletUA)).toBe("TABLET");
+
+    // Windows Phone / IEMobile should be MOBILE
+    const winPhoneUA =
+      "Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0; Trident/6.0; IEMobile/10.0; ARM; Touch)";
+    const winPhoneInfo = parseUserAgent(winPhoneUA);
+    expect(winPhoneInfo.device).toBe("MOBILE");
+    expect(winPhoneInfo.os).toBe("Windows");
+
+    // Opera Mini on mobile should be MOBILE
+    const operaMiniUA =
+      "Opera/9.80 (Android; Opera Mini/36.2.2254/119.132; U; id) Presto/2.12.423 Version/12.16";
+    expect(detectDevice(operaMiniUA)).toBe("MOBILE");
+    expect(detectOS(operaMiniUA)).toBe("Android");
+  });
+
+  it("should detect bot and crawler user agents gracefully as UNKNOWN device", () => {
+    const bots = [
+      "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+      "Twitterbot/1.0",
+      "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+      "Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)",
+      "curl/8.4.0",
+      "python-requests/2.31.0",
+      "Wget/1.21.3",
+      "PostmanRuntime/7.36.0",
+    ];
+
+    for (const bot of bots) {
+      const parsed = parseUserAgent(bot);
+      expect(parsed.device).toBe("UNKNOWN");
+      expect(parsed.os).toBe("Other");
+      expect(parsed.browser).toBe("Other");
+    }
   });
 });
 

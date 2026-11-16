@@ -4,6 +4,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { AdminNavTabs } from "@/features/admin/components/AdminNavTabs";
 import { AdminSidebar } from "@/features/admin/components/AdminSidebar";
 import { AdminLinksContainer } from "@/features/admin/components/links/AdminLinksContainer";
+import { PlatformsCatalogSubTab } from "@/features/admin/components/links/PlatformsCatalogSubTab";
+import { LinksModerationSubTab } from "@/features/admin/components/links/LinksModerationSubTab";
 import { PlatformsTable } from "@/features/admin/components/links/PlatformsTable";
 import { PlatformModal } from "@/features/admin/components/links/PlatformModal";
 import { LinksModerationTable } from "@/features/admin/components/links/LinksModerationTable";
@@ -132,6 +134,51 @@ describe("Admin Links UI Components Suite", () => {
 
       expect(html).toContain("تحليلات المنصات");
       expect(html).toContain("تجميع بيانات التحليلات الفعلية");
+    });
+
+    it("applies active styling to the selected sub-tab navigation pill", () => {
+      // 1. Check platforms sub-tab active styling
+      const platformsHtml = renderToStaticMarkup(
+        <AdminLinksContainer initialSubTab="platforms" />
+      );
+      expect(platformsHtml).toContain("bg-primary-container text-on-primary-container shadow-md");
+      expect(platformsHtml).toContain("دليل المنصات");
+
+      // 2. Check moderation sub-tab active styling
+      const moderationHtml = renderToStaticMarkup(
+        <AdminLinksContainer initialSubTab="moderation" />
+      );
+      expect(moderationHtml).toContain("bg-primary-container text-on-primary-container shadow-md");
+      expect(moderationHtml).toContain("الإشراف على الروابط ومراجعتها");
+
+      // 3. Check analytics sub-tab active styling
+      const analyticsHtml = renderToStaticMarkup(
+        <AdminLinksContainer initialSubTab="analytics" />
+      );
+      expect(analyticsHtml).toContain("bg-primary-container text-on-primary-container shadow-md");
+      expect(analyticsHtml).toContain("تحليلات المنصات");
+    });
+
+    it("renders LinksModerationSubTab search and filter controls accurately", () => {
+      const html = renderToStaticMarkup(<LinksModerationSubTab />);
+
+      expect(html).toContain("الإشراف على الروابط ومراجعتها");
+      expect(html).toContain("ابحث بالعنوان، الرابط، أو صانع المحتوى...");
+      expect(html).toContain("جميع المنصات");
+      expect(html).toContain("كل الحالات");
+      expect(html).toContain("نشطة فقط");
+      expect(html).toContain("معطلة");
+      expect(html).toContain("مثبتة");
+      expect(html).toContain("مؤرشفة");
+      expect(html).toContain("تحديث");
+    });
+
+    it("renders PlatformsCatalogSubTab action bar with Add Platform button", () => {
+      const html = renderToStaticMarkup(<PlatformsCatalogSubTab />);
+
+      expect(html).toContain("دليل المنصات المعتمدة");
+      expect(html).toContain("إضافة منصة جديدة");
+      expect(html).toContain("تحديث");
     });
   });
 
@@ -283,6 +330,22 @@ describe("Admin Links UI Components Suite", () => {
       );
 
       expect(html).toContain("لا توجد روابط مطابقة لمعايير البحث");
+    });
+
+    it("renders loading state when links are being fetched", () => {
+      const html = renderToStaticMarkup(
+        <LinksModerationTable
+          links={[]}
+          isLoading={true}
+          actionLoadingId={null}
+          onUpdateLink={vi.fn()}
+          page={1}
+          totalPages={1}
+          onPageChange={vi.fn()}
+        />
+      );
+
+      expect(html).toContain("جارٍ تحميل الروابط...");
     });
   });
 

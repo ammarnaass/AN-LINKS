@@ -118,7 +118,9 @@ export function extractHostname(url: string): string | null {
     if (!trimmed) return null;
     const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
     const parsed = new URL(withProto);
-    return parsed.hostname.toLowerCase();
+    const host = parsed.hostname.toLowerCase();
+    if (!host || /^[\.\s]+$/.test(host)) return null;
+    return host;
   } catch {
     return null;
   }

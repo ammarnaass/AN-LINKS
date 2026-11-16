@@ -73,6 +73,74 @@ describe("Platform Detector Utility", () => {
     expect(detectPlatform(null as unknown as string)).toBeNull();
   });
 
+  it("should handle malformed URLs safely without throwing", () => {
+    expect(extractHostname("http://")).toBeNull();
+    expect(extractHostname("https://.")).toBeNull();
+    expect(extractHostname("https://...")).toBeNull();
+    expect(extractHostname("https://///")).toBeNull();
+    expect(extractHostname("http://:80")).toBeNull();
+    expect(extractHostname("   http://   ")).toBeNull();
+    expect(detectPlatform("http://")).toBeNull();
+    expect(detectPlatform("https://.")).toBeNull();
+    expect(detectPlatform("https://...")).toBeNull();
+    expect(detectPlatform("https://///")).toBeNull();
+    expect(detectPlatform("http://:80")).toBeNull();
+  });
+
+  it("should reject malicious or non-web schemes and script injections", () => {
+    expect(detectPlatform("javascript:alert(1)")).toBeNull();
+    expect(detectPlatform("mailto:creator@domain.com")).toBeNull();
+    expect(detectPlatform("tel:+966500000000")).toBeNull();
+    expect(detectPlatform("data:text/html,<script>alert(1)</script>")).toBeNull();
+    expect(detectPlatform("ftp://files.youtube.com")).toBeNull();
+    expect(detectPlatform("spotify://track/4cOdK2wGLETKBW3PvgPWqT")).toBeNull();
+    expect(detectPlatform("custom-app://open/page")).toBeNull();
+  });
+
+  it("should prevent domain spoofing and phishing subdomains", () => {
+    // Phishing domains that contain platform name as subdomain of attacker domain
+    expect(detectPlatform("https://youtube.com.attacker.com/watch")).toBeNull();
+    expect(detectPlatform("https://tiktok.com.phishing.org/login")).toBeNull();
+    expect(detectPlatform("https://salla.sa.fake-site.com")).toBeNull();
+    expect(detectPlatform("https://zid.store.evil.ru")).toBeNull();
+
+    // Domains that prepend platform name
+    expect(detectPlatform("https://fakeyoutube.com")).toBeNull();
+    expect(detectPlatform("https://not-tiktok.com")).toBeNull();
+    expect(detectPlatform("https://my-twitch.tv.evil.com")).toBeNull();
+  });
+
+  it("should correctly detect legitimate subdomains of platforms", () => {
+    expect(detectPlatform("https://music.youtube.com")?.slug).toBe("youtube");
+    expect(detectPlatform("https://studio.youtube.com")?.slug).toBe("youtube");
+    expect(detectPlatform("https://store.salla.sa/category")?.slug).toBe("salla");
+    expect(detectPlatform("https://merchant.zid.store")?.slug).toBe("zid");
+    expect(detectPlatform("https://gist.github.com/user/123")?.slug).toBe("github");
+  });
+
+  it("should safely handle internationalized domain names (IDN)", () => {
+    const idnUrl = "https://منصة.السعودية/متجر";
+    const hostname = extractHostname(idnUrl);
+    expect(hostname).toBeDefined();
+    expect(hostname).not.toBeNull();
+    // Since default platforms don't have Arabic IDN, detectPlatform returns null
+    expect(detectPlatform(idnUrl)).toBeNull();
+
+    // With a custom IDN platform pattern matching the punycode or domain
+    const idnPlatforms: PlatformPattern[] = [
+      {
+        slug: "saudi-platform",
+        nameAr: "منصة سعودية",
+        nameEn: "Saudi Platform",
+        category: "COMMERCE",
+        defaultIcon: "shopping-bag",
+        brandColor: "#007A3D",
+        domainPattern: hostname || "منصة.السعودية",
+      },
+    ];
+    expect(detectPlatform(idnUrl, idnPlatforms)?.slug).toBe("saudi-platform");
+  });
+
   it("should support custom platform patterns list if supplied", () => {
     const customList: PlatformPattern[] = [
       {
