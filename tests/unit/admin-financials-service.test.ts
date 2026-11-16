@@ -16,7 +16,9 @@ import {
   deleteAdminCoupon,
   getAdminTransactions,
   logFinancialAudit,
+  refundAdminInvoice,
 } from "@/features/admin/server/admin-financials.service";
+import * as financialsBarrel from "@/features/admin/server/financials";
 import { prisma } from "@/shared/db";
 import { decryptSecret } from "@/shared/lib/crypto";
 import { requireAdminSession } from "@/features/admin/server/admin.guard";
@@ -77,6 +79,8 @@ vi.mock("@/shared/db", () => {
       count: vi.fn(),
       findMany: vi.fn(),
       aggregate: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
     },
     financialAuditLog: {
       create: vi.fn(),
@@ -1029,6 +1033,88 @@ describe("Admin Financials Service", () => {
         orderBy: { createdAt: "desc" },
         include: expect.any(Object),
       });
+    });
+  });
+
+  describe("refundAdminInvoice", () => {
+    it("successfully refunds a paid invoice and logs audit", async () => {
+      vi.mocked(prisma.financialInvoice.findUnique).mockResolvedValueOnce({
+        id: "inv_123",
+        invoiceNumber: "INV-2026-0099",
+        amountTotal: 150.0,
+        status: "PAID",
+      } as any);
+
+      vi.mocked(prisma.financialInvoice.update).mockResolvedValueOnce({
+        id: "inv_123",
+        invoiceNumber: "INV-2026-0099",
+        amountTotal: 150.0,
+        status: "REFUNDED",
+      } as any);
+
+      const result = await refundAdminInvoice("inv_123", "Customer requested cancellation", TEST_ADMIN_ID);
+
+      expect(result.success).toBe(true);
+      expect(result.invoiceId).toBe("inv_123");
+      expect(result.status).toBe("REFUNDED");
+      expect(result.refundedAmount).toBe(150.0);
+      expect(prisma.financialInvoice.update).toHaveBeenCalledWith({
+        where: { id: "inv_123" },
+        data: { status: "REFUNDED" },
+      });
+      expect(prisma.financialAuditLog.create).toHaveBeenCalledWith({
+        data: {
+          adminId: TEST_ADMIN_ID,
+          action: "REFUND_INVOICE",
+          entity: "FinancialInvoice",
+          entityId: "inv_123",
+          details: {
+            reason: "Customer requested cancellation",
+            amount: 150.0,
+            invoiceNumber: "INV-2026-0099",
+          },
+        },
+      });
+    });
+
+    it("throws an error if the invoice does not exist", async () => {
+      vi.mocked(prisma.financialInvoice.findUnique).mockResolvedValueOnce(null);
+
+      await expect(
+        refundAdminInvoice("inv_nonexistent", "reason", TEST_ADMIN_ID)
+      ).rejects.toThrow("الفاتورة غير موجودة: inv_nonexistent");
+    });
+
+    it("throws an error if the invoice is already refunded", async () => {
+      vi.mocked(prisma.financialInvoice.findUnique).mockResolvedValueOnce({
+        id: "inv_already_refunded",
+        status: "REFUNDED",
+      } as any);
+
+      await expect(
+        refundAdminInvoice("inv_already_refunded", "reason", TEST_ADMIN_ID)
+      ).rejects.toThrow("تم استرجاع هذه الفاتورة مسبقاً");
+    });
+  });
+
+  describe("Modular Sub-services Re-export Verification", () => {
+    it("ensures all sub-service functions are exported via @/features/admin/server/financials", () => {
+      expect(typeof financialsBarrel.logFinancialAudit).toBe("function");
+      expect(typeof financialsBarrel.getFinancialOverview).toBe("function");
+      expect(typeof financialsBarrel.getAdminGateways).toBe("function");
+      expect(typeof financialsBarrel.updateAdminGateway).toBe("function");
+      expect(typeof financialsBarrel.getAdminPlans).toBe("function");
+      expect(typeof financialsBarrel.upsertAdminPlan).toBe("function");
+      expect(typeof financialsBarrel.deleteAdminPlan).toBe("function");
+      expect(typeof financialsBarrel.updateAdminPlanQuotas).toBe("function");
+      expect(typeof financialsBarrel.getAdminCurrencies).toBe("function");
+      expect(typeof financialsBarrel.updateAdminCurrency).toBe("function");
+      expect(typeof financialsBarrel.getAdminCoupons).toBe("function");
+      expect(typeof financialsBarrel.createAdminCoupon).toBe("function");
+      expect(typeof financialsBarrel.toggleAdminCoupon).toBe("function");
+      expect(typeof financialsBarrel.deleteAdminCoupon).toBe("function");
+      expect(typeof financialsBarrel.getAdminTransactions).toBe("function");
+      expect(typeof financialsBarrel.refundAdminInvoice).toBe("function");
     });
   });
 
