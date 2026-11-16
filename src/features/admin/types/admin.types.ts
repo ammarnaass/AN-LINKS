@@ -1,3 +1,12 @@
+export type AdminTabKey =
+  | "analytics"
+  | "users"
+  | "sessions"
+  | "payments"
+  | "links"
+  | "settings"
+  | "reports";
+
 export type GatewayId =
   | "mada"
   | "apple_pay"
@@ -72,6 +81,7 @@ export interface AdminAnalyticsData {
   proSubscribersCount: number;
   totalPlatformClicks: number;
   totalPlatformViews: number;
+  totalLinks?: number;
   chartData: Array<{
     date: string;
     revenue: number;

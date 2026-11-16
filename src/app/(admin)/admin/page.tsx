@@ -12,6 +12,7 @@ import {
   AdminPaymentsTab,
   AdminSettingsTab,
   AdminReportsTab,
+  AdminLinksContainer,
   DEFAULT_PLATFORM_SETTINGS,
 } from "@/features/admin";
 import { useAdminConsole } from "@/features/admin/hooks/useAdminConsole";
@@ -24,6 +25,7 @@ const TAB_TITLES: Record<AdminTabKey, string> = {
   users: "إدارة المستخدمين والمشتركين",
   sessions: "الجلسات النشطة والأجهزة",
   payments: "طرق الدفع وبوابات الاشتراكات",
+  links: "إدارة الروابط والمنصات وحوكمة المحتوى",
   settings: "إعدادات المنصة والسياسات",
   reports: "مركز البلاغات والاعتدال",
 };
@@ -46,6 +48,7 @@ export default function AdminConsolePage() {
     sessions,
     settings,
     reports,
+    linksCount,
     handleToggleRole,
     handleToggleSuspend,
     handleSaveSettings,
@@ -66,6 +69,7 @@ export default function AdminConsolePage() {
         usersCount={users.length}
         sessionsCount={sessions.length}
         pendingReportsCount={pendingReportsCount}
+        linksCount={linksCount}
         isOpenMobile={isMobileOpen}
         onCloseMobile={closeMobile}
         isCollapsed={isCollapsed}
@@ -161,6 +165,8 @@ export default function AdminConsolePage() {
               onUpdateSettings={handleSaveSettings}
             />
           )}
+
+          {activeTab === "links" && <AdminLinksContainer />}
 
           {activeTab === "settings" && (
             <AdminSettingsTab

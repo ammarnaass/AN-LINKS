@@ -19,16 +19,18 @@ export function useAdminConsole() {
   const [sessions, setSessions] = useState<AdminSessionDTO[]>([]);
   const [settings, setSettings] = useState<AdminPlatformSettings | null>(null);
   const [reports, setReports] = useState<AdminReportItem[]>([]);
+  const [linksCount, setLinksCount] = useState<number>(0);
 
   const loadAllData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [anRes, uRes, sRes, setRes, rRes] = await Promise.all([
+      const [anRes, uRes, sRes, setRes, rRes, lRes] = await Promise.all([
         fetch("/api/admin/analytics").then((r) => (r.ok ? r.json() : null)),
         fetch("/api/admin/users").then((r) => (r.ok ? r.json() : null)),
         fetch("/api/admin/sessions").then((r) => (r.ok ? r.json() : null)),
         fetch("/api/admin/settings").then((r) => (r.ok ? r.json() : null)),
         fetch("/api/admin/reports").then((r) => (r.ok ? r.json() : null)),
+        fetch("/api/admin/links?limit=1").then((r) => (r.ok ? r.json() : null)),
       ]);
 
       if (anRes?.analytics) setAnalytics(anRes.analytics);
@@ -36,6 +38,11 @@ export function useAdminConsole() {
       if (sRes?.sessions) setSessions(sRes.sessions);
       if (setRes?.settings) setSettings(setRes.settings);
       if (rRes?.reports) setReports(rRes.reports);
+      if (lRes?.total !== undefined) {
+        setLinksCount(lRes.total);
+      } else if (anRes?.analytics?.totalLinks !== undefined) {
+        setLinksCount(anRes.analytics.totalLinks);
+      }
     } catch (err) {
       console.error("Admin data load error:", err);
     } finally {
@@ -116,6 +123,7 @@ export function useAdminConsole() {
     sessions,
     settings,
     reports,
+    linksCount,
     handleToggleRole,
     handleToggleSuspend,
     handleSaveSettings,

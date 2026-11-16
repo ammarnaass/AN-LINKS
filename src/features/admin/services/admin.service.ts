@@ -193,6 +193,7 @@ export async function getPlatformAnalyticsData(): Promise<AdminAnalyticsData> {
     proSubscribersCount: 0,
     totalPlatformClicks,
     totalPlatformViews,
+    totalLinks,
     chartData,
     topCreators,
     recentTransactions: statefulTransactions,

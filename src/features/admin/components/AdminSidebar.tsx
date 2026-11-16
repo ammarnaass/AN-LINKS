@@ -15,6 +15,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Link2,
 } from "lucide-react";
 import { AdminTabKey } from "./AdminNavTabs";
 
@@ -24,6 +25,7 @@ export interface AdminSidebarProps {
   usersCount?: number;
   sessionsCount?: number;
   pendingReportsCount?: number;
+  linksCount?: number;
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
   isCollapsed?: boolean;
@@ -36,6 +38,7 @@ export function AdminSidebar({
   usersCount = 0,
   sessionsCount = 0,
   pendingReportsCount = 0,
+  linksCount = 0,
   isOpenMobile = false,
   onCloseMobile,
   isCollapsed = false,
@@ -69,6 +72,12 @@ export function AdminSidebar({
       key: "payments",
       label: "طرق الدفع والاشتراكات",
       icon: <CreditCard className="w-4 h-4 shrink-0" />,
+    },
+    {
+      key: "links",
+      label: "إدارة الروابط والمنصات",
+      icon: <Link2 className="w-4 h-4 shrink-0" />,
+      badge: linksCount > 0 ? linksCount : undefined,
     },
     {
       key: "settings",
