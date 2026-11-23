@@ -87,3 +87,4 @@
 ## 3. القرار والتوصية النهائية
 
 تم اعتماد كافة توصيات السمكات الذهبية، وتحديث وثيقة التصميم [`docs/designs/account-security-subscription-settings.md`](file:///home/ammar/AN%20LINKS/docs/designs/account-security-subscription-settings.md) لتتوافق معها 100%، وتجهيز خطة التنفيذ المفصلة `docs/superpowers/plans/2026-11-16-account-security-subscription-settings.md` للبدء في المهام السبع وفق منهجية التطوير المدفوع بالوكلاء الفرعيين (SDD).
+
