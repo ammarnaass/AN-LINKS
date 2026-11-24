@@ -185,6 +185,9 @@ export function BioPageContent({
       style={styles.backgroundStyle}
       dir="rtl"
     >
+      {styles.overlayStyle && (
+        <div className="absolute inset-0 pointer-events-none z-0" style={styles.overlayStyle} />
+      )}
       <BioAmbientGlows />
       <BioMainFrame
         profile={profile}

@@ -30,6 +30,8 @@ export interface PreviewState {
   backgroundType: string;
   customBackground: string | null;
   socialPosition: string;
+  cardStyle: string;
+  bgOverlayOpacity: number;
   isLoaded: boolean;
   links: PreviewLinkItem[];
   socials: PreviewSocialItem[];
@@ -56,6 +58,8 @@ const DEFAULT_PREVIEW: PreviewState = {
   backgroundType: "THEME",
   customBackground: null,
   socialPosition: "top",
+  cardStyle: "glass",
+  bgOverlayOpacity: 40,
   isLoaded: false,
   links: [],
   socials: [],
@@ -102,6 +106,8 @@ export function PreviewProvider({
                 ? p.profile.customBackground
                 : prev.customBackground,
             socialPosition: p.profile.socialPosition || prev.socialPosition,
+            cardStyle: p.profile.cardStyle || prev.cardStyle,
+            bgOverlayOpacity: p.profile.bgOverlayOpacity ?? prev.bgOverlayOpacity,
             links: l?.links || [],
             socials: l?.socials || [],
             isLoaded: true,

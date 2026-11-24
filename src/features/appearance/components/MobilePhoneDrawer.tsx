@@ -47,6 +47,8 @@ export function MobilePhoneDrawer({ isOpen, onClose, preview }: MobilePhoneDrawe
           customBackground={preview.customBackground}
           buttonShadow={preview.buttonShadow}
           socialPosition={preview.socialPosition}
+          cardStyle={preview.cardStyle}
+          bgOverlayOpacity={preview.bgOverlayOpacity}
           links={preview.links}
           socials={preview.socials}
         />

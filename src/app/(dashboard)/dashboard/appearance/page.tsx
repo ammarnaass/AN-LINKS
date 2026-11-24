@@ -23,7 +23,8 @@ export default function AppearancePage() {
     themeKey: preview.themeKey, accentColor: preview.accentColor, buttonStyle: preview.buttonStyle,
     borderRadius: preview.borderRadius, font: preview.font, backgroundType: preview.backgroundType,
     customBackground: preview.customBackground, buttonShadow: preview.buttonShadow,
-    socialPosition: preview.socialPosition,
+    socialPosition: preview.socialPosition, cardStyle: preview.cardStyle,
+    bgOverlayOpacity: preview.bgOverlayOpacity,
   });
 
   const saveProfile = async (isManual = false) => {
@@ -63,7 +64,7 @@ export default function AppearancePage() {
     preview.isLoaded, preview.themeKey, preview.accentColor, preview.buttonStyle,
     preview.borderRadius, preview.font, preview.displayName, preview.bio,
     preview.avatarUrl, preview.backgroundType, preview.customBackground,
-    preview.buttonShadow, preview.socialPosition,
+    preview.buttonShadow, preview.socialPosition, preview.cardStyle, preview.bgOverlayOpacity,
   ]);
 
   const handleManualSave = () => {
@@ -82,6 +83,7 @@ export default function AppearancePage() {
       font: p.font || "Cairo", backgroundType: p.backgroundType || "THEME",
       customBackground: p.customBackground !== undefined ? p.customBackground : null,
       buttonShadow: p.buttonShadow || "none", socialPosition: p.socialPosition || "top",
+      cardStyle: p.cardStyle || "glass", bgOverlayOpacity: p.bgOverlayOpacity ?? 40,
     });
   };
 
@@ -122,6 +124,7 @@ export default function AppearancePage() {
               buttonStyle={preview.buttonStyle} borderRadius={preview.borderRadius} font={preview.font}
               backgroundType={preview.backgroundType} customBackground={preview.customBackground}
               buttonShadow={preview.buttonShadow} socialPosition={preview.socialPosition}
+              cardStyle={preview.cardStyle} bgOverlayOpacity={preview.bgOverlayOpacity}
               links={preview.links} socials={preview.socials}
             />
           </div>

@@ -19,6 +19,8 @@ export interface PhoneScreenContentProps {
   customBackground?: string | null;
   buttonShadow?: string | null;
   socialPosition?: string | null;
+  bgOverlayOpacity?: number | null;
+  cardStyle?: string | null;
 }
 
 export function PhoneScreenContent({
@@ -37,6 +39,8 @@ export function PhoneScreenContent({
   customBackground,
   buttonShadow,
   socialPosition = "top",
+  bgOverlayOpacity,
+  cardStyle,
 }: PhoneScreenContentProps) {
   const styles = resolveThemeStyles({
     themeKey,
@@ -47,6 +51,8 @@ export function PhoneScreenContent({
     backgroundType,
     customBackground,
     buttonShadow,
+    bgOverlayOpacity,
+    cardStyle,
   });
 
   const activeLinks = (links || []).filter((l) => l.isActive !== false);
@@ -68,10 +74,13 @@ export function PhoneScreenContent({
 
   return (
     <div
-      className={`w-full h-full min-h-full flex flex-col items-center justify-between px-4 pt-12 pb-6 select-none overflow-y-auto no-scrollbar ${styles.backgroundClass} ${styles.fontClass}`}
+      className={`relative w-full h-full min-h-full flex flex-col items-center justify-between px-4 pt-12 pb-6 select-none overflow-y-auto no-scrollbar ${styles.backgroundClass} ${styles.fontClass}`}
       style={styles.backgroundStyle}
     >
-      <div className="w-full flex flex-col items-center">
+      {styles.overlayStyle && (
+        <div className="absolute inset-0 pointer-events-none z-0" style={styles.overlayStyle} />
+      )}
+      <div className="relative z-10 w-full flex flex-col items-center">
         {/* Profile Header */}
         <div className="flex flex-col items-center w-full">
           <div className="relative mb-3">

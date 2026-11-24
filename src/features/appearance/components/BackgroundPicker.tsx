@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Palette, Sparkles, Sliders } from "lucide-react";
+import { Check, Palette, Sparkles, Sliders, Image as ImageIcon } from "lucide-react";
 import { AdvancedColorPicker } from "./AdvancedColorPicker";
 import { GradientBuilder } from "./GradientBuilder";
+import { BackgroundImagePicker } from "./BackgroundImagePicker";
 
 export interface BackgroundPickerProps {
-  backgroundType: "THEME" | "SOLID" | "GRADIENT";
+  backgroundType: "THEME" | "SOLID" | "GRADIENT" | "IMAGE";
   customBackground?: string | null;
+  bgOverlayOpacity?: number | null;
   activeThemeName?: string;
-  onBackgroundChange: (type: "THEME" | "SOLID" | "GRADIENT", value?: string | null) => void;
+  onBackgroundChange: (type: "THEME" | "SOLID" | "GRADIENT" | "IMAGE", value?: string | null) => void;
+  onOverlayOpacityChange?: (opacity: number) => void;
 }
 
 const SOLID_PRESETS = [
@@ -35,24 +38,31 @@ const GRADIENT_PRESETS = [
 export function BackgroundPicker({
   backgroundType = "THEME",
   customBackground,
+  bgOverlayOpacity = 40,
   activeThemeName = "السمة الافتراضية",
   onBackgroundChange,
+  onOverlayOpacityChange,
 }: BackgroundPickerProps) {
   const [customHex, setCustomHex] = useState(
     customBackground && customBackground.startsWith("#") ? customBackground : "#0f131c"
   );
 
-  const handleTabSelect = (type: "THEME" | "SOLID" | "GRADIENT") => {
+  const handleTabSelect = (type: "THEME" | "SOLID" | "GRADIENT" | "IMAGE") => {
     if (type === "THEME") {
       onBackgroundChange("THEME", null);
     } else if (type === "SOLID") {
       const fallbackColor = customBackground && customBackground.startsWith("#") ? customBackground : customHex;
       onBackgroundChange("SOLID", fallbackColor);
-    } else {
+    } else if (type === "GRADIENT") {
       const fallbackGrad = customBackground && customBackground.includes("gradient")
         ? customBackground
         : GRADIENT_PRESETS[0].css;
       onBackgroundChange("GRADIENT", fallbackGrad);
+    } else {
+      const fallbackImg = customBackground && (customBackground.startsWith("http") || customBackground.startsWith("/uploads/"))
+        ? customBackground
+        : null;
+      onBackgroundChange("IMAGE", fallbackImg);
     }
   };
 
@@ -70,13 +80,13 @@ export function BackgroundPicker({
           </span>
           <div>
             <h3 className="font-bold text-on-surface text-base">خلفية الصفحة (Background)</h3>
-            <p className="text-xs text-on-surface-variant">اختر خلفية السمة التلقائية أو لون مسمط أو تدرج لوني فخم</p>
+            <p className="text-xs text-on-surface-variant">اختر خلفية السمة، أو لون مسمط، أو تدرج لوني، أو صورة خلفية كاملة</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="grid grid-cols-3 gap-2 p-1 bg-surface-container rounded-xl border border-outline-variant/20">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1 bg-surface-container rounded-xl border border-outline-variant/20">
         <button
           type="button"
           onClick={() => handleTabSelect("THEME")}
@@ -114,6 +124,19 @@ export function BackgroundPicker({
         >
           <Sliders className="w-3.5 h-3.5" />
           <span>تدرج لوني</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSelect("IMAGE")}
+          className={`py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+            backgroundType === "IMAGE"
+              ? "bg-surface-container-high text-primary shadow-sm ring-1 ring-primary/30"
+              : "text-on-surface-variant hover:text-on-surface"
+          }`}
+        >
+          <ImageIcon className="w-3.5 h-3.5" />
+          <span>صورة خلفية</span>
         </button>
       </div>
 
@@ -178,6 +201,16 @@ export function BackgroundPicker({
             onChange={(grad) => onBackgroundChange("GRADIENT", grad)}
           />
         </div>
+      )}
+
+      {/* IMAGE TAB CONTENT */}
+      {backgroundType === "IMAGE" && (
+        <BackgroundImagePicker
+          customBackground={customBackground}
+          bgOverlayOpacity={bgOverlayOpacity}
+          onImageChange={(url) => onBackgroundChange("IMAGE", url)}
+          onOverlayOpacityChange={(op) => onOverlayOpacityChange?.(op)}
+        />
       )}
     </section>
   );

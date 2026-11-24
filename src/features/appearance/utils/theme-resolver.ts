@@ -6,6 +6,7 @@ import { sanitizeCustomBackground } from "./sanitizer";
 export interface ResolvedThemeStyles {
   backgroundClass: string;
   backgroundStyle?: React.CSSProperties;
+  overlayStyle?: React.CSSProperties;
   cardClass: string;
   buttonClass: string;
   buttonStyleProps?: React.CSSProperties;
@@ -41,10 +42,33 @@ function resolveBackground(
     }
   }
 
+  if (backgroundType === "IMAGE" && customBackground) {
+    const sanitized = sanitizeCustomBackground(customBackground);
+    if (sanitized) {
+      return {
+        backgroundClass: "bg-cover bg-center bg-no-repeat",
+        backgroundStyle: { backgroundImage: `url(${sanitized})` },
+      };
+    }
+  }
+
   return {
     backgroundClass: themeBackgroundClass,
     backgroundStyle: undefined,
   };
+}
+
+function resolveOverlayStyle(
+  backgroundType?: string | null,
+  bgOverlayOpacity?: number | null
+): React.CSSProperties | undefined {
+  if (backgroundType === "IMAGE") {
+    const opacity = (bgOverlayOpacity !== undefined && bgOverlayOpacity !== null ? bgOverlayOpacity : 40) / 100;
+    return {
+      backgroundColor: `rgba(0, 0, 0, ${opacity})`,
+    };
+  }
+  return undefined;
 }
 
 function resolveButtonClass(
@@ -69,6 +93,11 @@ export function resolveThemeStyles(
     profile?.customBackground
   );
 
+  const overlayStyle = resolveOverlayStyle(
+    profile?.backgroundType,
+    profile?.bgOverlayOpacity
+  );
+
   const fontKey = profile?.font || "Cairo";
   const fontClass = FONTS[fontKey]?.className || "font-cairo";
   const buttonClass = resolveButtonClass(
@@ -80,6 +109,7 @@ export function resolveThemeStyles(
   return {
     backgroundClass,
     backgroundStyle,
+    overlayStyle,
     cardClass: theme.cardClass,
     buttonClass,
     buttonStyleProps: undefined,

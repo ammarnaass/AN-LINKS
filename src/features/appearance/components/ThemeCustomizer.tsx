@@ -31,7 +31,7 @@ export function ThemeCustomizer({ profile, onProfileChange }: ThemeCustomizerPro
   };
 
   const handleBackgroundChange = (
-    type: "THEME" | "SOLID" | "GRADIENT",
+    type: "THEME" | "SOLID" | "GRADIENT" | "IMAGE",
     value?: string | null
   ) => {
     onProfileChange({
@@ -60,10 +60,12 @@ export function ThemeCustomizer({ profile, onProfileChange }: ThemeCustomizerPro
       />
 
       <BackgroundPicker
-        backgroundType={(profile.backgroundType as "THEME" | "SOLID" | "GRADIENT") || "THEME"}
+        backgroundType={(profile.backgroundType as "THEME" | "SOLID" | "GRADIENT" | "IMAGE") || "THEME"}
         customBackground={profile.customBackground}
+        bgOverlayOpacity={profile.bgOverlayOpacity}
         activeThemeName={currentTheme.nameAr}
         onBackgroundChange={handleBackgroundChange}
+        onOverlayOpacityChange={(op) => onProfileChange({ ...profile, bgOverlayOpacity: op })}
       />
 
       <ButtonAndRadiusPicker
