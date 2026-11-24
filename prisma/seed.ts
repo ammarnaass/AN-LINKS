@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { seedFinancials } from "./seed-financials.ts";
 import { seedPlatforms } from "./seed-platforms.ts";
 import { seedFathiAccount } from "./seed-fathi.ts";
+import { seedFamousCreators } from "./seed-creators.ts";
 
 const prisma = new PrismaClient();
 
@@ -221,6 +222,9 @@ async function main() {
 
   // 9. Seed Fathi Elkashti Creator Account
   await seedFathiAccount(prisma);
+
+  // 10. Seed VIP Famous Creators Showcases
+  await seedFamousCreators(prisma);
 
   console.log("🎉 Seeding completed successfully!");
 }

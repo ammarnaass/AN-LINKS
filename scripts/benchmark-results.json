@@ -1,0 +1,78 @@
+[
+  {
+    "concurrency": 10,
+    "totalRequests": 200,
+    "successfulRequests": 200,
+    "failedRequests": 0,
+    "durationSeconds": 30.86,
+    "rps": 6.48,
+    "latencyMin": 170.51,
+    "latencyMean": 1519.54,
+    "latencyP50": 1479.56,
+    "latencyP90": 1955.47,
+    "latencyP95": 2362.53,
+    "latencyP99": 3362.18,
+    "latencyMax": 3366.29,
+    "statusCodes": {
+      "200": 180,
+      "302": 20
+    }
+  },
+  {
+    "concurrency": 25,
+    "totalRequests": 500,
+    "successfulRequests": 500,
+    "failedRequests": 0,
+    "durationSeconds": 76.85,
+    "rps": 6.51,
+    "latencyMin": 204.57,
+    "latencyMean": 3780.17,
+    "latencyP50": 3391.07,
+    "latencyP90": 4149.97,
+    "latencyP95": 4508.7,
+    "latencyP99": 13657.99,
+    "latencyMax": 13834.04,
+    "statusCodes": {
+      "200": 450,
+      "302": 50
+    }
+  },
+  {
+    "concurrency": 50,
+    "totalRequests": 1000,
+    "successfulRequests": 1000,
+    "failedRequests": 0,
+    "durationSeconds": 126.46,
+    "rps": 7.91,
+    "latencyMin": 329.2,
+    "latencyMean": 6201.92,
+    "latencyP50": 6321.8,
+    "latencyP90": 7878.16,
+    "latencyP95": 8622.9,
+    "latencyP99": 9298.68,
+    "latencyMax": 9489.76,
+    "statusCodes": {
+      "200": 900,
+      "302": 100
+    }
+  },
+  {
+    "concurrency": 100,
+    "totalRequests": 1500,
+    "successfulRequests": 1500,
+    "failedRequests": 0,
+    "durationSeconds": 164.75,
+    "rps": 9.1,
+    "latencyMin": 609.79,
+    "latencyMean": 10592.46,
+    "latencyP50": 10822.62,
+    "latencyP90": 14962.4,
+    "latencyP95": 16103.85,
+    "latencyP99": 17268.26,
+    "latencyMax": 19659.61,
+    "statusCodes": {
+      "200": 1350,
+      "302": 150
+    }
+  }
+]
