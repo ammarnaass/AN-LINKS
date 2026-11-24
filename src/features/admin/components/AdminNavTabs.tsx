@@ -51,13 +51,13 @@ export function AdminNavTabs({
     },
     {
       key: "subscriptions",
-      label: "باقات واشتراكات المنصة",
+      label: "خطط وباقات الاشتراكات",
       icon: <Package className="w-4 h-4 shrink-0" />,
       badge: plansCount > 0 ? plansCount : undefined,
     },
     {
       key: "payments",
-      label: "المالية وبوابات الدفع",
+      label: "العمليات المالية والفواتير",
       icon: <CreditCard className="w-4 h-4 shrink-0" />,
     },
     {

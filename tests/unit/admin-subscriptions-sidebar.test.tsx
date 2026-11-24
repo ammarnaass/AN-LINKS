@@ -19,8 +19,8 @@ describe("Admin Subscriptions Sidebar Separation Test Suite", () => {
       />
     );
 
-    expect(html).toContain("باقات واشتراكات المنصة");
-    expect(html).toContain("المالية وبوابات الدفع");
+    expect(html).toContain("خطط وباقات الاشتراكات");
+    expect(html).toContain("العمليات المالية والفواتير");
     expect(html).toContain("الإحصائيات والنمو");
     expect(html).toContain("المستخدمين");
   });
@@ -49,8 +49,8 @@ describe("Admin Subscriptions Sidebar Separation Test Suite", () => {
       />
     );
 
-    expect(html).toContain("باقات واشتراكات المنصة");
-    expect(html).toContain("المالية وبوابات الدفع");
+    expect(html).toContain("خطط وباقات الاشتراكات");
+    expect(html).toContain("العمليات المالية والفواتير");
   });
 
   it("should render SubscriptionsSubTabNav with all 3 dedicated sub-tabs", () => {

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Cairo } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/features/auth";
 import { cookies } from "next/headers";
@@ -9,12 +8,6 @@ import {
   normalizeLocale,
   getDirection,
 } from "@/shared/i18n";
-
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  display: "swap",
-  variable: "--font-cairo",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || "https://anlinks.dev"),
@@ -47,7 +40,7 @@ export default async function RootLayout({
     <html
       lang={initialLocale}
       dir={initialDir}
-      className={`dark ${cairo.variable}`}
+      className="dark"
       suppressHydrationWarning
     >
       <head>
@@ -71,6 +64,10 @@ export default async function RootLayout({
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
           rel="stylesheet"

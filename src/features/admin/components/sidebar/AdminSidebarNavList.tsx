@@ -60,11 +60,11 @@ export function AdminSidebarNavList({
 
   const financialItems: NavItemConfig[] = [
     { key: "gateways", label: "بوابات الدفع", icon: <CreditCard className="w-4 h-4 shrink-0" /> },
-    { key: "subscriptions", label: "باقات واشتراكات المنصة", icon: <Package className="w-4 h-4 shrink-0" />, badge: plansCount > 0 ? plansCount : undefined, matches: ["subscriptions", "plans"] },
+    { key: "subscriptions", label: "خطط وباقات الاشتراكات", icon: <Package className="w-4 h-4 shrink-0" />, badge: plansCount > 0 ? plansCount : undefined, matches: ["subscriptions", "plans"] },
     { key: "quotas", label: "الصلاحيات والمحددات", icon: <Sliders className="w-4 h-4 shrink-0" /> },
     { key: "currencies", label: "العملات وأسعار الصرف", icon: <Coins className="w-4 h-4 shrink-0" /> },
     { key: "coupons", label: "أكواد وقسائم الخصم", icon: <Tag className="w-4 h-4 shrink-0" /> },
-    { key: "payments", label: "المالية وبوابات الدفع", icon: <Receipt className="w-4 h-4 shrink-0" />, matches: ["payments", "transactions"] },
+    { key: "payments", label: "العمليات المالية والفواتير", icon: <Receipt className="w-4 h-4 shrink-0" />, matches: ["payments", "transactions"] },
   ];
 
   const renderSection = (title: string, items: NavItemConfig[]) => (

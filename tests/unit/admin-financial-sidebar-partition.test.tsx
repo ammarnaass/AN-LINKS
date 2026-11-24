@@ -50,11 +50,11 @@ describe("Admin Financial & Subscriptions Sidebar Partition Test Suite", () => {
 
     // All 6 financial partition items
     expect(html).toContain("بوابات الدفع");
-    expect(html).toContain("باقات واشتراكات المنصة");
+    expect(html).toContain("خطط وباقات الاشتراكات");
     expect(html).toContain("الصلاحيات والمحددات");
     expect(html).toContain("العملات وأسعار الصرف");
     expect(html).toContain("أكواد وقسائم الخصم");
-    expect(html).toContain("المالية وبوابات الدفع");
+    expect(html).toContain("العمليات المالية والفواتير");
 
     // Badges
     expect(html).toContain("4");
@@ -82,11 +82,11 @@ describe("Admin Financial & Subscriptions Sidebar Partition Test Suite", () => {
     );
 
     expect(html).toContain('title="بوابات الدفع"');
-    expect(html).toContain('title="باقات واشتراكات المنصة"');
+    expect(html).toContain('title="خطط وباقات الاشتراكات"');
     expect(html).toContain('title="الصلاحيات والمحددات"');
     expect(html).toContain('title="العملات وأسعار الصرف"');
     expect(html).toContain('title="أكواد وقسائم الخصم"');
-    expect(html).toContain('title="المالية وبوابات الدفع"');
+    expect(html).toContain('title="العمليات المالية والفواتير"');
   });
 
   it("should mount all 6 dedicated tab wrapper components without crashing", () => {
