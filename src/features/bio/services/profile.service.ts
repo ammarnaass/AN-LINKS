@@ -62,3 +62,30 @@ export async function getPublicProfileData(username: string) {
   };
 }
 
+export async function getPublicProfileByDomain(domain: string) {
+  const cleanDomain = domain.toLowerCase().trim();
+
+  const profile = await prisma.profile.findFirst({
+    where: {
+      customDomain: cleanDomain,
+      domainVerified: true,
+      isPublished: true,
+      user: { isSuspended: false },
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+
+  if (!profile || !profile.user) {
+    return null;
+  }
+
+  return getPublicProfileData(profile.user.username);
+}
+
+

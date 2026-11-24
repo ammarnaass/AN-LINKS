@@ -56,6 +56,10 @@ model Profile {
   tiktokPixelId     String?
   googleAnalyticsId String?
   snapchatPixelId   String?
+  customDomain            String?   @unique
+  domainVerified          Boolean   @default(false)
+  domainVerificationToken String?
+  domainVerifiedAt        DateTime?
 }
 
 enum PlatformCategory {

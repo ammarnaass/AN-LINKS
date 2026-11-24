@@ -5,6 +5,7 @@ import { useSettingsProfile } from "../hooks/useSettingsProfile";
 import { AvatarUploadCard } from "./profile/AvatarUploadCard";
 import { ProfileFieldsForm } from "./profile/ProfileFieldsForm";
 import { MarketingPixelsCard } from "./profile/MarketingPixelsCard";
+import { CustomDomainCard } from "./profile/CustomDomainCard";
 
 export interface ProfileTabProps {
   displayName?: string;
@@ -92,6 +93,8 @@ export function ProfileTab(props?: ProfileTabProps) {
         onSave={() => handleUpdate(profile)}
         isSaving={isSaving}
       />
+
+      <CustomDomainCard />
     </section>
   );
 }
