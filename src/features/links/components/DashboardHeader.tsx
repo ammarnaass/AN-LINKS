@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { ThemeToggle, LanguageSwitcher } from "@/shared/ui";
+import { useTranslation } from "@/shared/i18n";
 
 interface DashboardHeaderProps {
   displayName: string;
@@ -20,6 +21,7 @@ export function DashboardHeader({
   onTogglePageActive,
 }: DashboardHeaderProps) {
   const [copied, setCopied] = useState(false);
+  const { t } = useTranslation();
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
@@ -33,14 +35,14 @@ export function DashboardHeader({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 text-on-surface-variant text-xs">
-          <span className="text-on-surface font-semibold">لوحة التحكم</span>
+          <span className="text-on-surface font-semibold">{t("dashboard.title")}</span>
           <span className="material-symbols-outlined text-[14px] [transform:scaleX(-1)]">chevron_left</span>
-          <span className="text-primary font-medium">مدير الروابط والمنصات</span>
+          <span className="text-primary font-medium">{t("dashboard.platformManager")}</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-xs">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span>المزامنة التلقائية فورية</span>
+            <span>{t("dashboard.syncRealtime")}</span>
           </span>
           <LanguageSwitcher />
           <ThemeToggle />
@@ -68,9 +70,11 @@ export function DashboardHeader({
 
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-on-surface">أهلاً بك، {displayName}</h2>
+                <h2 className="text-xl font-bold text-on-surface">
+                  {t("dashboard.welcome", { name: displayName })}
+                </h2>
                 <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-xs font-semibold">
-                  موثّق
+                  {t("dashboard.verified")}
                 </span>
               </div>
               <div className="flex items-center gap-2 mt-1">

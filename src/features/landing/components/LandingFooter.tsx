@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { BrandLogo } from "@/shared/ui";
+import { BrandLogo, LanguageSwitcher } from "@/shared/ui";
 
 export function LandingFooter() {
   return (
@@ -74,10 +74,13 @@ export function LandingFooter() {
         </div>
 
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-on-surface-variant">
-          <p className="text-outline">© 2025 منصة AN LINKS. جميع الحقوق محفوظة لرواد العالم الرقمي العربي.</p>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
-            <span>جميع الأنظمة والخدمات تعمل بكفاءة تامة</span>
+          <p className="text-outline">© 2026 منصة AN LINKS. جميع الحقوق محفوظة.</p>
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher variant="minimal" />
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
+              <span>جميع الأنظمة والخدمات تعمل بكفاءة تامة</span>
+            </div>
           </div>
         </div>
       </div>

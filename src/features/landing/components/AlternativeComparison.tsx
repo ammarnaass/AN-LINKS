@@ -11,7 +11,7 @@ export function AlternativeComparison() {
           <span>المقارنة الحقيقية</span>
         </div>
         <h2 className="text-2xl sm:text-4xl font-extrabold text-on-surface">
-          لماذا يفضل المبدعون العرب منصة «روابط» على البدائل العالمية؟
+          لماذا يفضل المبدعون منصة «AN LINKS» على البدائل العالمية؟
         </h2>
         <p className="text-xs sm:text-sm text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
           فارق شاسع في تجربة الاستخدام، سرعة التصفح، والملائمة الحقيقية لاحتياجات صناع المحتوى ورواد الأعمال في الشرق الأوسط.

@@ -67,7 +67,10 @@ export function LanguageSwitcher({
         </button>
 
         {isOpen && (
-          <div className="absolute bottom-full mb-1.5 start-0 w-36 py-1 bg-surface-container-high border border-outline-variant/40 rounded-xl shadow-xl z-50 text-xs">
+          <div
+            onMouseDown={(e) => e.stopPropagation()}
+            className="absolute bottom-full mb-1.5 start-0 w-36 py-1 bg-surface-container-high border border-outline-variant/40 rounded-xl shadow-xl z-50 text-xs"
+          >
             {locales.map((l) => (
               <button
                 key={l.code}
@@ -106,7 +109,10 @@ export function LanguageSwitcher({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-1.5 end-0 w-44 py-1.5 bg-surface-container border border-outline-variant/40 rounded-xl shadow-2xl z-50 text-xs animate-in fade-in slide-in-from-top-1">
+        <div
+          onMouseDown={(e) => e.stopPropagation()}
+          className="absolute top-full mt-1.5 end-0 w-44 py-1.5 bg-surface-container border border-outline-variant/40 rounded-xl shadow-2xl z-50 text-xs animate-in fade-in slide-in-from-top-1"
+        >
           {locales.map((l) => (
             <button
               key={l.code}

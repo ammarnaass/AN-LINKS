@@ -8,6 +8,7 @@ import { ReportModal } from "./ReportModal";
 import { QrShareModal } from "./QrShareModal";
 import { TrackingPixels } from "./TrackingPixels";
 import { LanguageSwitcher } from "@/shared/ui";
+import { useTranslation } from "@/shared/i18n";
 import { resolveThemeStyles, ResolvedThemeStyles } from "@/features/appearance";
 import { ProfileData, SocialItem, LinkItem } from "../types/bio.types";
 
@@ -42,6 +43,8 @@ function BioLinksDeck({
   buttonClass: string;
   isPreview: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <nav aria-label={`روابط ${profile.displayName}`} className="w-full flex flex-col gap-3.5 my-4">
       {links.length > 0 ? (
@@ -61,7 +64,7 @@ function BioLinksDeck({
       ) : (
         <div className="text-center py-6 px-4 rounded-xl bg-surface-container-low border border-dashed border-outline-variant/40">
           <p className="text-xs text-on-surface-variant font-medium">
-            لا توجد روابط منشورة حالياً
+            {t("bio.noLinksYet")}
           </p>
         </div>
       )}
@@ -76,11 +79,13 @@ function BioFooter({
   isPreview: boolean;
   onOpenReport: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="pt-6 w-full flex flex-col items-center gap-3 border-t border-white/5">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-on-surface-variant hover:text-primary transition-colors">
-          <span>⚡ صُمم بواسطة</span>
+          <span>{t("bio.designedWith")}</span>
           <span className="font-bold text-on-surface">AN LINKS</span>
         </div>
         <LanguageSwitcher variant="minimal" />
@@ -91,7 +96,7 @@ function BioFooter({
           onClick={onOpenReport}
           className="text-[10px] text-outline hover:text-red-400 transition"
         >
-          إبلاغ عن محتوى غير لائق
+          {t("bio.reportContent")}
         </button>
       )}
     </div>

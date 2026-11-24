@@ -99,9 +99,8 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
         <button
           type="button"
           onClick={() => setLinkType("LINK")}
-          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-            linkType === "LINK" ? "bg-primary text-on-primary shadow-xs" : "text-on-surface-variant hover:text-on-surface"
-          }`}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition ${linkType === "LINK" ? "bg-primary text-on-primary shadow-xs" : "text-on-surface-variant hover:text-on-surface"
+            }`}
         >
           <Link2 className="w-3.5 h-3.5" />
           <span>رابط عادي</span>
@@ -109,9 +108,8 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
         <button
           type="button"
           onClick={() => setLinkType("HEADER")}
-          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-            linkType === "HEADER" ? "bg-primary text-on-primary shadow-xs" : "text-on-surface-variant hover:text-on-surface"
-          }`}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition ${linkType === "HEADER" ? "bg-primary text-on-primary shadow-xs" : "text-on-surface-variant hover:text-on-surface"
+            }`}
         >
           <Heading className="w-3.5 h-3.5" />
           <span>عنوان قسم</span>
@@ -119,9 +117,8 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
         <button
           type="button"
           onClick={() => setLinkType("YOUTUBE")}
-          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-            linkType === "YOUTUBE" ? "bg-primary text-on-primary shadow-xs" : "text-on-surface-variant hover:text-on-surface"
-          }`}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition ${linkType === "YOUTUBE" ? "bg-primary text-on-primary shadow-xs" : "text-on-surface-variant hover:text-on-surface"
+            }`}
         >
           <YoutubeIcon className="w-3.5 h-3.5" />
           <span>يوتيوب</span>
@@ -129,9 +126,8 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
         <button
           type="button"
           onClick={() => setLinkType("SPOTIFY")}
-          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-            linkType === "SPOTIFY" ? "bg-primary text-on-primary shadow-xs" : "text-on-surface-variant hover:text-on-surface"
-          }`}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition ${linkType === "SPOTIFY" ? "bg-primary text-on-primary shadow-xs" : "text-on-surface-variant hover:text-on-surface"
+            }`}
         >
           <Music className="w-3.5 h-3.5" />
           <span>سبوتيفاي</span>
@@ -171,8 +167,8 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
                 linkType === "YOUTUBE"
                   ? "youtube.com/watch?v=..."
                   : linkType === "SPOTIFY"
-                  ? "open.spotify.com/track/..."
-                  : "store.example.com"
+                    ? "open.spotify.com/track/..."
+                    : "store.example.com"
               }
               value={newUrl}
               onChange={(e) => handleUrlChange(e.target.value)}
@@ -215,11 +211,10 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
                 key={cat.id}
                 type="button"
                 onClick={() => setNewCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                  newCategory === cat.id
-                    ? `${cat.color} ring-1 ring-primary`
-                    : "bg-surface-container-high text-on-surface-variant border-outline-variant/30 hover:text-on-surface"
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${newCategory === cat.id
+                  ? `${cat.color} ring-1 ring-primary`
+                  : "bg-surface-container-high text-on-surface-variant border-outline-variant/30 hover:text-on-surface"
+                  }`}
               >
                 {cat.label}
               </button>

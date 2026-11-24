@@ -4,23 +4,30 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sanitizeClaimUsername } from "../validators/claim.validator";
 import { HeroSectionProps } from "../types/landing.types";
+import { useTranslation } from "@/shared/i18n";
 
 function HeroBadgeHeader() {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-surface-container-high/70 backdrop-blur-md shadow-sm mb-6 border border-white/5">
         <span className="w-2 h-2 rounded-full bg-primary-container animate-ping" />
         <span className="text-xs sm:text-sm font-semibold text-primary tracking-wide">
-          ✨ المنصة العربية الأولى لروابط البايو الذكية والتفاعلية
+          {t("hero.badge")}
         </span>
       </div>
 
       <h1 className="text-3xl sm:text-5xl lg:text-[56px] text-center font-bold text-on-surface max-w-4xl tracking-tight leading-[1.18] mb-6">
-        رابط واحد يجمع <span className="text-primary drop-shadow-[0_0_24px_rgba(16,185,129,0.35)]">عالمك الرقمي</span> بالكامل ويضاعف وصولك
+        {t("hero.titlePart1")}{" "}
+        <span className="text-primary drop-shadow-[0_0_24px_rgba(16,185,129,0.35)]">
+          {t("hero.titleHighlight")}
+        </span>{" "}
+        {t("hero.titlePart2")}
       </h1>
 
       <p className="text-base sm:text-lg text-on-surface-variant text-center max-w-2xl mb-10 leading-relaxed">
-        ابنِ صفحة بايو مذهلة بتصميم بانتو عصري، مع ميزة الفحص الذاتي للروابط المعطلة، ونماذج بيع المنتجات الرقمية، وتحليلات فورية في أقل من 60 ثانية.
+        {t("hero.subtitle")}
       </p>
     </>
   );
@@ -35,6 +42,8 @@ function HeroClaimForm({
   setHandle: (v: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="w-full max-w-xl p-2.5 bg-surface-container-high/90 backdrop-blur-xl rounded-xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] mb-4 border border-white/5">
       <form onSubmit={onSubmit} className="flex flex-col sm:flex-row items-center gap-2">
@@ -45,7 +54,7 @@ function HeroClaimForm({
           <input
             className="w-full bg-transparent text-on-surface text-sm sm:text-base placeholder:text-outline focus:outline-none px-2 text-left font-medium"
             dir="ltr"
-            placeholder="اسمك_أو_علامتك"
+            placeholder={t("hero.claimPlaceholder")}
             type="text"
             value={handle}
             onChange={(e) => setHandle(e.target.value)}
@@ -56,7 +65,7 @@ function HeroClaimForm({
           type="submit"
         >
           <span className="material-symbols-outlined text-[20px]">bolt</span>
-          <span>احجز رابطك مجاناً</span>
+          <span>{t("hero.claimButton")}</span>
         </button>
       </form>
     </div>

@@ -3,7 +3,7 @@ import React from "react";
 export type PhoneFinish = "titanium" | "obsidian" | "gold";
 
 export interface PhoneChassisProps {
-  children?: React.ReactNode;
+  children: React.ReactNode;
   finish?: PhoneFinish;
   className?: string;
 }

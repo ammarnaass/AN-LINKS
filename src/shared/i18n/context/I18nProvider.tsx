@@ -44,6 +44,10 @@ export function I18nProvider({ children, initialLocale = DEFAULT_LOCALE }: I18nP
     } catch {
       // Non-blocking
     }
+
+    if (typeof window !== "undefined" && typeof window.location?.reload === "function") {
+      window.location.reload();
+    }
   };
 
   const t = useMemo(() => {
@@ -87,20 +91,31 @@ export function I18nProvider({ children, initialLocale = DEFAULT_LOCALE }: I18nP
 }
 
 export function useI18n(): I18nContextValue {
-  const ctx = useContext(I18nContext);
+  let ctx: I18nContextValue | null = null;
+  try {
+    ctx = useContext(I18nContext);
+  } catch {
+    // Graceful fallback when invoked outside of React render dispatcher (e.g. tests)
+  }
+
   if (!ctx) {
-    // Graceful fallback outside provider
     const dict = getDictionary(DEFAULT_LOCALE);
     return {
       locale: DEFAULT_LOCALE,
       direction: "rtl",
       locales: LOCALES_LIST,
       setLocale: async () => {},
-      t: (key: string) => {
+      t: (key: string, params?: TranslationParams) => {
         const parts = key.split(".");
         let val: any = dict;
         for (const p of parts) val = val?.[p];
-        return typeof val === "string" ? val : key;
+        let text = typeof val === "string" ? val : key;
+        if (params) {
+          for (const [k, v] of Object.entries(params)) {
+            text = text.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+          }
+        }
+        return text;
       },
     };
   }
