@@ -1,4 +1,5 @@
 import { isUsernameReserved } from "@/shared/utils/reserved-usernames";
+import { detectBankFromIban, SaudiBank } from "../constants/saudi-banks";
 
 export interface ProfileSettingsInput {
   displayName: string;
@@ -41,10 +42,41 @@ export function validatePasswordChange(
   return { valid: true };
 }
 
-export function validateSaudiIban(iban: string): { valid: boolean; error?: string } {
+export function validateSaudiIban(iban: string): {
+  valid: boolean;
+  bank?: SaudiBank;
+  cleanIban?: string;
+  error?: string;
+} {
   const clean = iban.replace(/\s+/g, "").toUpperCase();
-  if (!/^SA\d{22}$/.test(clean)) {
-    return { valid: false, error: "رقم الآيبان السعودي يجب أن يبدأ بـ SA متبوعاً بـ 22 رقماً" };
+
+  if (!clean.startsWith("SA")) {
+    return { valid: false, error: "يجب أن يبدأ الآيبان السعودي بـ SA" };
   }
-  return { valid: true };
+  if (clean.length !== 24) {
+    return { valid: false, error: "طول الآيبان السعودي يجب أن يكون 24 خانة بالضبط" };
+  }
+  if (!/^SA\d{22}$/.test(clean)) {
+    return { valid: false, error: "صيغة الآيبان غير صحيحة، يجب أن يحتوي على أرقام فقط بعد SA" };
+  }
+
+  const bank = detectBankFromIban(clean);
+  if (!bank) {
+    return { valid: false, error: "رمز البنك في الآيبان غير معتمد لدى البنك المركزي السعودي (ساما)" };
+  }
+
+  // ISO 7064 MOD 97-10 check:
+  // Move first 4 chars to the end: 'SAkk...' -> '...SAkk'
+  // S=28, A=10
+  const rearranged = clean.slice(4) + "2810" + clean.slice(2, 4);
+  try {
+    const isChecksumValid = BigInt(rearranged) % 97n === 1n;
+    if (!isChecksumValid) {
+      return { valid: false, error: "رقم الآيبان غير صالح (فشل التحقق من أرقام التدقيق المصرفية)" };
+    }
+  } catch {
+    return { valid: false, error: "تعذر فحص صحة الآيبان" };
+  }
+
+  return { valid: true, bank, cleanIban: clean };
 }
