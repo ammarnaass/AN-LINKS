@@ -10,10 +10,20 @@ import { reorderLinkItems } from "../validators/link.validator";
 interface LinkEditorProps {
   links: LinkData[];
   onLinksChange: (newLinks: LinkData[]) => void;
+  onAddLink?: (input: { title: string; url: string; platformId?: string | null; category?: string }) => Promise<LinkData | void>;
+  onUpdateLink?: (id: string, updated: Partial<LinkData>) => Promise<void>;
+  onDeleteLink?: (id: string) => Promise<void>;
   filter?: "all" | "active" | "draft";
 }
 
-export function LinkEditor({ links, onLinksChange, filter = "all" }: LinkEditorProps) {
+export function LinkEditor({
+  links,
+  onLinksChange,
+  onAddLink,
+  onUpdateLink,
+  onDeleteLink,
+  filter = "all",
+}: LinkEditorProps) {
   const [isAdding, setIsAdding] = useState(false);
 
   const filteredLinks = links.filter((link) => {
@@ -22,16 +32,31 @@ export function LinkEditor({ links, onLinksChange, filter = "all" }: LinkEditorP
     return true;
   });
 
-  const handleAdd = (newLink: LinkData) => {
-    onLinksChange([...links, newLink]);
+  const handleAdd = async (newLink: LinkData) => {
+    if (onAddLink) {
+      await onAddLink({
+        title: newLink.title,
+        url: newLink.url,
+        platformId: newLink.platformId,
+        category: newLink.category,
+      });
+    } else {
+      onLinksChange([...links, newLink]);
+    }
     setIsAdding(false);
   };
 
-  const handleUpdate = (updated: LinkData) => {
+  const handleUpdate = async (updated: LinkData) => {
+    if (onUpdateLink) {
+      await onUpdateLink(updated.id, updated);
+    }
     onLinksChange(links.map((l) => (l.id === updated.id ? updated : l)));
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    if (onDeleteLink) {
+      await onDeleteLink(id);
+    }
     onLinksChange(
       links
         .filter((l) => l.id !== id)

@@ -9,7 +9,7 @@ import { detectPlatform } from "../services/platform-detector";
 import { getSocialIcon } from "@/shared/ui";
 
 interface AddLinkFormProps {
-  onAdd: (newLink: LinkData) => void;
+  onAdd: (newLink: LinkData) => Promise<void> | void;
   onCancel: () => void;
   existingCount: number;
 }
@@ -19,6 +19,7 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
   const [newUrl, setNewUrl] = useState("");
   const [newCategory, setNewCategory] = useState("link");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const detectedPlatform = detectPlatform(newUrl);
 
@@ -30,7 +31,7 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -54,7 +55,14 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
       clicksCount: 0,
     };
 
-    onAdd(newLink);
+    try {
+      setIsSubmitting(true);
+      await onAdd(newLink);
+    } catch (err: any) {
+      setError(err?.message || "فشل إضافة الرابط");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const PlatformIcon = detectedPlatform ? getSocialIcon(detectedPlatform.slug) : null;
@@ -155,9 +163,10 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
       <div className="flex justify-end gap-2 pt-2">
         <button
           type="submit"
-          className="px-5 py-2.5 rounded-xl bg-primary-container text-on-primary font-bold text-sm shadow-md hover:bg-primary transition-all"
+          disabled={isSubmitting}
+          className="px-5 py-2.5 rounded-xl bg-primary-container text-on-primary font-bold text-sm shadow-md hover:bg-primary transition-all disabled:opacity-50"
         >
-          حفظ الرابط ونشره
+          {isSubmitting ? "جاري الحفظ..." : "حفظ الرابط ونشره"}
         </button>
       </div>
     </form>

@@ -40,10 +40,38 @@ async function main() {
           buttonStyle: "filled",
           borderRadius: "rounded-xl",
           font: "Cairo",
-          isPublished: false,
+          isPublished: true,
         },
       },
     },
+  });
+
+  // Seed Admin Starter Links
+  await prisma.link.deleteMany({ where: { userId: admin.id } });
+  await prisma.link.createMany({
+    data: [
+      {
+        userId: admin.id,
+        title: "بوابة الإدارة المركزية | AN LINKS",
+        url: "http://localhost:3000/admin",
+        position: 0,
+        isActive: true,
+      },
+      {
+        userId: admin.id,
+        title: "مركز الدعم الفني وتلقي البلاغات",
+        url: "https://support.anlinks.dev",
+        position: 1,
+        isActive: true,
+      },
+      {
+        userId: admin.id,
+        title: "التوثيق الرسمي وسياسة الخدمة",
+        url: "https://anlinks.dev/terms",
+        position: 2,
+        isActive: true,
+      },
+    ],
   });
   console.log(`✅ System Admin seeded: ${admin.email} (@${admin.username})`);
 

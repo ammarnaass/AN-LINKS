@@ -10,7 +10,13 @@ import {
   LinkData,
   SocialItem,
 } from "@/features/links";
-import { fetchUserLinks, batchReorderLinksClient } from "@/features/links/services/links.client";
+import {
+  fetchUserLinks,
+  createLinkClient,
+  updateLinkClient,
+  deleteLinkClient,
+  batchReorderLinksClient,
+} from "@/features/links/services/links.client";
 import { ProfileData } from "@/components/public/BioPageContent";
 
 export default function DashboardPage() {
@@ -68,6 +74,61 @@ export default function DashboardPage() {
     };
   }, []);
 
+  const handleAddLink = async (input: { title: string; url: string; platformId?: string | null; category?: string }) => {
+    try {
+      const created = await createLinkClient(input);
+      setLinks((prev) => [...prev, created]);
+    } catch (err) {
+      console.error("Create link failed:", err);
+      throw err;
+    }
+  };
+
+  const handleUpdateLink = async (id: string, updated: Partial<LinkData>) => {
+    try {
+      await updateLinkClient(id, {
+        title: updated.title,
+        url: updated.url,
+        isActive: updated.isActive,
+        isPinned: updated.isPinned,
+        isArchived: updated.isArchived,
+        platformId: updated.platformId,
+      });
+      setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, ...updated } : l)));
+    } catch (err) {
+      console.error("Update link failed:", err);
+    }
+  };
+
+  const handleDeleteLink = async (id: string) => {
+    try {
+      await deleteLinkClient(id);
+      const remaining = links.filter((l) => l.id !== id).map((l, idx) => ({ ...l, position: idx }));
+      setLinks(remaining);
+      await batchReorderLinksClient({
+        links: remaining.map((l, idx) => ({ id: l.id, position: idx, isActive: l.isActive })),
+      });
+    } catch (err) {
+      console.error("Delete link failed:", err);
+    }
+  };
+
+  const handleTogglePageActive = async () => {
+    const nextState = !isPageActive;
+    setIsPageActive(nextState);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublished: nextState }),
+      });
+      if (!res.ok) throw new Error("Failed to update profile publish state");
+    } catch (err) {
+      console.error("Toggle page status failed:", err);
+      setIsPageActive(!nextState);
+    }
+  };
+
   const handleLinksChange = async (newLinks: LinkData[]) => {
     setLinks(newLinks);
     try {
@@ -113,7 +174,7 @@ export default function DashboardPage() {
         avatarUrl={profile.avatarUrl}
         username={username}
         isPageActive={isPageActive}
-        onTogglePageActive={() => setIsPageActive(!isPageActive)}
+        onTogglePageActive={handleTogglePageActive}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -128,6 +189,9 @@ export default function DashboardPage() {
           <LinkEditor
             links={links}
             onLinksChange={handleLinksChange}
+            onAddLink={handleAddLink}
+            onUpdateLink={handleUpdateLink}
+            onDeleteLink={handleDeleteLink}
             filter={filter}
           />
 
