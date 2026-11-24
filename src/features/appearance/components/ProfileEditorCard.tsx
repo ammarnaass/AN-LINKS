@@ -3,6 +3,7 @@
 import React from "react";
 import { ProfileData } from "../types/appearance.types";
 import { ThemeConfig } from "../constants/themes";
+import { AvatarUploadField } from "./AvatarUploadField";
 
 interface ProfileEditorCardProps {
   profile: ProfileData;
@@ -11,8 +12,6 @@ interface ProfileEditorCardProps {
 }
 
 export function ProfileEditorCard({ profile, currentTheme, onChange }: ProfileEditorCardProps) {
-  const initialLetter = (profile.displayName?.trim()?.charAt(0) || "ر").toUpperCase();
-
   return (
     <section className="bg-surface-container-low rounded-2xl p-6 shadow-xl border border-outline-variant/30 space-y-5">
       <div className="flex items-center justify-between pb-4 border-b border-surface-container-highest/60">
@@ -30,41 +29,11 @@ export function ProfileEditorCard({ profile, currentTheme, onChange }: ProfileEd
         </span>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-        <div className="relative group">
-          {profile.avatarUrl ? (
-            <img
-              src={profile.avatarUrl}
-              alt={profile.displayName || "صورة المستخدم"}
-              className="w-20 h-20 rounded-full object-cover shadow-[0_0_24px_rgba(78,222,163,0.25)] ring-2 ring-primary/40"
-            />
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center font-bold text-2xl shadow-[0_0_24px_rgba(78,222,163,0.25)] ring-2 ring-primary/40 select-none">
-              {initialLetter}
-            </div>
-          )}
-          <span className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-md">
-            <span className="material-symbols-outlined text-[13px]">photo_camera</span>
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-1 text-center sm:text-right flex-1">
-          <h4 className="font-bold text-on-surface text-sm">الصورة الرمزية</h4>
-          <p className="text-xs text-on-surface-variant">
-            نوصي بصورة مربعة واضحة بحجم لا يقل عن 600×600 بكسل.
-          </p>
-          <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
-            <input
-              type="text"
-              placeholder="رابط الصورة (URL)"
-              value={profile.avatarUrl || ""}
-              onChange={(e) => onChange("avatarUrl", e.target.value)}
-              dir="ltr"
-              className="px-3 py-1.5 rounded-lg bg-surface-container-high border border-outline-variant/40 text-on-surface text-xs outline-none focus:border-primary flex-1 max-w-xs text-right"
-            />
-          </div>
-        </div>
-      </div>
+      <AvatarUploadField
+        avatarUrl={profile.avatarUrl}
+        displayName={profile.displayName}
+        onAvatarChange={(url) => onChange("avatarUrl", url || "")}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
