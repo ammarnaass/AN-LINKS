@@ -2,20 +2,24 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { LANDING_PRICING_PLANS } from "../constants/landing-pricing";
 import { LandingPricingTier, PricingBannerSectionProps } from "../types/landing.types";
+import { useTranslation } from "@/shared/i18n";
+import { getLandingContent } from "../constants/i18n";
 
 function PricingBannerHeader() {
+  const { locale } = useTranslation();
+  const content = getLandingContent(locale).pricing;
+
   return (
     <div className="flex flex-col items-center text-center gap-3 mb-10">
       <span className="text-xs uppercase tracking-widest text-primary font-bold">
-        باقات واضحة ومدروسة
+        {content.tag}
       </span>
       <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface">
-        استثمر في حضورك الرقمي دون أي تكاليف خفية
+        {content.title}
       </h2>
       <p className="text-sm text-on-surface-variant max-w-lg">
-        ابدأ مجاناً مدى الحياة، وقم بالترقية عندما تحتاج أدوات ذكية ومتقدمة لتسريع نموك التجاري.
+        {content.subtitle}
       </p>
     </div>
   );
@@ -28,29 +32,33 @@ function BillingToggle({
   isYearly: boolean;
   onToggle: () => void;
 }) {
+  const { locale, direction } = useTranslation();
+  const content = getLandingContent(locale).pricing;
+  const isRtl = direction === "rtl";
+
   return (
     <div className="flex items-center gap-4 bg-surface-container px-4 py-2 rounded-xl mb-12 border border-white/5">
       <span className={`text-xs font-semibold ${!isYearly ? "text-on-surface" : "text-on-surface-variant"}`}>
-        فاتورة شهرية
+        {content.monthly}
       </span>
       <button
-        aria-label="تبديل نوع الفاتورة"
+        aria-label="Toggle billing cycle"
         onClick={onToggle}
         className="w-12 h-7 bg-primary-container rounded-full relative p-1 transition-colors flex items-center cursor-pointer"
         type="button"
       >
         <span
           className={`w-5 h-5 rounded-full bg-on-primary-container shadow-md transition-transform transform ${
-            isYearly ? "-translate-x-5" : "translate-x-0"
+            isYearly ? (isRtl ? "-translate-x-5" : "translate-x-5") : "translate-x-0"
           }`}
         />
       </button>
       <div className="flex items-center gap-2">
         <span className={`text-xs font-semibold ${isYearly ? "text-on-surface" : "text-on-surface-variant"}`}>
-          فاتورة سنوية
+          {content.yearly}
         </span>
         <span className="px-2 py-0.5 rounded-full bg-primary-container/20 text-primary text-xs font-bold">
-          وفر 20%
+          {content.save}
         </span>
       </div>
     </div>
@@ -60,7 +68,6 @@ function BillingToggle({
 function PricingTierCard({
   tier,
   isYearly,
-  onOpenAuth,
 }: {
   tier: LandingPricingTier;
   isYearly: boolean;
@@ -107,7 +114,7 @@ function PricingTierCard({
       </div>
 
       <Link
-        href="/register"
+        href={tier.ctaPath || "/register"}
         className={`mt-8 block w-full py-3.5 px-4 rounded-lg font-bold text-xs text-center transition-all cursor-pointer ${
           tier.isPopular
             ? "bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary shadow-[0_0_20px_rgba(16,185,129,0.4)]"
@@ -122,6 +129,8 @@ function PricingTierCard({
 
 export function PricingBannerSection({ onOpenAuth }: PricingBannerSectionProps) {
   const [isYearly, setIsYearly] = useState(false);
+  const { locale } = useTranslation();
+  const content = getLandingContent(locale).pricing;
 
   return (
     <section id="pricing" className="w-full py-24 px-6 lg:px-12 bg-surface-container-low">
@@ -129,7 +138,7 @@ export function PricingBannerSection({ onOpenAuth }: PricingBannerSectionProps) 
         <PricingBannerHeader />
         <BillingToggle isYearly={isYearly} onToggle={() => setIsYearly(!isYearly)} />
         <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-          {LANDING_PRICING_PLANS.map((tier) => (
+          {content.tiers.map((tier) => (
             <PricingTierCard
               key={tier.id}
               tier={tier}

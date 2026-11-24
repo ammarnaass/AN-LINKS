@@ -3,8 +3,13 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GiantCtaSectionProps } from "../types/landing.types";
+import { useTranslation } from "@/shared/i18n";
+import { getLandingContent } from "../constants/i18n";
 
 export function GiantCtaSection({ onOpenAuth }: GiantCtaSectionProps = {}) {
+  const { locale } = useTranslation();
+  const content = getLandingContent(locale).giantCta;
+
   let router: ReturnType<typeof useRouter> | null = null;
   try {
     router = useRouter();
@@ -34,15 +39,15 @@ export function GiantCtaSection({ onOpenAuth }: GiantCtaSectionProps = {}) {
 
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-container/20 text-primary text-xs font-bold mb-6">
           <span className="material-symbols-outlined text-[16px]">stars</span>
-          <span>انضم لأكثر من 50 ألف مبدع عربي اليوم</span>
+          <span>{content.badge}</span>
         </div>
 
         <h2 className="text-2xl sm:text-4xl lg:text-[44px] font-bold text-on-surface max-w-2xl mb-4 leading-tight">
-          جاهز لتوحيد حضورك الرقمي في <span className="text-primary">رابط واحد استثنائي؟</span>
+          {content.title} <span className="text-primary">{content.titleHighlight}</span>
         </h2>
 
         <p className="text-sm sm:text-base text-on-surface-variant max-w-xl mb-10 leading-relaxed">
-          ابدأ الآن مجاناً، اختر قالبك المفضل، وانطلق في بناء علامتك الشخصية ومضاعفة وصولك بكل فخر وإتقان.
+          {content.subtitle}
         </p>
 
         <form
@@ -51,12 +56,12 @@ export function GiantCtaSection({ onOpenAuth }: GiantCtaSectionProps = {}) {
         >
           <div className="flex items-center w-full px-4 py-2.5 bg-surface-container-low rounded-lg flex-1">
             <span className="text-outline text-xs sm:text-sm font-mono" dir="ltr">
-              anlinks.dev/
+              {content.prefix}
             </span>
             <input
               className="w-full bg-transparent text-on-surface text-sm sm:text-base placeholder:text-outline focus:outline-none px-2 text-left"
               dir="ltr"
-              placeholder="اسمك_الجديد"
+              placeholder={content.placeholder}
               type="text"
               value={handle}
               onChange={(e) => setHandle(e.target.value)}
@@ -67,13 +72,9 @@ export function GiantCtaSection({ onOpenAuth }: GiantCtaSectionProps = {}) {
             type="submit"
           >
             <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
-            <span>ابدأ الآن مجاناً</span>
+            <span>{content.button}</span>
           </button>
         </form>
-
-        <p className="text-xs text-outline mt-4">
-          لا يتطلب بطاقة ائتمانية • إعداد سهل في 60 ثانية • دعم فني عربي على مدار الساعة
-        </p>
       </div>
     </section>
   );

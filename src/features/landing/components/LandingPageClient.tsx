@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "@/shared/i18n";
 import {
   LandingHeader,
   HeroSection,
@@ -17,10 +18,12 @@ import {
 } from "@/features/landing";
 
 export function LandingPageClient() {
+  const { direction } = useTranslation();
+
   return (
     <div
       className="min-h-screen flex flex-col bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container"
-      dir="rtl"
+      dir={direction}
     >
       <LandingHeader />
 

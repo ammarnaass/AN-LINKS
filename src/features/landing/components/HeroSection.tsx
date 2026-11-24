@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { sanitizeClaimUsername } from "../validators/claim.validator";
 import { HeroSectionProps } from "../types/landing.types";
 import { useTranslation } from "@/shared/i18n";
+import { getLandingContent } from "../constants/i18n";
 
 function HeroBadgeHeader() {
   const { t } = useTranslation();
@@ -73,6 +74,9 @@ function HeroClaimForm({
 }
 
 function HeroProofRow({ displayHandle }: { displayHandle: string }) {
+  const { locale } = useTranslation();
+  const proof = getLandingContent(locale).heroProof;
+
   return (
     <div className="flex flex-wrap items-center justify-center gap-6 mb-16 text-xs text-on-surface-variant">
       <div className="flex items-center gap-2 bg-surface-container/60 px-3 py-1.5 rounded-full border border-white/5">
@@ -81,23 +85,23 @@ function HeroProofRow({ displayHandle }: { displayHandle: string }) {
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-container" />
         </span>
         <span className="text-primary font-medium font-mono" dir="ltr">
-          anlinks.dev/{displayHandle} متاح للتسجيل الفوري
+          anlinks.dev/{displayHandle} {proof.available}
         </span>
       </div>
 
       <div className="flex items-center gap-1.5">
         <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
-        <span>+50,000 صانع محتوى وشركة</span>
+        <span>{proof.creatorsCount}</span>
       </div>
 
       <div className="flex items-center gap-1.5">
         <span className="material-symbols-outlined text-tertiary text-[18px]">star</span>
-        <span>تقييم 4.9/5 نجوم</span>
+        <span>{proof.rating}</span>
       </div>
 
       <div className="flex items-center gap-1.5">
         <span className="material-symbols-outlined text-secondary text-[18px]">credit_card_off</span>
-        <span>بدون بطاقة ائتمانية</span>
+        <span>{proof.noCard}</span>
       </div>
     </div>
   );

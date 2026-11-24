@@ -1,24 +1,30 @@
+"use client";
+
 import React from "react";
-import { LANDING_TESTIMONIALS } from "../constants/testimonials-data";
+import { useTranslation } from "@/shared/i18n";
+import { getLandingContent } from "../constants/i18n";
 
 export function TestimonialsSection() {
+  const { locale } = useTranslation();
+  const content = getLandingContent(locale).testimonials;
+
   return (
     <section id="testimonials" className="w-full py-24 px-6 lg:px-12 bg-surface-container-lowest">
       <div className="max-w-7xl mx-auto flex flex-col gap-16">
         <div className="flex flex-col items-center text-center gap-3">
           <span className="text-xs uppercase tracking-widest text-primary font-bold">
-            قصص نجاح
+            {content.tag}
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface">
-            ماذا يقول صناع المحتوى ورواد الأعمال عنا؟
+            {content.title}
           </h2>
           <p className="text-sm text-on-surface-variant max-w-lg">
-            تجارب حقيقية ساعدت صناع المحتوى على توثيق حضورهم ورفع معدل المبيعات.
+            {content.subtitle}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {LANDING_TESTIMONIALS.map((t, idx) => (
+          {content.items.map((t, idx) => (
             <div
               key={idx}
               className="flex flex-col justify-between p-6 bg-surface-container-low rounded-xl shadow-sm border border-white/5"

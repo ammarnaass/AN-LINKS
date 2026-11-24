@@ -1,17 +1,24 @@
+"use client";
+
 import React from "react";
+import { useTranslation } from "@/shared/i18n";
+import { getLandingContent } from "../constants/i18n";
 
 function FloatingAnalyticsCard() {
+  const { locale } = useTranslation();
+  const content = getLandingContent(locale).phoneMockup;
+
   return (
     <div className="hidden lg:flex absolute -left-6 top-12 z-20 flex-col gap-2 p-4 bg-surface-container-high/90 backdrop-blur-xl rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.6)] w-60 transform -rotate-2 hover:rotate-0 transition-transform duration-300 border border-white/5">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-on-surface-variant font-semibold">زيارات اليوم المباشرة</span>
+        <span className="text-xs text-on-surface-variant font-semibold">{content.analyticsTitle}</span>
         <span className="inline-flex p-1 rounded-md bg-primary-container/15 text-primary">
           <span className="material-symbols-outlined text-[18px]">trending_up</span>
         </span>
       </div>
       <div className="flex items-baseline gap-2">
         <span className="text-xl font-bold text-on-surface font-mono">+14,280</span>
-        <span className="text-xs text-primary font-bold font-mono">▲ 34.6%</span>
+        <span className="text-xs text-primary font-bold font-mono">{content.analyticsGrowth}</span>
       </div>
       <svg className="w-full h-8 text-primary overflow-visible mt-1" fill="none" viewBox="0 0 100 24">
         <path d="M0 18 Q 20 8, 35 15 T 65 5 T 100 2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2.5" />
@@ -22,6 +29,9 @@ function FloatingAnalyticsCard() {
 }
 
 function FloatingHealthCard() {
+  const { locale } = useTranslation();
+  const content = getLandingContent(locale).phoneMockup;
+
   return (
     <div className="hidden lg:flex absolute -right-6 bottom-16 z-20 items-center gap-3.5 p-4 bg-surface-container-high/90 backdrop-blur-xl rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.6)] w-64 transform rotate-2 hover:rotate-0 transition-transform duration-300 border border-white/5">
       <div className="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary shrink-0">
@@ -29,37 +39,44 @@ function FloatingHealthCard() {
       </div>
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-bold text-on-surface">فاحص الروابط الذكي</span>
+          <span className="text-xs font-bold text-on-surface">{content.sentinelTitle}</span>
           <span className="w-2 h-2 rounded-full bg-primary-container" />
         </div>
-        <span className="text-xs text-primary truncate">جميع الروابط تعمل 100% بنجاح</span>
+        <span className="text-xs text-primary truncate">{content.sentinelDesc}</span>
       </div>
     </div>
   );
 }
 
 function FloatingSaleCard() {
+  const { locale } = useTranslation();
+  const content = getLandingContent(locale).phoneMockup;
+
   return (
     <div className="hidden lg:flex absolute -right-2 top-8 z-20 items-center gap-3 p-3.5 bg-surface-container-high/90 backdrop-blur-xl rounded-xl shadow-[0_16px_32px_rgba(0,0,0,0.6)] transform -rotate-1 hover:rotate-0 transition-transform duration-300 border border-white/5">
       <div className="w-9 h-9 rounded-lg bg-secondary-container/30 text-secondary flex items-center justify-center">
         <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
       </div>
       <div className="flex flex-col">
-        <span className="text-xs text-on-surface font-bold">مبيعة كتاب إلكتروني جديدة</span>
-        <span className="text-[11px] text-on-surface-variant font-mono">149 ر.س • منذ دقيقتين</span>
+        <span className="text-xs text-on-surface font-bold">{content.saleTitle}</span>
+        <span className="text-[11px] text-on-surface-variant font-mono">{content.saleTime}</span>
       </div>
     </div>
   );
 }
 
 function PhoneBentoTiles() {
+  const { locale, direction } = useTranslation();
+  const content = getLandingContent(locale).phoneMockup;
+  const arrowIcon = direction === "rtl" ? "arrow_back" : "arrow_forward";
+
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="w-full bg-surface-container-low rounded-xl p-3 flex flex-col gap-2 hover:bg-surface-container transition-colors cursor-pointer">
         <div className="relative w-full h-28 rounded-lg overflow-hidden bg-surface-container-high">
           <img
             className="w-full h-full object-cover"
-            alt="Futuristic studio"
+            alt="Studio content"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiHQG-5svtX-byGr_5cfpU0mSLy0pofVz155SvSQQH1UwfxOH314vLEALfTETuPcpFpVborvY04-gRQQ5j0UOWNybAKJm6nI4sMsXlKFvWuYNZAf3HzfMxMFFC--yeAENJu8o-r3sUcTxmvgr-VQz4gtN7NDci5-hRrqOjyquNEayOUDOWhju3b6VME6vbBRITTVzHkNhLqHCidvKyWx33-wgjG-43Bn8EAopprhsv"
           />
           <div className="absolute inset-0 bg-surface-container-lowest/40 flex items-center justify-center">
@@ -67,13 +84,13 @@ function PhoneBentoTiles() {
               <span className="material-symbols-outlined text-[22px]">play_arrow</span>
             </div>
           </div>
-          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-surface-container-lowest/80 text-[10px] font-mono text-primary font-bold">
-            جديد 18:42 دقيقة
+          <div className="absolute bottom-2 end-2 px-2 py-0.5 rounded bg-surface-container-lowest/80 text-[10px] font-mono text-primary font-bold">
+            {content.videoBadge}
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-on-surface truncate">أقوى 7 أدوات ذكاء اصطناعي لعام 2025</span>
-          <span className="material-symbols-outlined text-[18px] text-outline">arrow_back</span>
+          <span className="text-xs font-semibold text-on-surface truncate">{content.videoTitle}</span>
+          <span className="material-symbols-outlined text-[18px] text-outline">{arrowIcon}</span>
         </div>
       </div>
 
@@ -82,13 +99,13 @@ function PhoneBentoTiles() {
           <div className="w-10 h-10 rounded-lg bg-secondary-container/40 text-secondary flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-[20px]">menu_book</span>
           </div>
-          <div className="flex flex-col text-right">
-            <span className="text-xs font-bold text-on-surface">دليل إطلاق المنتجات الرقمية</span>
-            <span className="text-[10px] text-on-surface-variant">نسخة PDF تفاعلية + قوالب جاهزة</span>
+          <div className="flex flex-col text-start">
+            <span className="text-xs font-bold text-on-surface">{content.productTitle}</span>
+            <span className="text-[10px] text-on-surface-variant">{content.productDesc}</span>
           </div>
         </div>
         <span className="px-2.5 py-1 rounded-md bg-secondary-container/50 text-secondary-fixed text-xs font-bold">
-          149 ر.س
+          {content.productPrice}
         </span>
       </div>
 
@@ -97,9 +114,9 @@ function PhoneBentoTiles() {
           <div className="w-10 h-10 rounded-lg bg-tertiary-container/30 text-tertiary flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-[20px]">graphic_eq</span>
           </div>
-          <div className="flex flex-col text-right">
-            <span className="text-xs font-bold text-on-surface">بودكاست فكرة رقمية - حلقة #42</span>
-            <span className="text-[10px] text-outline">استمع على Spotify و Apple Podcasts</span>
+          <div className="flex flex-col text-start">
+            <span className="text-xs font-bold text-on-surface">{content.podcastTitle}</span>
+            <span className="text-[10px] text-outline">{content.podcastDesc}</span>
           </div>
         </div>
         <span className="material-symbols-outlined text-outline text-[18px]">headphones</span>
@@ -107,12 +124,12 @@ function PhoneBentoTiles() {
 
       <div className="w-full bg-surface-container-high/60 rounded-xl p-3 flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-on-surface">انضم لـ 24,000+ مشترك أسبوعياً</span>
+          <span className="text-[11px] font-bold text-on-surface">{content.newsletterTitle}</span>
           <span className="material-symbols-outlined text-primary text-[16px]">mail</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <input className="w-full bg-surface-container-lowest px-2.5 py-1.5 rounded-md text-[12px] text-on-surface placeholder:text-outline focus:outline-none" placeholder="بريدك..." type="email" />
-          <button className="bg-primary-container text-on-primary-container px-3 py-1.5 rounded-md text-[12px] font-bold" type="button">اشترك</button>
+          <input className="w-full bg-surface-container-lowest px-2.5 py-1.5 rounded-md text-[12px] text-on-surface placeholder:text-outline focus:outline-none" placeholder={content.newsletterPlaceholder} type="email" />
+          <button className="bg-primary-container text-on-primary-container px-3 py-1.5 rounded-md text-[12px] font-bold" type="button">{content.newsletterButton}</button>
         </div>
       </div>
     </div>
@@ -120,6 +137,9 @@ function PhoneBentoTiles() {
 }
 
 export function PhoneMockup() {
+  const { locale } = useTranslation();
+  const content = getLandingContent(locale).phoneMockup;
+
   return (
     <div className="relative w-full max-w-4xl mx-auto flex items-center justify-center">
       <FloatingAnalyticsCard />
@@ -137,7 +157,7 @@ export function PhoneMockup() {
             <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-primary-container via-tertiary-container to-secondary-container shadow-md">
               <img
                 className="w-full h-full rounded-full object-cover"
-                alt="فيصل الشمري"
+                alt={content.creatorName}
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtCG1l8MU-TPAQrrs-GnIqgHe1fT59n-QyRn_tJngVy1VGTaGPHCFTyDM4lxxo3RY6_PHzL2lTNP0YnCgOgIYYDe9AUnxO17nl4M9EmqUHKpy3Iz9Oiubce8kfv2Yvf3c7nArj_M_wjENrNH2cBPWC1HZpp_zWn9sQk_yC_CYtusrDwFLQW8wRN18rjuuUZfcecQRUGAYZ8PoElkIx6bHGaYo6Z8LsXVHskw1Lostl"
               />
             </div>
@@ -146,9 +166,9 @@ export function PhoneMockup() {
             </div>
           </div>
 
-          <h3 className="text-base font-bold text-on-surface text-center">فيصل الشمري</h3>
+          <h3 className="text-base font-bold text-on-surface text-center">{content.creatorName}</h3>
           <p className="text-xs text-on-surface-variant text-center max-w-[260px] mt-1 mb-4 leading-relaxed">
-            صانع محتوى تقني ومؤسس استوديو «ابتكار». أشارك أسرار الذكاء الاصطناعي والتجارة الرقمية.
+            {content.creatorBio}
           </p>
 
           <div className="flex items-center gap-2 mb-5">
@@ -162,8 +182,8 @@ export function PhoneMockup() {
           <PhoneBentoTiles />
 
           <div className="mt-6 flex items-center gap-1 opacity-60">
-            <span className="text-[11px] text-outline">مدعوم بواسطة</span>
-            <span className="text-[11px] text-primary font-bold">روابط</span>
+            <span className="text-[11px] text-outline">Powered by</span>
+            <span className="text-[11px] text-primary font-bold">AN LINKS</span>
           </div>
         </div>
       </div>
