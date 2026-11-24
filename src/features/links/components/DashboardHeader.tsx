@@ -74,7 +74,7 @@ export function DashboardHeader({
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <span className="font-mono text-on-surface-variant text-xs" dir="ltr">
-                  bio.link/{username}
+                  anlinks.dev/{username}
                 </span>
                 <button
                   type="button"

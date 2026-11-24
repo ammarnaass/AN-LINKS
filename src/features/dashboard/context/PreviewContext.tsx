@@ -52,7 +52,7 @@ export interface PreviewContextValue {
 const DEFAULT_PREVIEW: PreviewState = {
   username: "creator",
   displayName: "صانع محتوى",
-  bio: "أهلاً بكم في صفحتي الشخصية على منصة روابط",
+  bio: "أهلاً بكم في صفحتي الشخصية على منصة AN LINKS",
   avatarUrl: null,
   themeKey: "layanDark",
   accentColor: "#4edea3",
