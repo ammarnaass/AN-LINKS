@@ -3,7 +3,7 @@
 import React from "react";
 import { AdminUserItem } from "../types/admin.types";
 import { AppBadge, AppButton } from "@/shared/ui";
-import { UserX, UserCheck, Shield } from "lucide-react";
+import { UserX, UserCheck, Shield, MapPin } from "lucide-react";
 
 export interface AdminUsersTableProps {
   users: AdminUserItem[];
@@ -31,6 +31,7 @@ export function AdminUsersTable({
           <tr>
             <th className="py-3 px-4 font-bold">المستخدم</th>
             <th className="py-3 px-4 font-bold">البريد</th>
+            <th className="py-3 px-4 font-bold">مكان الإقامة</th>
             <th className="py-3 px-4 font-bold">الصلاحية</th>
             <th className="py-3 px-4 font-bold">الروابط</th>
             <th className="py-3 px-4 font-bold">الحالة</th>
@@ -48,6 +49,20 @@ export function AdminUsersTable({
               </td>
               <td className="py-3 px-4 text-on-surface-variant font-mono" dir="ltr">
                 {u.email}
+              </td>
+              <td className="py-3 px-4">
+                {u.location ? (
+                  <div className="flex items-center gap-1.5 text-on-surface">
+                    <MapPin className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                    <span className="font-medium text-xs truncate max-w-[120px]" title={u.location}>
+                      {u.location}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-on-surface-variant/60 text-[11px] italic">
+                    غير محدد
+                  </span>
+                )}
               </td>
               <td className="py-3 px-4">
                 {u.role === "ADMIN" ? (

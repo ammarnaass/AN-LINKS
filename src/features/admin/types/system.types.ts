@@ -38,6 +38,7 @@ export interface AdminPlatformSettings {
 
 export interface RoleUpdateInput { role: "ADMIN" | "USER"; }
 export interface SuspendUserInput { isSuspended: boolean; }
+export interface UserLocationUpdateInput { location: string | null; }
 export interface ReportUpdateInput { status: "RESOLVED" | "DISMISSED"; }
 export interface AdminUsersQuery { search?: string; status?: "all" | "active" | "suspended" | "admin" | "pro"; }
 
@@ -49,6 +50,7 @@ export interface AdminUserItem {
   isSuspended: boolean;
   createdAt: string;
   displayName: string;
+  location: string | null;
   linksCount: number;
   reportsCount: number;
 }

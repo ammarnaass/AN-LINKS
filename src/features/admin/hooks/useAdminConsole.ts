@@ -82,6 +82,20 @@ export function useAdminConsole() {
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isSuspended: newSuspended } : u)));
   };
 
+  const handleUpdateUserLocation = async (userId: string, location: string | null) => {
+    const res = await fetch(`/api/admin/users/${userId}/location`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ location }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "فشل تحديث الموقع الجغرافي");
+    }
+    const data = await res.json();
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, location: data.location } : u)));
+  };
+
   const handleSaveSettings = async (partial: Partial<AdminPlatformSettings>): Promise<boolean> => {
     try {
       const res = await fetch("/api/admin/settings", {
@@ -126,6 +140,7 @@ export function useAdminConsole() {
     linksCount,
     handleToggleRole,
     handleToggleSuspend,
+    handleUpdateUserLocation,
     handleSaveSettings,
     handleRevokeSession,
     handleUpdateReport,

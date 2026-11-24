@@ -3,12 +3,14 @@
 import React, { useState } from "react";
 import { AdminUserItem } from "../types/admin.types";
 import { AppBadge, AppButton, AppInput } from "@/shared/ui";
-import { Search, Shield, UserCheck, UserX, ExternalLink, ShieldCheck } from "lucide-react";
+import { Search, Shield, UserCheck, UserX, ExternalLink, ShieldCheck, MapPin } from "lucide-react";
+import { AdminEditLocationModal } from "./AdminEditLocationModal";
 
 export interface AdminUsersTabProps {
   users: AdminUserItem[];
   onToggleSuspend: (userId: string, currentSuspended: boolean) => void;
   onToggleRole: (userId: string, currentRole: string) => void;
+  onUpdateLocation?: (userId: string, location: string | null) => Promise<void> | void;
   isUpdatingId?: string | null;
 }
 
@@ -16,16 +18,19 @@ export function AdminUsersTab({
   users,
   onToggleSuspend,
   onToggleRole,
+  onUpdateLocation,
   isUpdatingId,
 }: AdminUsersTabProps) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "suspended" | "admin">("all");
+  const [editingLocationUser, setEditingLocationUser] = useState<AdminUserItem | null>(null);
 
   const filtered = users.filter((u) => {
     const matchesSearch =
       u.displayName.toLowerCase().includes(search.toLowerCase()) ||
       u.username.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase());
+      u.email.toLowerCase().includes(search.toLowerCase()) ||
+      (u.location && u.location.toLowerCase().includes(search.toLowerCase()));
 
     if (!matchesSearch) return false;
     if (filter === "active") return !u.isSuspended;
@@ -77,6 +82,7 @@ export function AdminUsersTab({
             <tr>
               <th className="py-3.5 px-4 font-bold">المستخدم</th>
               <th className="py-3.5 px-4 font-bold">البريد الإلكتروني</th>
+              <th className="py-3.5 px-4 font-bold">مكان الإقامة</th>
               <th className="py-3.5 px-4 font-bold">الرتبة</th>
               <th className="py-3.5 px-4 font-bold">الروابط</th>
               <th className="py-3.5 px-4 font-bold">الحالة</th>
@@ -113,6 +119,31 @@ export function AdminUsersTab({
                     </div>
                   </td>
                   <td className="py-3 px-4 text-on-surface-variant font-mono" dir="ltr">{u.email}</td>
+                  <td className="py-3 px-4">
+                    {u.location ? (
+                      <button
+                        type="button"
+                        onClick={() => onUpdateLocation && setEditingLocationUser(u)}
+                        className="flex items-center gap-1.5 text-on-surface hover:text-primary transition-colors text-right group cursor-pointer"
+                        title="انقر لتعديل مكان الإقامة"
+                      >
+                        <MapPin className="w-3.5 h-3.5 text-red-400 shrink-0 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium text-xs truncate max-w-[130px] group-hover:underline">
+                          {u.location}
+                        </span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onUpdateLocation && setEditingLocationUser(u)}
+                        className="flex items-center gap-1 text-[11px] text-on-surface-variant/60 hover:text-primary transition-colors cursor-pointer"
+                        title="انقر لإضافة مكان الإقامة"
+                      >
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span>إضافة</span>
+                      </button>
+                    )}
+                  </td>
                   <td className="py-3 px-4">
                     {isAdmin ? (
                       <AppBadge variant="primary" size="sm" className="gap-1 font-bold">
@@ -161,6 +192,15 @@ export function AdminUsersTab({
           </tbody>
         </table>
       </div>
+
+      {onUpdateLocation && (
+        <AdminEditLocationModal
+          isOpen={!!editingLocationUser}
+          onClose={() => setEditingLocationUser(null)}
+          user={editingLocationUser}
+          onSave={onUpdateLocation}
+        />
+      )}
     </div>
   );
 }

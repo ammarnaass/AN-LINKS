@@ -6,6 +6,7 @@ export * from "./hooks/useAdminFinancials";
 export * from "./hooks/useAdminSidebar";
 export * from "./components/AdminStatCards";
 export * from "./components/AdminUsersTable";
+export * from "./components/AdminEditLocationModal";
 export * from "./components/AdminReportsTable";
 export * from "./components/AdminNavTabs";
 export * from "./components/AdminAnalyticsTab";

@@ -51,6 +51,7 @@ export default function AdminConsolePage() {
     linksCount,
     handleToggleRole,
     handleToggleSuspend,
+    handleUpdateUserLocation,
     handleSaveSettings,
     handleRevokeSession,
     handleUpdateReport,
@@ -147,6 +148,7 @@ export default function AdminConsolePage() {
               users={users}
               onToggleSuspend={handleToggleSuspend}
               onToggleRole={handleToggleRole}
+              onUpdateLocation={handleUpdateUserLocation}
             />
           )}
 

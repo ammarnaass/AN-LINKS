@@ -36,6 +36,7 @@ async function main() {
         create: {
           displayName: "مدير النظام | AN LINKS",
           bio: "الحساب الإداري الرسمي لإدارة وتشغيل منصة الروابط وتلقي البلاغات 🛡️",
+          location: "الجزائر العاصمة، الجزائر",
           themeKey: "classic",
           accentColor: "#2563EB",
           buttonStyle: "filled",
@@ -44,6 +45,21 @@ async function main() {
           isPublished: true,
         },
       },
+    },
+  });
+
+  // Ensure Admin profile has location set
+  await prisma.profile.upsert({
+    where: { userId: admin.id },
+    create: {
+      userId: admin.id,
+      displayName: "مدير النظام | AN LINKS",
+      bio: "الحساب الإداري الرسمي لإدارة وتشغيل منصة الروابط وتلقي البلاغات 🛡️",
+      location: "الجزائر العاصمة، الجزائر",
+      themeKey: "classic",
+    },
+    update: {
+      location: "الجزائر العاصمة، الجزائر",
     },
   });
 

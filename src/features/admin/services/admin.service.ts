@@ -27,6 +27,7 @@ export async function getAdminUsersList(query: AdminUsersQuery = {}): Promise<Ad
       { username: { contains: s, mode: "insensitive" } },
       { email: { contains: s, mode: "insensitive" } },
       { profile: { displayName: { contains: s, mode: "insensitive" } } },
+      { profile: { location: { contains: s, mode: "insensitive" } } },
     ];
   }
 
@@ -53,6 +54,7 @@ export async function getAdminUsersList(query: AdminUsersQuery = {}): Promise<Ad
     isSuspended: u.isSuspended,
     createdAt: u.createdAt.toISOString(),
     displayName: u.profile?.displayName ?? u.username,
+    location: u.profile?.location ?? null,
     linksCount: u._count.links,
     reportsCount: reportCountMap.get(u.username) ?? 0,
   }));
