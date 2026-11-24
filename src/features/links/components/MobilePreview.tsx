@@ -54,6 +54,11 @@ export function MobilePreview({ profile, username, links, socials }: MobilePrevi
           url: l.url,
           isActive: l.isActive,
           position: l.position,
+          thumbnailUrl: l.thumbnailUrl,
+          customBgColor: l.customBgColor,
+          customTextColor: l.customTextColor,
+          customBorderColor: l.customBorderColor,
+          customShadow: l.customShadow,
         }))}
         socials={socials.map((s, idx) => ({
           network: s.network,

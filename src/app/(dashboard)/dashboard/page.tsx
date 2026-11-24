@@ -93,6 +93,11 @@ export default function DashboardPage() {
         isPinned: updated.isPinned,
         isArchived: updated.isArchived,
         platformId: updated.platformId,
+        thumbnailUrl: updated.thumbnailUrl,
+        customBgColor: updated.customBgColor,
+        customTextColor: updated.customTextColor,
+        customBorderColor: updated.customBorderColor,
+        customShadow: updated.customShadow,
       });
       setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, ...updated } : l)));
     } catch (err) {

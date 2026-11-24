@@ -29,8 +29,12 @@ function LinkInner({
     <>
       <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary-container/20 to-transparent opacity-40 group-hover:opacity-100 transition-opacity pointer-events-none" />
       <div className="relative flex items-center gap-3.5 min-w-0 z-10">
-        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary-container/80 text-on-primary-container flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-          <Globe className="w-5 h-5" />
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary-container/80 text-on-primary-container flex items-center justify-center shadow-md group-hover:scale-110 transition-transform overflow-hidden">
+          {link.thumbnailUrl ? (
+            <img src={link.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <Globe className="w-5 h-5" />
+          )}
         </div>
         <div className="flex flex-col text-right truncate">
           <div className="flex items-center gap-2 truncate">
@@ -85,12 +89,26 @@ export function LinkButton({
 }: LinkButtonProps) {
   const { effectiveButtonStyle, resolvedRadius, resolvedButtonClass } =
     resolveLinkStyles(buttonStyle, borderRadius, themeKey, buttonShadow, buttonClass);
-  const customStyle: React.CSSProperties =
-    accentColor && effectiveButtonStyle === "filled" ? { borderColor: accentColor } : {};
+  const customStyle: React.CSSProperties = {
+    ...(accentColor && effectiveButtonStyle === "filled" ? { borderColor: accentColor } : {}),
+    ...(link.customBgColor ? { backgroundColor: link.customBgColor } : {}),
+    ...(link.customTextColor ? { color: link.customTextColor } : {}),
+    ...(link.customBorderColor ? { borderColor: link.customBorderColor, borderWidth: "2px" } : {}),
+  };
+
+  const shadowClass = link.customShadow === "glow"
+    ? "shadow-[0_0_20px_rgba(78,222,163,0.35)]"
+    : link.customShadow === "strong"
+    ? "shadow-xl"
+    : link.customShadow === "soft"
+    ? "shadow-md"
+    : link.customShadow === "none"
+    ? "shadow-none"
+    : "";
 
   const content = (
     <div
-      className={`group relative w-full p-4 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-0.5 active:scale-[0.99] overflow-hidden border border-white/5 ${resolvedRadius} ${resolvedButtonClass}`}
+      className={`group relative w-full p-4 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-0.5 active:scale-[0.99] overflow-hidden border border-white/5 ${resolvedRadius} ${resolvedButtonClass} ${shadowClass}`}
       style={customStyle}
     >
       <LinkInner link={link} highlightBadge={highlightBadge} />
