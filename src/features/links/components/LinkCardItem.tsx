@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Trash2, ArrowUp, ArrowDown, ExternalLink, GripVertical, Pin, Archive } from "lucide-react";
+import { Trash2, ArrowUp, ArrowDown, ExternalLink, GripVertical, Pin, Archive, Palette } from "lucide-react";
 import { LinkData } from "../types/links.types";
 import { CATEGORIES } from "../constants/categories";
 import { validateLinkInput } from "../validators/link.validator";
 import { detectPlatform, DEFAULT_PLATFORM_PATTERNS } from "../services/platform-detector";
 import { getSocialIcon } from "@/shared/ui";
+import { LinkAppearanceCustomizer } from "./LinkAppearanceCustomizer";
+import { LinkInlineEdit } from "./LinkInlineEdit";
 
 interface LinkCardItemProps {
   link: LinkData;
@@ -17,15 +19,9 @@ interface LinkCardItemProps {
   onMove: (index: number, direction: "up" | "down") => void;
 }
 
-export function LinkCardItem({
-  link,
-  index,
-  totalCount,
-  onUpdate,
-  onDelete,
-  onMove,
-}: LinkCardItemProps) {
+export function LinkCardItem({ link, index, totalCount, onUpdate, onDelete, onMove }: LinkCardItemProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isCustomizing, setIsCustomizing] = useState(false);
   const [editTitle, setEditTitle] = useState(link.title);
   const [editUrl, setEditUrl] = useState(link.url);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +32,10 @@ export function LinkCardItem({
   const platformName = link.platform?.nameAr || matched?.nameAr || platformSlug;
   const platformColor = link.platform?.brandColor || matched?.brandColor;
   const PlatformIcon = platformSlug ? getSocialIcon(platformSlug) : null;
+
+  const hasCustomStyles = Boolean(
+    link.thumbnailUrl || link.customBgColor || link.customTextColor || link.customBorderColor || link.customShadow
+  );
 
   const handleSave = () => {
     const validation = validateLinkInput({ title: editTitle, url: editUrl });
@@ -57,40 +57,15 @@ export function LinkCardItem({
 
   if (isEditing) {
     return (
-      <div className="rounded-xl p-4 bg-surface-container border border-primary/40 shadow-md space-y-3">
-        {error && <p className="text-xs text-error">{error}</p>}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-surface-container-high border border-outline-variant/50 text-on-surface text-sm"
-          />
-          <input
-            type="text"
-            value={editUrl}
-            onChange={(e) => setEditUrl(e.target.value)}
-            dir="ltr"
-            className="px-3 py-2 rounded-lg bg-surface-container-high border border-outline-variant/50 text-on-surface text-sm text-right"
-          />
-        </div>
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => setIsEditing(false)}
-            className="px-3 py-1.5 rounded-lg bg-surface-container-high text-xs text-on-surface-variant"
-          >
-            إلغاء
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-bold text-xs"
-          >
-            حفظ
-          </button>
-        </div>
-      </div>
+      <LinkInlineEdit
+        editTitle={editTitle}
+        setEditTitle={setEditTitle}
+        editUrl={editUrl}
+        setEditUrl={setEditUrl}
+        error={error}
+        onCancel={() => setIsEditing(false)}
+        onSave={handleSave}
+      />
     );
   }
 
@@ -144,6 +119,12 @@ export function LinkCardItem({
                   <span>مؤرشف</span>
                 </span>
               )}
+              {hasCustomStyles && (
+                <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25 text-[11px] font-semibold flex items-center gap-1">
+                  <Palette className="w-3 h-3" />
+                  <span>مظهر مخصص</span>
+                </span>
+              )}
               {!link.isActive && (
                 <span className="px-2 py-0.5 rounded-full bg-error-container/20 text-error text-[11px]">
                   مسودة مخفية
@@ -151,7 +132,12 @@ export function LinkCardItem({
               )}
             </div>
 
-            <h4 className="font-bold text-on-surface text-base mt-1.5 truncate">{link.title}</h4>
+            <div className="flex items-center gap-2 mt-1.5">
+              {link.thumbnailUrl && (
+                <img src={link.thumbnailUrl} alt="" className="w-5 h-5 rounded object-cover shrink-0 border border-white/20" />
+              )}
+              <h4 className="font-bold text-on-surface text-base truncate">{link.title}</h4>
+            </div>
 
             <a
               href={link.url}
@@ -199,6 +185,18 @@ export function LinkCardItem({
           <div className="flex items-center gap-1 text-on-surface-variant pt-1">
             <button
               type="button"
+              onClick={() => setIsCustomizing(!isCustomizing)}
+              className={`p-1.5 rounded-lg transition-colors ${
+                isCustomizing || hasCustomStyles
+                  ? "bg-primary/20 text-primary hover:bg-primary/30"
+                  : "hover:bg-surface-container-highest hover:text-on-surface"
+              }`}
+              title="تخصيص مظهر الرابط"
+            >
+              <Palette className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
               onClick={() => onUpdate({ ...link, isPinned: !link.isPinned })}
               className={`p-1.5 rounded-lg transition-colors ${
                 link.isPinned
@@ -240,6 +238,10 @@ export function LinkCardItem({
           </div>
         </div>
       </div>
+
+      {isCustomizing && (
+        <LinkAppearanceCustomizer link={link} onUpdate={onUpdate} />
+      )}
     </div>
   );
 }
