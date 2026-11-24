@@ -12,6 +12,10 @@ export function useSettingsProfile() {
     bio: "",
     phone: "",
     location: "",
+    metaPixelId: "",
+    tiktokPixelId: "",
+    googleAnalyticsId: "",
+    snapchatPixelId: "",
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +37,10 @@ export function useSettingsProfile() {
             bio: res.data.bio || "",
             phone: res.data.phone || "",
             location: res.data.location || "",
+            metaPixelId: res.data.metaPixelId || "",
+            tiktokPixelId: res.data.tiktokPixelId || "",
+            googleAnalyticsId: res.data.googleAnalyticsId || "",
+            snapchatPixelId: res.data.snapchatPixelId || "",
           });
           setAvatarUrl(res.data.avatarUrl || null);
         }

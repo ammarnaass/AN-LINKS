@@ -3,12 +3,20 @@ import { LinkValidationInput, LinkValidationResult } from "../types/links.types"
 
 export function validateLinkInput(input: LinkValidationInput): LinkValidationResult {
   if (!input.title || input.title.trim().length === 0) {
-    return { valid: false, error: "عنوان الرابط مطلوب" };
+    return { valid: false, error: input.type === "HEADER" ? "عنوان القسم مطلوب" : "عنوان الرابط مطلوب" };
   }
 
   const cleanTitle = input.title.trim();
   if (cleanTitle.length > 100) {
     return { valid: false, error: "يجب ألا يتجاوز عنوان الرابط 100 حرف" };
+  }
+
+  if (input.type === "HEADER") {
+    return {
+      valid: true,
+      title: cleanTitle,
+      normalizedUrl: "https://header.anlinks.dev",
+    };
   }
 
   const urlCheck = sanitizeUrl(input.url);

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Globe } from "lucide-react";
 import { THEMES, BUTTON_STYLES, BUTTON_SHADOWS, BORDER_RADIUS_MAP } from "@/features/appearance";
 import { LinkItem } from "../types/bio.types";
+import { BioSectionHeader, BioYouTubeEmbed, BioSpotifyEmbed } from "./BioMediaEmbeds";
 
 export type { LinkItem };
 
@@ -87,6 +88,16 @@ export function LinkButton({
   isPreview = false,
   highlightBadge,
 }: LinkButtonProps) {
+  if (link.type === "HEADER") {
+    return <BioSectionHeader title={link.title} />;
+  }
+  if (link.type === "YOUTUBE") {
+    return <BioYouTubeEmbed title={link.title} url={link.url} />;
+  }
+  if (link.type === "SPOTIFY") {
+    return <BioSpotifyEmbed title={link.title} url={link.url} />;
+  }
+
   const { effectiveButtonStyle, resolvedRadius, resolvedButtonClass } =
     resolveLinkStyles(buttonStyle, borderRadius, themeKey, buttonShadow, buttonClass);
   const customStyle: React.CSSProperties = {

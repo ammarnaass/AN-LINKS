@@ -90,9 +90,12 @@ export function LoginForm() {
         <div className="space-y-1">
           <div className="flex items-center justify-between px-0.5">
             <span className="text-xs font-semibold text-on-surface-variant">كلمة المرور</span>
-            <span className="text-[11px] text-primary hover:underline cursor-pointer">
+            <Link
+              href="/forgot-password"
+              className="text-[11px] text-primary hover:underline cursor-pointer"
+            >
               نسيت كلمة المرور؟
-            </span>
+            </Link>
           </div>
           <AppInput
             type="password"

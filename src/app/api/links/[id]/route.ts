@@ -31,6 +31,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       data: {
         ...(typeof body.title === "string" ? { title: body.title.trim() } : {}),
         ...(typeof body.url === "string" ? { url: body.url.trim() } : {}),
+        ...(typeof body.type === "string" ? { type: body.type } : {}),
         ...(typeof body.icon !== "undefined" ? { icon: body.icon } : {}),
         ...(typeof body.isActive === "boolean" ? { isActive: body.isActive } : {}),
         ...(typeof body.isPinned === "boolean" ? { isPinned: body.isPinned } : {}),

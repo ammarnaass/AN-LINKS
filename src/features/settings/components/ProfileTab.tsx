@@ -4,6 +4,7 @@ import React from "react";
 import { useSettingsProfile } from "../hooks/useSettingsProfile";
 import { AvatarUploadCard } from "./profile/AvatarUploadCard";
 import { ProfileFieldsForm } from "./profile/ProfileFieldsForm";
+import { MarketingPixelsCard } from "./profile/MarketingPixelsCard";
 
 export interface ProfileTabProps {
   displayName?: string;
@@ -84,6 +85,13 @@ export function ProfileTab(props?: ProfileTabProps) {
           />
         </div>
       </div>
+
+      <MarketingPixelsCard
+        profile={profile}
+        setProfile={setProfile}
+        onSave={() => handleUpdate(profile)}
+        isSaving={isSaving}
+      />
     </section>
   );
 }

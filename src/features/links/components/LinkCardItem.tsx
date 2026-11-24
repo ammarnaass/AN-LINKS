@@ -9,6 +9,7 @@ import { detectPlatform, DEFAULT_PLATFORM_PATTERNS } from "../services/platform-
 import { getSocialIcon } from "@/shared/ui";
 import { LinkAppearanceCustomizer } from "./LinkAppearanceCustomizer";
 import { LinkInlineEdit } from "./LinkInlineEdit";
+import { LinkCardActions } from "./LinkCardActions";
 
 interface LinkCardItemProps {
   link: LinkData;
@@ -107,6 +108,21 @@ export function LinkCardItem({ link, index, totalCount, onUpdate, onDelete, onMo
                 {catObj.icon && <span className="material-symbols-outlined text-[12px]">{catObj.icon}</span>}
                 <span>{catObj.label}</span>
               </span>
+              {link.type === "HEADER" && (
+                <span className="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[11px] font-semibold">
+                  عنوان قسم
+                </span>
+              )}
+              {link.type === "YOUTUBE" && (
+                <span className="px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30 text-[11px] font-semibold">
+                  يوتيوب
+                </span>
+              )}
+              {link.type === "SPOTIFY" && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold">
+                  سبوتيفاي
+                </span>
+              )}
               {link.isPinned && (
                 <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 text-[11px] font-semibold flex items-center gap-1">
                   <Pin className="w-3 h-3 fill-current" />
@@ -139,16 +155,18 @@ export function LinkCardItem({ link, index, totalCount, onUpdate, onDelete, onMo
               <h4 className="font-bold text-on-surface text-base truncate">{link.title}</h4>
             </div>
 
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              dir="ltr"
-              className="text-right text-xs text-on-surface-variant hover:text-primary truncate max-w-sm mt-0.5 flex items-center gap-1"
-            >
-              <span>{link.url.replace(/^https?:\/\//i, "")}</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
+            {link.type !== "HEADER" && (
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                dir="ltr"
+                className="text-right text-xs text-on-surface-variant hover:text-primary truncate max-w-sm mt-0.5 flex items-center gap-1"
+              >
+                <span>{link.url.replace(/^https?:\/\//i, "")}</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
 
             <div className="flex flex-wrap items-center gap-2.5 mt-2 pt-1">
               <span className="inline-flex items-center gap-1 text-primary text-xs bg-primary/10 px-2 py-0.5 rounded font-mono">
@@ -171,72 +189,15 @@ export function LinkCardItem({ link, index, totalCount, onUpdate, onDelete, onMo
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-3 shrink-0">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={link.isActive}
-              onChange={() => onUpdate({ ...link, isActive: !link.isActive })}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-on-primary after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container shadow-inner" />
-          </label>
-
-          <div className="flex items-center gap-1 text-on-surface-variant pt-1">
-            <button
-              type="button"
-              onClick={() => setIsCustomizing(!isCustomizing)}
-              className={`p-1.5 rounded-lg transition-colors ${
-                isCustomizing || hasCustomStyles
-                  ? "bg-primary/20 text-primary hover:bg-primary/30"
-                  : "hover:bg-surface-container-highest hover:text-on-surface"
-              }`}
-              title="تخصيص مظهر الرابط"
-            >
-              <Palette className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onUpdate({ ...link, isPinned: !link.isPinned })}
-              className={`p-1.5 rounded-lg transition-colors ${
-                link.isPinned
-                  ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
-                  : "hover:bg-surface-container-highest hover:text-on-surface"
-              }`}
-              title={link.isPinned ? "إلغاء التثبيت" : "تثبيت الرابط"}
-            >
-              <Pin className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onUpdate({ ...link, isArchived: !link.isArchived })}
-              className={`p-1.5 rounded-lg transition-colors ${
-                link.isArchived
-                  ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
-                  : "hover:bg-surface-container-highest hover:text-on-surface"
-              }`}
-              title={link.isArchived ? "إلغاء الأرشفة" : "أرشفة الرابط"}
-            >
-              <Archive className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className="p-1.5 rounded-lg hover:bg-surface-container-highest hover:text-on-surface transition-colors"
-              title="تعديل الرابط"
-            >
-              <span className="material-symbols-outlined text-[18px]">edit</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(link.id)}
-              className="p-1.5 rounded-lg hover:bg-error-container/30 hover:text-error transition-colors"
-              title="حذف الرابط"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <LinkCardActions
+          link={link}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+          onStartEdit={() => setIsEditing(true)}
+          isCustomizing={isCustomizing}
+          setIsCustomizing={setIsCustomizing}
+          hasCustomStyles={hasCustomStyles}
+        />
       </div>
 
       {isCustomizing && (

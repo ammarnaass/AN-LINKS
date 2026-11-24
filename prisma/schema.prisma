@@ -52,6 +52,10 @@ model Profile {
   cardStyle        String   @default("glass")
   bgOverlayOpacity Int      @default(40)
   isPublished      Boolean  @default(true)
+  metaPixelId       String?
+  tiktokPixelId     String?
+  googleAnalyticsId String?
+  snapchatPixelId   String?
 }
 
 enum PlatformCategory {
@@ -95,6 +99,7 @@ model Link {
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   platformId  String?
   platform    Platform?       @relation(fields: [platformId], references: [id], onDelete: SetNull)
+  type        String          @default("LINK") // LINK | HEADER | YOUTUBE | SPOTIFY
   title       String
   url         String
   icon        String?
@@ -406,4 +411,15 @@ model SecurityAuditLog {
 
   @@index([userId, createdAt])
 }
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
 

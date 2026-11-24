@@ -8,7 +8,13 @@ export interface ProfileSettingsInput {
   bio?: string;
   phone?: string;
   location?: string;
+  metaPixelId?: string | null;
+  tiktokPixelId?: string | null;
+  googleAnalyticsId?: string | null;
+  snapchatPixelId?: string | null;
 }
+
+const PIXEL_ID_REGEX = /^[a-zA-Z0-9_\-\.]{3,64}$/;
 
 export function validateSettingsProfile(
   input: ProfileSettingsInput
@@ -24,6 +30,18 @@ export function validateSettingsProfile(
   }
   if (isUsernameReserved(input.username)) {
     return { valid: false, error: "اسم المستخدم هذا محجوز للنظام" };
+  }
+  if (input.metaPixelId && !PIXEL_ID_REGEX.test(input.metaPixelId.trim())) {
+    return { valid: false, error: "معرف Meta Pixel غير صالح (يجب أن يحتوي على أرقام أو حروف بدون مسافات)" };
+  }
+  if (input.tiktokPixelId && !PIXEL_ID_REGEX.test(input.tiktokPixelId.trim())) {
+    return { valid: false, error: "معرف TikTok Pixel غير صالح" };
+  }
+  if (input.googleAnalyticsId && !PIXEL_ID_REGEX.test(input.googleAnalyticsId.trim())) {
+    return { valid: false, error: "معرف Google Analytics (GA4) غير صالح (مثال: G-XXXXXXXXXX)" };
+  }
+  if (input.snapchatPixelId && !PIXEL_ID_REGEX.test(input.snapchatPixelId.trim())) {
+    return { valid: false, error: "معرف Snapchat Pixel غير صالح" };
   }
   return { valid: true };
 }

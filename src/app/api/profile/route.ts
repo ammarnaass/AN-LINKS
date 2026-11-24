@@ -59,7 +59,15 @@ function parseProfileUpdates(body: Record<string, unknown>, data: Record<string,
   for (const f of textFields) {
     if (typeof body[f] === "string") data[f] = (body[f] as string).trim();
   }
-  const nullableFields = ["avatarUrl", "phone", "location"] as const;
+  const nullableFields = [
+    "avatarUrl",
+    "phone",
+    "location",
+    "metaPixelId",
+    "tiktokPixelId",
+    "googleAnalyticsId",
+    "snapchatPixelId",
+  ] as const;
   for (const f of nullableFields) {
     if (typeof body[f] === "string") data[f] = (body[f] as string).trim() || null;
     else if (body[f] === null) data[f] = null;
@@ -97,6 +105,10 @@ function buildDefaultProfileData(userId: string, displayName: string, overrides:
     cardStyle: (overrides.cardStyle as string) || "glass",
     bgOverlayOpacity: typeof overrides.bgOverlayOpacity === "number" ? overrides.bgOverlayOpacity : 40,
     isPublished: typeof overrides.isPublished === "boolean" ? overrides.isPublished : true,
+    metaPixelId: (overrides.metaPixelId as string) || null,
+    tiktokPixelId: (overrides.tiktokPixelId as string) || null,
+    googleAnalyticsId: (overrides.googleAnalyticsId as string) || null,
+    snapchatPixelId: (overrides.snapchatPixelId as string) || null,
   };
 }
 

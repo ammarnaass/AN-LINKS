@@ -19,6 +19,10 @@ export async function getProfileData(userId: string) {
           phone: true,
           location: true,
           avatarUrl: true,
+          metaPixelId: true,
+          tiktokPixelId: true,
+          googleAnalyticsId: true,
+          snapchatPixelId: true,
         },
       },
     },
@@ -36,6 +40,10 @@ export async function getProfileData(userId: string) {
     phone: user.profile?.phone ?? "",
     location: user.profile?.location ?? "",
     avatarUrl: user.profile?.avatarUrl ?? null,
+    metaPixelId: user.profile?.metaPixelId ?? null,
+    tiktokPixelId: user.profile?.tiktokPixelId ?? null,
+    googleAnalyticsId: user.profile?.googleAnalyticsId ?? null,
+    snapchatPixelId: user.profile?.snapchatPixelId ?? null,
   };
 }
 
@@ -81,12 +89,20 @@ export async function updateProfileData(
         bio: input.bio?.trim() ?? null,
         phone: input.phone?.trim() ?? null,
         location: input.location?.trim() ?? null,
+        metaPixelId: input.metaPixelId?.trim() || null,
+        tiktokPixelId: input.tiktokPixelId?.trim() || null,
+        googleAnalyticsId: input.googleAnalyticsId?.trim() || null,
+        snapchatPixelId: input.snapchatPixelId?.trim() || null,
       },
       update: {
         displayName: input.displayName.trim(),
         bio: input.bio?.trim() ?? null,
         phone: input.phone?.trim() ?? null,
         location: input.location?.trim() ?? null,
+        metaPixelId: input.metaPixelId?.trim() || null,
+        tiktokPixelId: input.tiktokPixelId?.trim() || null,
+        googleAnalyticsId: input.googleAnalyticsId?.trim() || null,
+        snapchatPixelId: input.snapchatPixelId?.trim() || null,
       },
     });
 
@@ -97,6 +113,10 @@ export async function updateProfileData(
       bio: updatedProfile.bio,
       phone: updatedProfile.phone,
       location: updatedProfile.location,
+      metaPixelId: updatedProfile.metaPixelId,
+      tiktokPixelId: updatedProfile.tiktokPixelId,
+      googleAnalyticsId: updatedProfile.googleAnalyticsId,
+      snapchatPixelId: updatedProfile.snapchatPixelId,
     };
   });
 }

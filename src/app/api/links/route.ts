@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         title: body.title.trim(),
         url: body.url.trim(),
+        type: typeof body.type === "string" ? body.type : "LINK",
         icon: body.icon || null,
         position: count,
         isActive: true,

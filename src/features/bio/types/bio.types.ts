@@ -23,6 +23,10 @@ export interface ProfileData {
   cardStyle?: string | null;
   bgOverlayOpacity?: number | null;
   isPublished?: boolean | null;
+  metaPixelId?: string | null;
+  tiktokPixelId?: string | null;
+  googleAnalyticsId?: string | null;
+  snapchatPixelId?: string | null;
 }
 
 export interface SocialItem {
@@ -35,6 +39,7 @@ export interface LinkItem {
   id: string;
   title: string;
   url: string;
+  type?: string;
   isActive: boolean;
   position: number;
   category?: string;

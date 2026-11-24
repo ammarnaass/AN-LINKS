@@ -2,12 +2,17 @@
 
 import React, { useState } from "react";
 import { ExternalLink, Link2, Globe, Sparkles } from "lucide-react";
+import {
+  extractYouTubeEmbedUrl,
+  extractSpotifyEmbedUrl,
+} from "@/features/links/utils/media-embed";
 
 export interface PhoneInteractiveLinkProps {
   link: {
     id: string;
     title: string;
     url: string;
+    type?: string;
     thumbnailUrl?: string | null;
     customBgColor?: string | null;
     customTextColor?: string | null;
@@ -24,6 +29,61 @@ export function PhoneInteractiveLink({
   baseStyleProps = {},
 }: PhoneInteractiveLinkProps) {
   const [showPrompt, setShowPrompt] = useState(false);
+
+  if (link.type === "HEADER") {
+    return (
+      <div className="w-full my-2 flex items-center justify-center gap-2">
+        <div className="h-[1px] flex-1 bg-white/10" />
+        <span className="text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-surface-container-high/70 text-on-surface border border-white/10 shadow-xs truncate max-w-[200px]">
+          {link.title}
+        </span>
+        <div className="h-[1px] flex-1 bg-white/10" />
+      </div>
+    );
+  }
+
+  if (link.type === "YOUTUBE") {
+    const embedUrl = extractYouTubeEmbedUrl(link.url);
+    if (embedUrl) {
+      return (
+        <div className="w-full my-1.5 overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-md">
+          {link.title && (
+            <div className="px-2.5 py-1 text-[10px] font-semibold text-on-surface border-b border-white/10 flex items-center justify-between bg-surface-container/30">
+              <span className="truncate">{link.title}</span>
+              <span className="text-[9px] text-red-400 font-mono">YouTube</span>
+            </div>
+          )}
+          <div className="relative w-full aspect-video">
+            <iframe
+              src={embedUrl}
+              title={link.title}
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      );
+    }
+  }
+
+  if (link.type === "SPOTIFY") {
+    const embedUrl = extractSpotifyEmbedUrl(link.url);
+    if (embedUrl) {
+      return (
+        <div className="w-full my-1.5 overflow-hidden rounded-xl border border-white/10 shadow-md bg-black/40">
+          <iframe
+            src={embedUrl}
+            width="100%"
+            height="80"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            className="w-full rounded-xl"
+          />
+        </div>
+      );
+    }
+  }
 
   const customStyle: React.CSSProperties = {
     ...baseStyleProps,

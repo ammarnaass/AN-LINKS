@@ -6,6 +6,7 @@ import { SocialIconsRow } from "./SocialIconsRow";
 import { LinkButton } from "./LinkButton";
 import { ReportModal } from "./ReportModal";
 import { QrShareModal } from "./QrShareModal";
+import { TrackingPixels } from "./TrackingPixels";
 import { resolveThemeStyles, ResolvedThemeStyles } from "@/features/appearance";
 import { ProfileData, SocialItem, LinkItem } from "../types/bio.types";
 
@@ -186,6 +187,7 @@ export function BioPageContent({
       style={styles.backgroundStyle}
       dir="rtl"
     >
+      <TrackingPixels profile={profile} isPreview={isPreview} />
       {styles.overlayStyle && (
         <div className="absolute inset-0 pointer-events-none z-0" style={styles.overlayStyle} />
       )}

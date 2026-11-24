@@ -19,11 +19,14 @@ export interface PlatformDTO {
   };
 }
 
+export type LinkType = "LINK" | "HEADER" | "YOUTUBE" | "SPOTIFY";
+
 export interface LinkData {
   id: string;
   userId?: string;
   title: string;
   url: string;
+  type?: LinkType | string;
   icon?: string | null;
   position: number;
   isActive: boolean;
@@ -58,6 +61,7 @@ export interface LinksPayload {
 export interface CreateLinkInput {
   title: string;
   url: string;
+  type?: LinkType | string;
   icon?: string;
   category?: string;
   platformId?: string | null;
@@ -73,6 +77,7 @@ export interface CreateLinkInput {
 export interface UpdateLinkInput {
   title?: string;
   url?: string;
+  type?: LinkType | string;
   icon?: string | null;
   isActive?: boolean;
   isPinned?: boolean;
@@ -131,6 +136,7 @@ export interface UserProfileDTO {
 export interface LinkValidationInput {
   title: string;
   url: string;
+  type?: LinkType | string;
 }
 
 export interface LinkValidationResult {
