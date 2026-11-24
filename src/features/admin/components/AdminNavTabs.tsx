@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BarChart3, Users, CreditCard, Settings, AlertTriangle, ShieldCheck, Link2 } from "lucide-react";
+import { BarChart3, Users, CreditCard, Settings, AlertTriangle, ShieldCheck, Link2, Package } from "lucide-react";
 import { AdminTabKey } from "../types/admin.types";
 
 export type { AdminTabKey };
@@ -13,6 +13,7 @@ export interface AdminNavTabsProps {
   sessionsCount?: number;
   pendingReportsCount?: number;
   linksCount?: number;
+  plansCount?: number;
 }
 
 export function AdminNavTabs({
@@ -22,6 +23,7 @@ export function AdminNavTabs({
   sessionsCount = 0,
   pendingReportsCount = 0,
   linksCount = 0,
+  plansCount = 0,
 }: AdminNavTabsProps) {
   const tabs: Array<{
     key: AdminTabKey;
@@ -48,8 +50,14 @@ export function AdminNavTabs({
       badge: sessionsCount > 0 ? sessionsCount : undefined,
     },
     {
+      key: "subscriptions",
+      label: "باقات واشتراكات المنصة",
+      icon: <Package className="w-4 h-4 shrink-0" />,
+      badge: plansCount > 0 ? plansCount : undefined,
+    },
+    {
       key: "payments",
-      label: "طرق الدفع والاشتراكات",
+      label: "المالية وبوابات الدفع",
       icon: <CreditCard className="w-4 h-4 shrink-0" />,
     },
     {

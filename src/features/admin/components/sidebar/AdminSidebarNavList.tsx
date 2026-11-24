@@ -5,6 +5,7 @@ import {
   BarChart3,
   Users,
   ShieldCheck,
+  Package,
   CreditCard,
   Settings,
   AlertTriangle,
@@ -21,6 +22,7 @@ export interface AdminSidebarNavListProps {
   sessionsCount?: number;
   pendingReportsCount?: number;
   linksCount?: number;
+  plansCount?: number;
 }
 
 export function AdminSidebarNavList({
@@ -32,12 +34,14 @@ export function AdminSidebarNavList({
   sessionsCount = 0,
   pendingReportsCount = 0,
   linksCount = 0,
+  plansCount = 0,
 }: AdminSidebarNavListProps) {
   const navItems = [
     { key: "analytics" as const, label: "الإحصائيات والنمو", icon: <BarChart3 className="w-4 h-4 shrink-0" /> },
     { key: "users" as const, label: "المستخدمين", icon: <Users className="w-4 h-4 shrink-0" />, badge: usersCount > 0 ? usersCount : undefined },
     { key: "sessions" as const, label: "الجلسات النشطة", icon: <ShieldCheck className="w-4 h-4 shrink-0" />, badge: sessionsCount > 0 ? sessionsCount : undefined },
-    { key: "payments" as const, label: "طرق الدفع والاشتراكات", icon: <CreditCard className="w-4 h-4 shrink-0" /> },
+    { key: "subscriptions" as const, label: "باقات واشتراكات المنصة", icon: <Package className="w-4 h-4 shrink-0" />, badge: plansCount > 0 ? plansCount : undefined },
+    { key: "payments" as const, label: "المالية وبوابات الدفع", icon: <CreditCard className="w-4 h-4 shrink-0" /> },
     { key: "links" as const, label: "إدارة الروابط والمنصات", icon: <Link2 className="w-4 h-4 shrink-0" />, badge: linksCount > 0 ? linksCount : undefined },
     { key: "settings" as const, label: "إعدادات المنصة", icon: <Settings className="w-4 h-4 shrink-0" /> },
     { key: "reports" as const, label: "البلاغات والاعتدال", icon: <AlertTriangle className="w-4 h-4 shrink-0" />, badge: pendingReportsCount > 0 ? pendingReportsCount : undefined, badgeColor: "bg-error text-white font-bold" },

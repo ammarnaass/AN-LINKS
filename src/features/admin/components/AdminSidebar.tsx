@@ -15,6 +15,7 @@ export interface AdminSidebarProps {
   sessionsCount?: number;
   pendingReportsCount?: number;
   linksCount?: number;
+  plansCount?: number;
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
   isCollapsed?: boolean;
@@ -28,6 +29,7 @@ export function AdminSidebar({
   sessionsCount = 0,
   pendingReportsCount = 0,
   linksCount = 0,
+  plansCount = 0,
   isOpenMobile = false,
   onCloseMobile,
   isCollapsed = false,
@@ -49,6 +51,7 @@ export function AdminSidebar({
         sessionsCount={sessionsCount}
         pendingReportsCount={pendingReportsCount}
         linksCount={linksCount}
+        plansCount={plansCount}
       />
       <AdminSidebarFooter isCollapsedView={isCollapsedView} />
     </div>

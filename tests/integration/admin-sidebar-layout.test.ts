@@ -46,7 +46,8 @@ describe("AdminSidebar Component", () => {
     expect(html).toContain("10");
     expect(html).toContain("البلاغات والاعتدال");
     expect(html).toContain("9");
-    expect(html).toContain("طرق الدفع والاشتراكات");
+    expect(html).toContain("باقات واشتراكات المنصة");
+    expect(html).toContain("المالية وبوابات الدفع");
     expect(html).toContain("إعدادات المنصة");
     expect(html).toContain("لوحة صانع المحتوى");
     expect(html).toContain("الموقع الرئيسي");

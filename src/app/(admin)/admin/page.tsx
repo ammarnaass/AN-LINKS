@@ -10,6 +10,7 @@ import {
   AdminAnalyticsTab,
   AdminUsersTab,
   AdminPaymentsTab,
+  AdminSubscriptionsTab,
   AdminSettingsTab,
   AdminReportsTab,
   AdminLinksContainer,
@@ -24,7 +25,8 @@ const TAB_TITLES: Record<AdminTabKey, string> = {
   analytics: "الإحصائيات والنمو والتحليلات",
   users: "إدارة المستخدمين والمشتركين",
   sessions: "الجلسات النشطة والأجهزة",
-  payments: "طرق الدفع وبوابات الاشتراكات",
+  subscriptions: "باقات واشتراكات المنصة والمميزات",
+  payments: "المالية وبوابات الدفع الإلكتروني",
   links: "إدارة الروابط والمنصات وحوكمة المحتوى",
   settings: "إعدادات المنصة والسياسات",
   reports: "مركز البلاغات والاعتدال",
@@ -158,6 +160,10 @@ export default function AdminConsolePage() {
               onRevokeSession={handleRevokeSession}
               isLoading={isLoading}
             />
+          )}
+
+          {activeTab === "subscriptions" && (
+            <AdminSubscriptionsTab />
           )}
 
           {activeTab === "payments" && (

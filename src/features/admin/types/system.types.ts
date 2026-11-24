@@ -1,5 +1,5 @@
 export type AdminTabKey =
-  | "analytics" | "users" | "sessions" | "payments" | "links" | "settings" | "reports";
+  | "analytics" | "users" | "sessions" | "subscriptions" | "payments" | "links" | "settings" | "reports";
 
 export type GatewayId =
   | "mada" | "apple_pay" | "visa_mastercard" | "stc_pay" | "tamara" | "tabby" | "fawry" | "stripe" | "paypal";

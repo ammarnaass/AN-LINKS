@@ -86,7 +86,8 @@ describe("AdminSidebar Responsive Unit Tests", () => {
       expect(html).toContain("الإحصائيات والنمو");
       expect(html).toContain("المستخدمين");
       expect(html).toContain("الجلسات النشطة");
-      expect(html).toContain("طرق الدفع والاشتراكات");
+      expect(html).toContain("باقات واشتراكات المنصة");
+      expect(html).toContain("المالية وبوابات الدفع");
       expect(html).toContain("إعدادات المنصة");
       expect(html).toContain("البلاغات والاعتدال");
       expect(html).toContain("لوحة صانع المحتوى");
