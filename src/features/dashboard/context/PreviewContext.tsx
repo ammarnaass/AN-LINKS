@@ -8,6 +8,11 @@ export interface PreviewLinkItem {
   url: string;
   isActive: boolean;
   position: number;
+  thumbnailUrl?: string | null;
+  customBgColor?: string | null;
+  customTextColor?: string | null;
+  customBorderColor?: string | null;
+  customShadow?: string | null;
 }
 
 export interface PreviewSocialItem {

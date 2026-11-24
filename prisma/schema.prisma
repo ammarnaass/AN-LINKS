@@ -102,8 +102,13 @@ model Link {
   isActive    Boolean         @default(true)
   isPinned    Boolean         @default(false)
   isArchived  Boolean         @default(false)
-  clicksCount Int             @default(0) // عداد إجمالي تراكمي سريع للنقرات
-  createdAt   DateTime        @default(now())
+  clicksCount       Int             @default(0) // عداد إجمالي تراكمي سريع للنقرات
+  thumbnailUrl      String?
+  customBgColor     String?
+  customTextColor   String?
+  customBorderColor String?
+  customShadow      String?
+  createdAt         DateTime        @default(now())
   updatedAt   DateTime        @default(now()) @updatedAt
 
   clicks      LinkClick[]

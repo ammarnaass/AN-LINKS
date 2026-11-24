@@ -37,6 +37,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         ...(typeof body.isArchived === "boolean" ? { isArchived: body.isArchived } : {}),
         ...(typeof body.platformId !== "undefined" ? { platformId: body.platformId } : {}),
         ...(typeof body.position === "number" ? { position: body.position } : {}),
+        ...(typeof body.thumbnailUrl !== "undefined" ? { thumbnailUrl: body.thumbnailUrl } : {}),
+        ...(typeof body.customBgColor !== "undefined" ? { customBgColor: body.customBgColor } : {}),
+        ...(typeof body.customTextColor !== "undefined" ? { customTextColor: body.customTextColor } : {}),
+        ...(typeof body.customBorderColor !== "undefined" ? { customBorderColor: body.customBorderColor } : {}),
+        ...(typeof body.customShadow !== "undefined" ? { customShadow: body.customShadow } : {}),
       },
     });
 

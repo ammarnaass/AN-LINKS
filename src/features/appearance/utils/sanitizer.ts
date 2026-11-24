@@ -23,6 +23,15 @@ export function isValidImageUrl(url: string): boolean {
   return false;
 }
 
+export function sanitizeHexColor(color: string): string | null {
+  if (typeof color !== "string") return null;
+  const trimmed = color.trim();
+  if (/^#([0-9a-fA-F]{3,8})$/.test(trimmed)) {
+    return trimmed;
+  }
+  return null;
+}
+
 export function sanitizeCustomBackground(bg: string): string | null {
   if (typeof bg !== "string") return null;
   const trimmed = bg.trim();

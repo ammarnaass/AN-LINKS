@@ -35,6 +35,11 @@ export interface LinkData {
   clicks?: number;
   clicksCount?: number;
   createdAt?: string;
+  thumbnailUrl?: string | null;
+  customBgColor?: string | null;
+  customTextColor?: string | null;
+  customBorderColor?: string | null;
+  customShadow?: string | null;
 }
 
 export interface SocialItem {
@@ -58,6 +63,11 @@ export interface CreateLinkInput {
   platformId?: string | null;
   isPinned?: boolean;
   isArchived?: boolean;
+  thumbnailUrl?: string | null;
+  customBgColor?: string | null;
+  customTextColor?: string | null;
+  customBorderColor?: string | null;
+  customShadow?: string | null;
 }
 
 export interface UpdateLinkInput {
@@ -70,6 +80,11 @@ export interface UpdateLinkInput {
   platformId?: string | null;
   position?: number;
   category?: string;
+  thumbnailUrl?: string | null;
+  customBgColor?: string | null;
+  customTextColor?: string | null;
+  customBorderColor?: string | null;
+  customShadow?: string | null;
 }
 
 export interface BatchReorderInput {
@@ -80,6 +95,11 @@ export interface BatchReorderInput {
     isPinned?: boolean;
     isArchived?: boolean;
     platformId?: string | null;
+    thumbnailUrl?: string | null;
+    customBgColor?: string | null;
+    customTextColor?: string | null;
+    customBorderColor?: string | null;
+    customShadow?: string | null;
   }[];
   socials?: {
     id?: string;

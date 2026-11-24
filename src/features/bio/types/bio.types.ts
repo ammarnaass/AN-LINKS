@@ -37,6 +37,12 @@ export interface LinkItem {
   isActive: boolean;
   position: number;
   category?: string;
+  icon?: string | null;
+  thumbnailUrl?: string | null;
+  customBgColor?: string | null;
+  customTextColor?: string | null;
+  customBorderColor?: string | null;
+  customShadow?: string | null;
 }
 
 export interface ProfileMetadataInput {

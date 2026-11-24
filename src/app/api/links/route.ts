@@ -58,6 +58,11 @@ export async function GET() {
       clicks: l.clicksCount || l.stats.reduce((acc, curr) => acc + curr.clicks, 0),
       clicksCount: l.clicksCount,
       createdAt: l.createdAt.toISOString(),
+      thumbnailUrl: l.thumbnailUrl,
+      customBgColor: l.customBgColor,
+      customTextColor: l.customTextColor,
+      customBorderColor: l.customBorderColor,
+      customShadow: l.customShadow,
     }));
 
     return NextResponse.json({
@@ -102,6 +107,11 @@ export async function POST(request: NextRequest) {
         isPinned: body.isPinned ?? false,
         isArchived: body.isArchived ?? false,
         platformId: body.platformId || null,
+        thumbnailUrl: body.thumbnailUrl || null,
+        customBgColor: body.customBgColor || null,
+        customTextColor: body.customTextColor || null,
+        customBorderColor: body.customBorderColor || null,
+        customShadow: body.customShadow || null,
       },
       include: {
         platform: true,
@@ -136,6 +146,11 @@ export async function PUT(request: NextRequest) {
               ...(typeof item.isPinned === "boolean" ? { isPinned: item.isPinned } : {}),
               ...(typeof item.isArchived === "boolean" ? { isArchived: item.isArchived } : {}),
               ...(item.platformId !== undefined ? { platformId: item.platformId } : {}),
+              ...(item.thumbnailUrl !== undefined ? { thumbnailUrl: item.thumbnailUrl } : {}),
+              ...(item.customBgColor !== undefined ? { customBgColor: item.customBgColor } : {}),
+              ...(item.customTextColor !== undefined ? { customTextColor: item.customTextColor } : {}),
+              ...(item.customBorderColor !== undefined ? { customBorderColor: item.customBorderColor } : {}),
+              ...(item.customShadow !== undefined ? { customShadow: item.customShadow } : {}),
             },
           })
         );
