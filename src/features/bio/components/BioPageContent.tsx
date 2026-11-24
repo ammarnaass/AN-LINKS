@@ -7,6 +7,7 @@ import { LinkButton } from "./LinkButton";
 import { ReportModal } from "./ReportModal";
 import { QrShareModal } from "./QrShareModal";
 import { TrackingPixels } from "./TrackingPixels";
+import { BioNewsletterCard } from "./BioNewsletterCard";
 import { LanguageSwitcher } from "@/shared/ui";
 import { useTranslation } from "@/shared/i18n";
 import { resolveThemeStyles, ResolvedThemeStyles } from "@/features/appearance";
@@ -149,6 +150,14 @@ function BioMainFrame({
       />
 
       <BioLinksDeck links={links} profile={profile} buttonClass={styles.buttonClass} isPreview={isPreview} />
+
+      <BioNewsletterCard
+        username={username}
+        displayName={profile.displayName}
+        accentColor={profile.accentColor || undefined}
+        buttonClass={styles.buttonClass}
+        isPreview={isPreview}
+      />
 
       {socialPosition === "bottom" && (
         <SocialIconsRow

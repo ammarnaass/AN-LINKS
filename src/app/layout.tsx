@@ -8,6 +8,7 @@ import {
   normalizeLocale,
   getDirection,
 } from "@/shared/i18n";
+import { CookieConsentBanner } from "@/shared/ui";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || "https://anlinks.dev"),
@@ -77,6 +78,7 @@ export default async function RootLayout({
         <AuthProvider>
           <I18nProvider initialLocale={initialLocale}>
             {children}
+            <CookieConsentBanner />
           </I18nProvider>
         </AuthProvider>
       </body>

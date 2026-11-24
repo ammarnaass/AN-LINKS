@@ -426,4 +426,16 @@ model PasswordResetToken {
   @@index([email])
 }
 
+model CreatorSubscriber {
+  id        String   @id @default(cuid())
+  creatorId String
+  email     String
+  name      String?
+  source    String?  @default("bio_page")
+  createdAt DateTime @default(now())
+
+  @@unique([creatorId, email])
+  @@index([creatorId, createdAt])
+}
+
 
