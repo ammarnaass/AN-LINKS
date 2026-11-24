@@ -5,6 +5,7 @@ export * from "./utils/sentinel.utils";
 export * from "./components/LinkHealthBanner";
 export * from "./components/AddLinkForm";
 export * from "./components/LinkCardItem";
+export * from "./components/LinkAppearanceCustomizer";
 export * from "./components/LinkEditor";
 export * from "./components/SocialLinksEditor";
 export * from "./components/MobilePreview";
