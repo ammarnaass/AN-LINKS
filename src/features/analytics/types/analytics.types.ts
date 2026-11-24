@@ -61,5 +61,8 @@ export interface UserAnalyticsSummary {
     clicks: number;
     ctr: number;
   }[];
+  trafficSources?: TrafficSourceItem[];
+  countries?: CountryItem[];
+  devices?: { name: string; percentage: number; count: number }[];
 }
 

@@ -129,8 +129,8 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="lg:col-span-5 space-y-6">
-          <TrafficSourcesTable sources={TRAFFIC_SOURCES_DATA} />
-          <DevicesAndGeoBreakdown countries={COUNTRIES_DATA} />
+          <TrafficSourcesTable sources={analytics?.trafficSources || TRAFFIC_SOURCES_DATA} />
+          <DevicesAndGeoBreakdown countries={analytics?.countries || COUNTRIES_DATA} />
         </div>
       </div>
     </div>

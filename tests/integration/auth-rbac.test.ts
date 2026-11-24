@@ -23,8 +23,12 @@ interface NextAuthCredentialsProvider {
 describe("Authentication & RBAC Integration Workflows", () => {
   const provider = authOptions.providers[0] as unknown as NextAuthCredentialsProvider;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    await prisma.user.updateMany({
+      where: { email: { in: ["admin@anlinks.dev", "client@anlinks.dev"] } },
+      data: { isSuspended: false },
+    });
   });
 
   it("should authenticate System Admin and assign ADMIN role", async () => {

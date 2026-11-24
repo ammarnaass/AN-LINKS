@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth.options";
 import { prisma } from "@/shared/db";
 import { UserAnalyticsSummary } from "@/features/analytics/types/analytics.types";
+import { aggregateAnalyticsBreakdowns } from "@/features/analytics/services/analytics-breakdown.service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -91,12 +92,17 @@ export async function GET(request: NextRequest) {
       })
       .sort((a, b) => b.clicks - a.clicks);
 
+    const userLinkIds = userLinks.map((l) => l.id);
+    const { trafficSources, countries } = await aggregateAnalyticsBreakdowns(userLinkIds, sinceDate);
+
     const summary: UserAnalyticsSummary = {
       totalViews,
       totalClicks,
       averageCtr,
       chartData,
       topLinks,
+      trafficSources,
+      countries,
     };
 
     return NextResponse.json({ success: true, analytics: summary });

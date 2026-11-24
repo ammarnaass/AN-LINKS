@@ -1,0 +1,26 @@
+{
+  "name": "AN LINKS | منصة روابط البايو العربية",
+  "short_name": "AN LINKS",
+  "description": "أسرع وأحدث منصة لروابط الـ Bio بالعربية وإدارة الهوية الرقمية",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0e17",
+  "theme_color": "#4edea3",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/logo-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "48x48 72x72 96x96",
+      "type": "image/svg+xml"
+    }
+  ]
+}

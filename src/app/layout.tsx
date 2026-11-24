@@ -43,8 +43,10 @@ const readex = Readex_Pro({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://anlinks.dev"),
   title: "AN LINKS | أسرع منصة لروابط الـ Bio بالعربية",
   description: "اجمع كل روابطك وحساباتك في صفحة واحدة احترافية وسريعة مصممة خصيصاً للمحتوى العربي.",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
