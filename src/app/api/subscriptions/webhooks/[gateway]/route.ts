@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/shared/db";
+import {
+  processPaymentSuccess,
+  processPaymentFailure,
+  processSubscriptionCancellation,
+} from "@/features/subscriptions/services/webhook-lifecycle.service";
 
 interface RouteParams {
   params: Promise<{ gateway: string }>;
@@ -34,7 +39,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const headerSecret = req.headers.get("x-webhook-secret");
 
-    // If an explicitly invalid signature or secret was passed
     if (headerSig === "invalid" || headerSecret === "invalid") {
       return NextResponse.json(
         { success: false, error: "Invalid signature or webhook secret" },
@@ -63,13 +67,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // 3. Extract transaction ID from payload
+    // 3. Extract transaction identifier
     const gatewayTxId =
       payload.gatewayTxId ||
       payload.id ||
       payload.transaction_id ||
       payload.data?.id ||
-      payload.data?.transaction_id;
+      payload.data?.transaction_id ||
+      payload.data?.object?.id;
 
     if (!gatewayTxId || typeof gatewayTxId !== "string") {
       return NextResponse.json(
@@ -87,7 +92,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ received: true, idempotent: true }, { status: 200 });
     }
 
-    // 5. Find pending invoice
+    // 5. Find invoice
     const invoice = await prisma.financialInvoice.findFirst({
       where: { gatewayTxId },
     });
@@ -99,7 +104,34 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // 6. Calculate period dates
+    // 6. Determine event type
+    const eventType = (payload.type || payload.event || payload.action || "").toLowerCase();
+
+    // 7. Handle Failure Events
+    const isFailure =
+      eventType.includes("failed") ||
+      eventType === "payment.failed" ||
+      eventType === "charge.failed" ||
+      eventType === "invoice.payment_failed";
+
+    if (isFailure) {
+      await processPaymentFailure(invoice.id, invoice.userId);
+      return NextResponse.json({ success: true, processed: true, event: "payment.failed" });
+    }
+
+    // 8. Handle Cancellation Events
+    const isCancellation =
+      eventType.includes("canceled") ||
+      eventType.includes("cancelled") ||
+      eventType.includes("deleted") ||
+      eventType === "customer.subscription.deleted";
+
+    if (isCancellation) {
+      await processSubscriptionCancellation(invoice.userId, { immediate: Boolean(payload.immediate) });
+      return NextResponse.json({ success: true, processed: true, event: "subscription.canceled" });
+    }
+
+    // 9. Calculate period dates
     const now = new Date();
     const billingCycle = (invoice.billingCycle || payload.billingCycle || "MONTHLY").toUpperCase();
     const periodEnd = new Date(now);
@@ -110,73 +142,18 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       periodEnd.setDate(periodEnd.getDate() + 30);
     }
 
-    // 7. Atomic transaction
-    await prisma.$transaction(async (tx) => {
-      // a. Mark invoice as PAID
-      await tx.financialInvoice.update({
-        where: { id: invoice.id },
-        data: {
-          status: "PAID",
-          paidAt: now,
-        },
-      });
-
-      // b. Resolve plan to check slug
-      const planId = invoice.planId || payload.planId;
-      let planSlug = "";
-      if (planId) {
-        const plan = await tx.subscriptionPlan.findUnique({
-          where: { id: planId },
-        });
-        if (plan) {
-          planSlug = plan.slug;
-        }
-      }
-
-      // c. Upsert UserSubscription
-      if (planId) {
-        await tx.userSubscription.upsert({
-          where: { userId: invoice.userId },
-          update: {
-            planId,
-            status: "ACTIVE",
-            billingCycle,
-            currency: invoice.currency,
-            amountPaid: invoice.amountTotal,
-            gatewayCode: gateway,
-            currentPeriodStart: now,
-            currentPeriodEnd: periodEnd,
-          },
-          create: {
-            userId: invoice.userId,
-            planId,
-            status: "ACTIVE",
-            billingCycle,
-            currency: invoice.currency,
-            amountPaid: invoice.amountTotal,
-            gatewayCode: gateway,
-            currentPeriodStart: now,
-            currentPeriodEnd: periodEnd,
-          },
-        });
-      }
-
-      // d. Update user role to "PRO" if plan slug is not "free"
-      if (planSlug && planSlug !== "free") {
-        await tx.user.update({
-          where: { id: invoice.userId },
-          data: { role: "PRO" },
-        });
-      }
-
-      // e. If coupon code exists, increment coupon usedCount
-      const couponCode = payload.couponCode;
-      if (couponCode && typeof couponCode === "string") {
-        await tx.promotionCoupon.updateMany({
-          where: { code: couponCode.trim().toUpperCase() },
-          data: { usedCount: { increment: 1 } },
-        });
-      }
+    // 10. Process payment success
+    await processPaymentSuccess({
+      invoiceId: invoice.id,
+      userId: invoice.userId,
+      planId: invoice.planId || payload.planId,
+      billingCycle,
+      currency: invoice.currency,
+      amountTotal: invoice.amountTotal,
+      gatewayCode: gateway,
+      now,
+      periodEnd,
+      couponCode: payload.couponCode,
     });
 
     return NextResponse.json({ success: true, processed: true }, { status: 200 });
