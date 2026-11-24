@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Link2, Palette, BarChart3, Settings } from "lucide-react";
 import { PreviewProvider } from "@/features/dashboard";
 import { UserNavDropdown } from "@/features/auth";
-import { ThemeToggle } from "@/shared/ui";
+import { ThemeToggle, BrandLogo } from "@/shared/ui";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,17 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="max-w-[1560px] mx-auto h-16 w-full px-4 sm:px-8 flex items-center justify-between gap-4">
           {/* Logo & Status Badge */}
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="flex items-center gap-2.5 group">
-              <div className="relative flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center ring-2 ring-primary/40 group-hover:scale-105 transition-transform">
-                  <Link2 className="w-4 h-4 rotate-45" />
-                </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary ring-2 ring-surface-container-lowest" />
-              </div>
-              <span className="font-bold text-lg text-on-surface tracking-tight">
-                روابط | AN LINKS
-              </span>
-            </Link>
+            <BrandLogo href="/dashboard" variant="minimal" size="sm" />
           </div>
 
           {/* Central Navigation Pills */}

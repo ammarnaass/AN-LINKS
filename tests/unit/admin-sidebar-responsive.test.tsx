@@ -56,7 +56,7 @@ describe("AdminSidebar Responsive Unit Tests", () => {
         })
       );
 
-      expect(html).toContain("روابط | AN LINKS");
+      expect(html).toContain("AN LINKS");
       expect(html).toContain("Console المشغّل والمدير");
       expect(html).toContain("flex flex-col");
     });
@@ -168,7 +168,7 @@ describe("AdminSidebar Responsive Unit Tests", () => {
       );
 
       // In collapsed view, brand text wrapper has class 'hidden'
-      expect(html).toContain('<div class="hidden"><span class="font-black text-sm text-on-surface tracking-tight">روابط | AN LINKS</span>');
+      expect(html).toContain('<div class="hidden"><span class="font-black text-sm text-on-surface tracking-tight">AN LINKS</span>');
       expect(html).toContain("Console المشغّل والمدير");
       expect(html).toContain("p-3 flex-col items-center gap-3 justify-center");
     });

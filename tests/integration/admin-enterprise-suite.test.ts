@@ -27,8 +27,8 @@ describe("Admin Enterprise Suite Integration (v3.1.0)", () => {
     const settings = getPlatformSettings();
 
     expect(settings).toBeDefined();
-    expect(settings.siteName).toBe("روابط | AN LINKS");
-    expect(settings.canonicalDomain).toBe("rawabet.me");
+    expect(settings.siteName).toBe("AN LINKS");
+    expect(settings.canonicalDomain).toBe("anlinks.dev");
     expect(settings.pricing.proMonthlyPrice).toBe(39);
     expect(settings.pricing.proYearlyPrice).toBe(349);
     expect(settings.pricing.storeCommissionRate).toBe(5);
@@ -71,7 +71,7 @@ describe("Admin Enterprise Suite Integration (v3.1.0)", () => {
 
     // Revert back to clean state
     updatePlatformSettings({
-      siteName: "روابط | AN LINKS",
+      siteName: "AN LINKS",
       maintenanceMode: false,
       pricing: {
         ...initial.pricing,

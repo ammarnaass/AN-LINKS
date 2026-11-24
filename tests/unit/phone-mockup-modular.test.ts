@@ -36,7 +36,7 @@ describe("Modular Phone Mockup Suite (SSR Node Compatibility)", () => {
     // Must contain clean zero-data fallback
     expect(html).toContain("لا توجد روابط منشورة حالياً");
     expect(html).toContain("ر"); // fallback letter
-    expect(html).toContain("مدعوم بواسطة روابط");
+    expect(html).toContain("مدعوم بواسطة AN LINKS");
   });
 
   it("should render PhoneScreenContent with explicit user profile and active links", () => {
@@ -57,7 +57,7 @@ describe("Modular Phone Mockup Suite (SSR Node Compatibility)", () => {
     expect(html).toContain("موقعي الشخصي");
     // Inactive link must NOT be rendered
     expect(html).not.toContain("مسودة غير منشورة");
-    expect(html).toContain("مدعوم بواسطة روابط");
+    expect(html).toContain("مدعوم بواسطة AN LINKS");
   });
 
   it("should resolve visual identity tokens including custom background, font, and button shadow", () => {

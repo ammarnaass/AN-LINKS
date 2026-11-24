@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80" fill="none">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="70%" stop-color="#f3f4f6" />
+      <stop offset="100%" stop-color="#9ca3af" />
+    </linearGradient>
+    <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Emblem Icon (Left) -->
+  <g transform="translate(10, 10)">
+    <!-- Squircle container -->
+    <rect x="0" y="0" width="60" height="60" rx="16" fill="#0d131d" stroke="#1f2937" stroke-width="1.5" />
+    <rect x="0.75" y="0.75" width="58.5" height="58.5" rx="15" fill="none" stroke="url(#logoGrad)" stroke-opacity="0.3" stroke-width="1" />
+    
+    <!-- Geometric A-N Link Graphic -->
+    <path d="M 17 44 L 26 19 C 27 16, 31 16, 32 19 L 38 34" 
+          stroke="url(#logoGrad)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 30 32 L 36 44 C 37 46, 39 47, 41 45 L 47 20" 
+          stroke="#6ee7b7" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 21 32 L 42 32" 
+          stroke="#6ee7b7" stroke-width="3.5" stroke-linecap="round" filter="url(#logoGlow)" />
+    
+    <!-- Nodes -->
+    <circle cx="26" cy="19" r="2.5" fill="#ffffff" />
+    <circle cx="47" cy="20" r="2.5" fill="#ffffff" />
+    <circle cx="32" cy="32" r="2" fill="#10b981" stroke="#ffffff" stroke-width="1.2" />
+  </g>
+
+  <!-- Typography: AN LINKS -->
+  <g transform="translate(84, 42)">
+    <text x="0" y="0" font-family="'Inter', 'Montserrat', 'Segoe UI', system-ui, -apple-system, sans-serif" 
+          font-size="26" font-weight="900" letter-spacing="1.5" fill="url(#textGrad)">
+      AN <tspan fill="#10b981">LINKS</tspan>
+    </text>
+    <text x="2" y="18" font-family="'Cairo', 'IBM Plex Sans Arabic', system-ui, sans-serif" 
+          font-size="10" font-weight="700" letter-spacing="0.5" fill="#6ee7b7" opacity="0.9">
+      منصة الروابط المتطورة • SMART BIO
+    </text>
+  </g>
+</svg>

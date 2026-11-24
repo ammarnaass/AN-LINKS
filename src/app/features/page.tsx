@@ -8,9 +8,9 @@ import {
 } from "@/features/landing";
 
 export const metadata: Metadata = {
-  title: "المميزات المتقدمة | منصة روابط (Rawabet)",
+  title: "المميزات المتقدمة | منصة AN LINKS",
   description:
-    "استكشف كافة مزايا منصة روابط: فاحص الروابط الذكي (Link Sentinel)، بيع المنتجات الرقمية، إحصاءات خالية من البوتات، وتصميم بينتو عربي متطور.",
+    "استكشف كافة مزايا منصة AN LINKS: فاحص الروابط الذكي (Link Sentinel)، بيع المنتجات الرقمية، إحصاءات خالية من البوتات، وتصميم بينتو عربي متطور.",
 };
 
 export default function FeaturesPage() {

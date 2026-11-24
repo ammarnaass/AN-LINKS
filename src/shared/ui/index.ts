@@ -8,5 +8,6 @@ export * from "./AppCard";
 export * from "./BentoTile";
 export * from "./ThemePreviewSwatch";
 export * from "./FloatingMetricCard";
+export * from "./BrandLogo";
 export * from "./phone/PhoneMockup";
 

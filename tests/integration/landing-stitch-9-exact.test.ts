@@ -58,8 +58,8 @@ describe("Stitch _9 Landing Page Exact Parity Test Suite", () => {
     expect(html).toContain('href="#pricing"');
     expect(html).toContain('href="#testimonials"');
     expect(html).toContain('href="#faq"');
-    expect(html).toContain("روابط");
-    expect(html).toContain("Rawabet");
+    expect(html).toContain("AN");
+    expect(html).toContain("LINKS");
   });
 
   it("should render PartnersMarqueeSection with 6 brand logos", () => {
@@ -113,7 +113,7 @@ describe("Stitch _9 Landing Page Exact Parity Test Suite", () => {
   it("should render GiantCtaSection with claim username input", () => {
     const html = renderToStaticMarkup(React.createElement(GiantCtaSection));
     expect(html).toContain("جاهز لتوحيد حضورك الرقمي");
-    expect(html).toContain("rawabet.me/");
+    expect(html).toContain("anlinks.dev/");
     expect(html).toContain("ابدأ الآن مجاناً");
   });
 });

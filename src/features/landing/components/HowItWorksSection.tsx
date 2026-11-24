@@ -6,7 +6,7 @@ const STEPS = [
     numColor: "text-primary",
     hoverBg: "group-hover:bg-primary-container group-hover:text-on-primary-container",
     title: "اختر اسم رابطك الفريد",
-    desc: "احجز اسم حسابك الخاص (rawabet.me/yourname) في ثوانٍ معدودة قبل أن يسبقك إليه أحد، وبدون الحاجة لبطاقة دفع.",
+    desc: "احجز اسم حسابك الخاص (anlinks.dev/yourname) في ثوانٍ معدودة قبل أن يسبقك إليه أحد، وبدون الحاجة لبطاقة دفع.",
     badgeIcon: "verified",
     badgeText: "حجز فوري ومجاني",
     badgeColor: "text-primary",

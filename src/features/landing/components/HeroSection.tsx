@@ -40,7 +40,7 @@ function HeroClaimForm({
       <form onSubmit={onSubmit} className="flex flex-col sm:flex-row items-center gap-2">
         <div className="flex items-center w-full px-4 py-2.5 bg-surface-container-lowest rounded-lg flex-1">
           <span className="text-outline text-xs sm:text-sm select-none font-mono" dir="ltr">
-            rawabet.me/
+            anlinks.dev/
           </span>
           <input
             className="w-full bg-transparent text-on-surface text-sm sm:text-base placeholder:text-outline focus:outline-none px-2 text-left font-medium"
@@ -72,7 +72,7 @@ function HeroProofRow({ displayHandle }: { displayHandle: string }) {
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-container" />
         </span>
         <span className="text-primary font-medium font-mono" dir="ltr">
-          rawabet.me/{displayHandle} متاح للتسجيل الفوري
+          anlinks.dev/{displayHandle} متاح للتسجيل الفوري
         </span>
       </div>
 

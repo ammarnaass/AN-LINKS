@@ -45,6 +45,16 @@ const readex = Readex_Pro({
 export const metadata: Metadata = {
   title: "AN LINKS | أسرع منصة لروابط الـ Bio بالعربية",
   description: "اجمع كل روابطك وحساباتك في صفحة واحدة احترافية وسريعة مصممة خصيصاً للمحتوى العربي.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/logo-icon.svg",
+  },
+  openGraph: {
+    title: "AN LINKS | المنصة الأكثر تطوراً لصفحات الروابط والـ Bio",
+    description: "اجمع كل روابطك وقنواتك ومتجرك في صفحة واحدة احترافية وسريعة مصممة للمحتوى العربي.",
+    images: [{ url: "/og-image.svg", width: 1200, height: 630, alt: "AN LINKS Platform" }],
+  },
 };
 
 export default function RootLayout({

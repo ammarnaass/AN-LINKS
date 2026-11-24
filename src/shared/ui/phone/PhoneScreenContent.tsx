@@ -183,7 +183,7 @@ export function PhoneScreenContent({
       {/* Footer Branding */}
       <div className="pt-4 pb-1 flex items-center gap-1 text-[11px] text-outline mt-auto shrink-0">
         <Sparkles className="w-3 h-3 text-primary" />
-        <span>مدعوم بواسطة روابط | AN LINKS</span>
+        <span>مدعوم بواسطة AN LINKS</span>
       </div>
     </div>
   );

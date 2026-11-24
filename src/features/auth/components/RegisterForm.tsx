@@ -135,7 +135,7 @@ export function RegisterForm() {
           error={formData.username ? usernameError || undefined : undefined}
           helperText={
             formData.username && !usernameError
-              ? `رابطك سيكون: rawabet.me/${formData.username}`
+              ? `رابطك سيكون: anlinks.dev/${formData.username}`
               : undefined
           }
           startAdornment={<AtSign className="w-4 h-4" />}

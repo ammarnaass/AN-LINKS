@@ -26,7 +26,7 @@ export function AlternativeComparison() {
               <th className="py-4 px-4 font-bold text-center text-primary bg-primary/10 w-1/3">
                 <span className="flex items-center justify-center gap-1.5">
                   <Sparkles className="w-4 h-4" />
-                  <span>منصة روابط (Rawabet)</span>
+                  <span>منصة AN LINKS</span>
                 </span>
               </th>
               <th className="py-4 px-4 font-bold text-center text-on-surface-variant w-1/6">Linktree</th>

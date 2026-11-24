@@ -51,7 +51,7 @@ export function GiantCtaSection({ onOpenAuth }: GiantCtaSectionProps = {}) {
         >
           <div className="flex items-center w-full px-4 py-2.5 bg-surface-container-low rounded-lg flex-1">
             <span className="text-outline text-xs sm:text-sm font-mono" dir="ltr">
-              rawabet.me/
+              anlinks.dev/
             </span>
             <input
               className="w-full bg-transparent text-on-surface text-sm sm:text-base placeholder:text-outline focus:outline-none px-2 text-left"

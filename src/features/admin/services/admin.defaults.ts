@@ -112,9 +112,9 @@ export const DEFAULT_GATEWAYS: Record<GatewayId, AdminGatewayConfig> = {
 };
 
 export const DEFAULT_PLATFORM_SETTINGS: AdminPlatformSettings = {
-  siteName: "روابط | AN LINKS",
+  siteName: "AN LINKS",
   supportEmail: "support@anlinks.dev",
-  canonicalDomain: "rawabet.me",
+  canonicalDomain: "anlinks.dev",
   maintenanceMode: false,
   maintenanceMessage: "المنصة تخضع لصيانة دورية مجدولة وسنعود للعمل خلال دقائق.",
   allowRegistration: true,

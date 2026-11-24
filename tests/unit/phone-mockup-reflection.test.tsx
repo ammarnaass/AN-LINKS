@@ -456,7 +456,7 @@ describe("PhoneMockup & PhoneScreenContent Live Visual Reflection Suite", () => 
       expect(html).toContain("جمال بن حمد");
       expect(html).toContain("@jamal");
       expect(html).toContain("رائد أعمال تقني");
-      expect(html).toContain("مدعوم بواسطة روابط | AN LINKS");
+      expect(html).toContain("مدعوم بواسطة AN LINKS");
     });
   });
 });

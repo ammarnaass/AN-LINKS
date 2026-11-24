@@ -19,12 +19,12 @@ export function AdminSidebarHeader({ isCollapsedView, onCloseMobile, onToggleCol
 
   return (
     <div className={`border-b border-outline-variant/15 flex ${containerClass}`}>
-      <Link href="/admin" className={linkClass} title="روابط | AN LINKS" aria-label="روابط | AN LINKS">
+      <Link href="/admin" className={linkClass} title="AN LINKS" aria-label="AN LINKS">
         <div className={iconWrapClass}>
           <Shield className="w-5 h-5 text-primary" />
         </div>
         <div className={isCollapsedView ? "hidden" : "flex flex-col"}>
-          <span className="font-black text-sm text-on-surface tracking-tight">روابط | AN LINKS</span>
+          <span className="font-black text-sm text-on-surface tracking-tight">AN LINKS</span>
           <span className="text-[10px] text-primary font-mono font-bold uppercase tracking-wider">Console المشغّل والمدير</span>
         </div>
       </Link>

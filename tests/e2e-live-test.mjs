@@ -12,7 +12,7 @@ async function runTests() {
   const landingHtml = await landingRes.text();
   assert(landingHtml.includes("AN LINKS"), "Landing page should contain brand name 'AN LINKS'");
   assert(landingHtml.includes("dir=\"rtl\""), "Landing page must be RTL");
-  assert(landingHtml.includes("rawabet.me/"), "Landing page should have handle claim prefix");
+  assert(landingHtml.includes("anlinks.dev/"), "Landing page should have handle claim prefix");
   assert(landingHtml.includes("احجز رابطك"), "Landing page should contain claim CTA button");
 
   assert(landingHtml.includes("فيصل الشمري") || landingHtml.includes("طارق المنصور"), "Landing page should render phone mockup showcase");
@@ -102,7 +102,7 @@ async function runTests() {
   const dashRes = await fetch(`${BASE_URL}/dashboard`);
   assert.strictEqual(dashRes.status, 200, "Dashboard should return 200 OK");
   const dashHtml = await dashRes.text();
-  assert(dashHtml.includes("لوحة التحكم"), "Dashboard should contain Arabic workspace breadcrumb");
+  assert(dashHtml.includes("الروابط") || dashHtml.includes("لوحة التحكم"), "Dashboard should contain Arabic workspace breadcrumb");
 
   const appRes = await fetch(`${BASE_URL}/dashboard/appearance`);
   assert.strictEqual(appRes.status, 200, "Appearance customizer should return 200 OK");

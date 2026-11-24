@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" fill="none">
+  <defs>
+    <linearGradient id="anGradPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="anGradAccent" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <radialGradient id="anGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+    </radialGradient>
+    <filter id="neonBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <circle cx="64" cy="64" r="54" fill="url(#anGlow)" />
+
+  <!-- Outer Rounded Squircle Frame -->
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="#0c1117" stroke="#1f293d" stroke-width="2" />
+  <rect x="9" y="9" width="110" height="110" rx="27" fill="none" stroke="url(#anGradPrimary)" stroke-opacity="0.25" stroke-width="1.5" />
+
+  <!-- Monogram A + N Linked Emblem -->
+  <!-- Left Link Loop (The A-leg & Loop) -->
+  <path d="M 36 88 L 52 38 C 54 32, 60 32, 62 38 L 72 68" 
+        stroke="url(#anGradPrimary)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Right Link Loop (The N-branch & Connected Node) -->
+  <path d="M 58 64 L 70 88 C 72 92, 76 94, 80 90 L 92 40" 
+        stroke="url(#anGradAccent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Connecting Hyperlink Crossbar -->
+  <path d="M 44 64 L 84 64" 
+        stroke="#6ee7b7" stroke-width="6" stroke-linecap="round" filter="url(#neonBlur)" />
+
+  <!-- Interconnected Signal Nodes -->
+  <circle cx="52" cy="38" r="4" fill="#ffffff" />
+  <circle cx="92" cy="40" r="4" fill="#ffffff" />
+  <circle cx="64" cy="64" r="3.5" fill="#10b981" stroke="#ffffff" stroke-width="2" />
+</svg>

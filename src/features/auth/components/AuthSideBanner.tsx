@@ -73,7 +73,7 @@ export function AuthSideBanner() {
       {/* Bottom Social Proof */}
       <div className="relative z-10 pt-4 border-t border-white/5 text-xs text-on-surface-variant space-y-1">
         <p className="font-semibold text-on-surface">
-          «منصة روابط وفرت عليّ استخدام 4 أدوات مختلفة وضاعفت مبيعات استشاراتي.»
+          «منصة AN LINKS وفرت عليّ استخدام 4 أدوات مختلفة وضاعفت مبيعات استشاراتي.»
         </p>
         <span className="text-[11px] text-outline">تقييم 4.9/5 من أكثر من 12,000 عميل</span>
       </div>

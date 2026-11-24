@@ -32,7 +32,7 @@ export const LANDING_TESTIMONIALS: LandingTestimonial[] = [
       "https://lh3.googleusercontent.com/aida-public/AB6AXuA7Ve0qepnRYSX9CgXi15HbtLRQp_bmSrGqNcLu3Y7QX-XI81vQswMkizB_PtZmdLk_vl4_F9-sB0ym6JRB-Yl8b0fjos138P69385kZa8kiJHz1QZujfn9fiI51DuiByhIA3obbnzKKzDRRsKl1zvuIDb3wkuuwKhd82hrSvV_Oktz37n-mTY7U78lC5ntl4IWAeN8FdJ9Lw0CBWxi5q8k38IGBw-Pyhr_JT42iree",
     rating: 5,
     quote:
-      "«بعت أكثر من 400 نسخة من كتابي الإلكتروني مباشرة عبر زر الدفع السريع داخل روابط دون الحاجة لبرمجة متجر كامل أو دفع عمولات معقدة.»",
+      "«بعت أكثر من 400 نسخة من كتابي الإلكتروني مباشرة عبر زر الدفع السريع داخل AN LINKS دون الحاجة لبرمجة متجر كامل أو دفع عمولات معقدة.»",
   },
 ];
 
