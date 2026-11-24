@@ -3,6 +3,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/shared/db";
 import { recordSession } from "./session.service";
+import { verifyTwoFactorCodeOrBackup } from "@/features/settings/server/two-factor.service";
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10);
@@ -27,6 +28,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "البريد الإلكتروني", type: "email" },
         password: { label: "كلمة المرور", type: "password" },
+        totpCode: { label: "رمز التحقق الثنائي", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -35,7 +37,7 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email.toLowerCase().trim() },
-          include: { profile: true },
+          include: { profile: true, twoFactorAuth: true },
         });
 
         if (!user || !user.passwordHash) {
@@ -49,6 +51,17 @@ export const authOptions: NextAuthOptions = {
         const isPasswordValid = await verifyPassword(credentials.password, user.passwordHash);
         if (!isPasswordValid) {
           throw new Error("بيانات الاعتماد غير صحيحة");
+        }
+
+        if (user.twoFactorAuth && user.twoFactorAuth.isEnabled) {
+          const totpCode = (credentials as Record<string, string>).totpCode;
+          if (!totpCode || !totpCode.trim()) {
+            throw new Error("2FA_REQUIRED");
+          }
+          const isTwoFactorValid = await verifyTwoFactorCodeOrBackup(user.id, totpCode);
+          if (!isTwoFactorValid) {
+            throw new Error("رمز التحقق الثنائي غير صحيح");
+          }
         }
 
         return {

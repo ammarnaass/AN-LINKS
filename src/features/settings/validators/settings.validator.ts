@@ -1,3 +1,5 @@
+import { isUsernameReserved } from "@/shared/utils/reserved-usernames";
+
 export interface ProfileSettingsInput {
   displayName: string;
   email: string;
@@ -17,6 +19,9 @@ export function validateSettingsProfile(
   }
   if (!input.username || !/^[a-zA-Z0-9_-]{3,30}$/.test(input.username)) {
     return { valid: false, error: "اسم المستخدم غير صالح" };
+  }
+  if (isUsernameReserved(input.username)) {
+    return { valid: false, error: "اسم المستخدم هذا محجوز للنظام" };
   }
   return { valid: true };
 }
@@ -43,4 +48,3 @@ export function validateSaudiIban(iban: string): { valid: boolean; error?: strin
   }
   return { valid: true };
 }
-
