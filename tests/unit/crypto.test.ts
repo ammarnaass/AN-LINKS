@@ -67,7 +67,7 @@ describe("Core Cryptography (AES-256-GCM)", () => {
   describe("decryptSecret", () => {
     it("decrypts valid ciphertext back to original plaintext", () => {
       const plaintexts = [
-        "sk_live_51M0abcdef123456789",
+        "sk_live_dummykey51M0abcdef123456789",
         "whsec_test_webhook_secret_998877",
         "رمز-سري-عربي-معقد-12345",
         "Special chars: !@#$%^&*()_+~`-={}|[]:\";'<>?,./",
@@ -119,10 +119,10 @@ describe("Core Cryptography (AES-256-GCM)", () => {
 
   describe("maskSecret", () => {
     it("masks Stripe/payment API keys preserving prefix and last 4 chars", () => {
-      expect(maskSecret("sk_live_51NzABC1234567890abcdef3a8f")).toBe("sk_live_••••••••3a8f");
-      expect(maskSecret("sk_test_51NzABC1234567890abcdef3a8f")).toBe("sk_test_••••••••3a8f");
-      expect(maskSecret("whsec_51NzABC1234567890abcdef3a8f")).toBe("whsec_••••••••3a8f");
-      expect(maskSecret("pk_live_51NzABC1234567890abcdef3a8f")).toBe("pk_live_••••••••3a8f");
+      expect(maskSecret("sk_live_dummykey1234567890abcdef3a8f")).toBe("sk_live_••••••••3a8f");
+      expect(maskSecret("sk_test_dummykey1234567890abcdef3a8f")).toBe("sk_test_••••••••3a8f");
+      expect(maskSecret("whsec_dummykey1234567890abcdef3a8f")).toBe("whsec_••••••••3a8f");
+      expect(maskSecret("pk_live_dummykey1234567890abcdef3a8f")).toBe("pk_live_••••••••3a8f");
     });
 
     it("masks secrets without prefix displaying mask and last 4 chars", () => {

@@ -105,7 +105,7 @@ export function decryptSecret(cipherPayload: string): string {
 /**
  * Masks a secret string for safe display or logging.
  * Retains recognizable provider prefix (e.g., sk_live_, whsec_) and last 4 characters.
- * Example: `sk_live_51NzABC1234567890abcdef3a8f` -> `sk_live_••••••••3a8f`
+ * Example: `sk_live_dummykey1234567890abcdef3a8f` -> `sk_live_••••••••3a8f`
  */
 export function maskSecret(secret: string): string {
   if (!secret) return "";
