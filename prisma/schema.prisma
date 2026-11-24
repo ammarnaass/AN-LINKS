@@ -48,6 +48,8 @@ model Profile {
   customBackground String?
   buttonShadow     String   @default("none")
   socialPosition   String   @default("top")
+  cardStyle        String   @default("glass")
+  bgOverlayOpacity Int      @default(40)
   isPublished      Boolean  @default(true)
 }
 

@@ -2,8 +2,9 @@ export type ButtonStyle = "filled" | "glass" | "soft" | "outline";
 export type ButtonShadow = "none" | "soft" | "strong" | "glow";
 export type BorderRadius = "rounded-none" | "rounded-md" | "rounded-xl" | "rounded-full";
 export type FontFamily = "Cairo" | "Tajawal" | "IBMPlex" | "Almarai" | "ReadexPro";
-export type BackgroundType = "THEME" | "SOLID" | "GRADIENT";
+export type BackgroundType = "THEME" | "SOLID" | "GRADIENT" | "IMAGE";
 export type SocialPosition = "top" | "bottom";
+export type CardStyle = "glass" | "solid" | "glow" | "outline";
 
 export interface ProfileData {
   displayName: string;
@@ -18,6 +19,9 @@ export interface ProfileData {
   customBackground?: string | null;
   buttonShadow?: string | null;
   socialPosition?: string | null;
+  cardStyle?: string | null;
+  bgOverlayOpacity?: number | null;
+  isPublished?: boolean | null;
 }
 
 export interface SocialItem {

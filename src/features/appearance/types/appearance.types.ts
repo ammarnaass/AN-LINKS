@@ -6,6 +6,7 @@ import type {
   FontFamily,
   BackgroundType,
   SocialPosition,
+  CardStyle,
 } from "@/features/bio";
 
 export type {
@@ -16,6 +17,7 @@ export type {
   FontFamily,
   BackgroundType,
   SocialPosition,
+  CardStyle,
 };
 
 export interface AppearanceCustomizerProps {

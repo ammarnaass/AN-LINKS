@@ -8,8 +8,9 @@ const VALID_BUTTON_STYLES = new Set(["filled", "glass", "soft", "outline"]);
 const VALID_BUTTON_SHADOWS = new Set(["none", "soft", "strong", "glow"]);
 const VALID_BORDER_RADII = new Set(["rounded-none", "rounded-md", "rounded-xl", "rounded-full"]);
 const VALID_FONTS = new Set(["Cairo", "Tajawal", "IBMPlex", "Almarai", "ReadexPro"]);
-const VALID_BACKGROUND_TYPES = new Set(["THEME", "SOLID", "GRADIENT"]);
+const VALID_BACKGROUND_TYPES = new Set(["THEME", "SOLID", "GRADIENT", "IMAGE"]);
 const VALID_SOCIAL_POSITIONS = new Set(["top", "bottom"]);
+const VALID_CARD_STYLES = new Set(["glass", "solid", "glow", "outline"]);
 
 function validateProfileEnums(body: Record<string, unknown>): string | null {
   if (body.buttonStyle !== undefined && (typeof body.buttonStyle !== "string" || !VALID_BUTTON_STYLES.has(body.buttonStyle))) {
@@ -29,6 +30,12 @@ function validateProfileEnums(body: Record<string, unknown>): string | null {
   }
   if (body.socialPosition !== undefined && (typeof body.socialPosition !== "string" || !VALID_SOCIAL_POSITIONS.has(body.socialPosition))) {
     return "قيمة موضع روابط التواصل غير صالحة";
+  }
+  if (body.cardStyle !== undefined && (typeof body.cardStyle !== "string" || !VALID_CARD_STYLES.has(body.cardStyle))) {
+    return "قيمة نمط البطاقة غير صالحة";
+  }
+  if (body.bgOverlayOpacity !== undefined && (typeof body.bgOverlayOpacity !== "number" || body.bgOverlayOpacity < 0 || body.bgOverlayOpacity > 100)) {
+    return "قيمة نسبة التعتيم يجب أن تكون بين 0 و 100";
   }
   return null;
 }
@@ -57,9 +64,12 @@ function parseProfileUpdates(body: Record<string, unknown>, data: Record<string,
     if (typeof body[f] === "string") data[f] = (body[f] as string).trim() || null;
     else if (body[f] === null) data[f] = null;
   }
-  const enumFields = ["buttonStyle", "buttonShadow", "borderRadius", "font", "backgroundType", "socialPosition"] as const;
+  const enumFields = ["buttonStyle", "buttonShadow", "borderRadius", "font", "backgroundType", "socialPosition", "cardStyle"] as const;
   for (const f of enumFields) {
     if (typeof body[f] === "string") data[f] = body[f];
+  }
+  if (typeof body.bgOverlayOpacity === "number") {
+    data.bgOverlayOpacity = Math.max(0, Math.min(100, Math.round(body.bgOverlayOpacity)));
   }
   if (typeof body.accentColor === "string") data.accentColor = body.accentColor.trim();
   if (typeof body.seoIndexing === "boolean") data.seoIndexing = body.seoIndexing;
@@ -83,6 +93,8 @@ function buildDefaultProfileData(userId: string, displayName: string, overrides:
     backgroundType: (overrides.backgroundType as string) || "THEME",
     customBackground: (overrides.customBackground as string) || null,
     socialPosition: (overrides.socialPosition as string) || "top",
+    cardStyle: (overrides.cardStyle as string) || "glass",
+    bgOverlayOpacity: typeof overrides.bgOverlayOpacity === "number" ? overrides.bgOverlayOpacity : 40,
     isPublished: typeof overrides.isPublished === "boolean" ? overrides.isPublished : true,
   };
 }
