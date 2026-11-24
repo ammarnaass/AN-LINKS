@@ -118,7 +118,7 @@ function BioMainFrame({
 }: BioMainFrameProps) {
   return (
     <div
-      className={`relative w-full max-w-[460px] bg-surface-container-lowest/90 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl p-5 sm:p-7 flex flex-col items-center z-10 my-4 ${styles.fontClass}`}
+      className={`relative w-full max-w-[460px] ${styles.cardClass} rounded-2xl p-5 sm:p-7 flex flex-col items-center z-10 my-4 transition-all duration-300 ${styles.fontClass}`}
     >
       <ProfileCard
         displayName={profile.displayName}

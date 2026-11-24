@@ -6,6 +6,13 @@ export const BUTTON_STYLES: Record<string, string> = {
   shadow: "shadow-md hover:shadow-lg border-transparent",
 };
 
+export const CARD_STYLES: Record<string, string> = {
+  glass: "bg-surface-container-lowest/70 backdrop-blur-xl border border-white/10 shadow-2xl",
+  solid: "bg-surface-container-low border border-outline-variant/30 shadow-xl",
+  glow: "bg-surface-container-lowest/80 backdrop-blur-lg border border-primary/50 shadow-[0_0_25px_rgba(78,222,163,0.25)]",
+  outline: "bg-transparent backdrop-blur-sm border-2 border-outline-variant/60 shadow-none",
+};
+
 export const BUTTON_SHADOWS: Record<string, string> = {
   none: "shadow-none",
   soft: "shadow-md hover:shadow-lg",

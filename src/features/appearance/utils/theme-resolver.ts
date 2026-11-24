@@ -1,6 +1,6 @@
 import React from "react";
 import type { ProfileData } from "@/features/bio";
-import { THEMES, FONTS, BUTTON_STYLES, BUTTON_SHADOWS } from "../constants/themes";
+import { THEMES, FONTS, BUTTON_STYLES, BUTTON_SHADOWS, CARD_STYLES } from "../constants/themes";
 import { sanitizeCustomBackground } from "./sanitizer";
 
 export interface ResolvedThemeStyles {
@@ -74,11 +74,21 @@ function resolveOverlayStyle(
 function resolveButtonClass(
   themeButtonClass: string,
   buttonStyle?: string | null,
-  buttonShadow?: string | null
+  buttonShadow?: string | null,
+  cardStyle?: string | null
 ): string {
   const styleModifier = BUTTON_STYLES[buttonStyle || "filled"] || BUTTON_STYLES.filled;
-  const shadowModifier = BUTTON_SHADOWS[buttonShadow || "none"] || BUTTON_SHADOWS.none;
-  return `${themeButtonClass} ${styleModifier} ${shadowModifier}`.trim();
+  const effectiveShadow = buttonShadow || "none";
+  const shadowModifier = BUTTON_SHADOWS[effectiveShadow] || BUTTON_SHADOWS.none;
+  const cardGlow = cardStyle === "glow" && effectiveShadow === "none" ? "hover:border-primary/60 hover:shadow-[0_0_15px_rgba(78,222,163,0.2)]" : "";
+  return `${themeButtonClass} ${styleModifier} ${shadowModifier} ${cardGlow}`.trim();
+}
+
+function resolveCardClass(themeCardClass: string, cardStyle?: string | null): string {
+  if (cardStyle && CARD_STYLES[cardStyle]) {
+    return CARD_STYLES[cardStyle];
+  }
+  return themeCardClass || CARD_STYLES.glass;
 }
 
 export function resolveThemeStyles(
@@ -103,14 +113,16 @@ export function resolveThemeStyles(
   const buttonClass = resolveButtonClass(
     theme.buttonClass,
     profile?.buttonStyle,
-    profile?.buttonShadow
+    profile?.buttonShadow,
+    profile?.cardStyle
   );
+  const cardClass = resolveCardClass(theme.cardClass, profile?.cardStyle);
 
   return {
     backgroundClass,
     backgroundStyle,
     overlayStyle,
-    cardClass: theme.cardClass,
+    cardClass,
     buttonClass,
     buttonStyleProps: undefined,
     textPrimaryClass: theme.textPrimary,

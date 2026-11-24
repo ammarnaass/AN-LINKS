@@ -8,6 +8,8 @@ import { ThemePresetsGrid } from "./ThemePresetsGrid";
 import { BackgroundPicker } from "./BackgroundPicker";
 import { ButtonAndRadiusPicker } from "./ButtonAndRadiusPicker";
 import { FontPicker } from "./FontPicker";
+import { CardStylePicker } from "./CardStylePicker";
+import { CardStyle } from "../types/appearance.types";
 
 interface ThemeCustomizerProps {
   profile: ProfileData;
@@ -66,6 +68,11 @@ export function ThemeCustomizer({ profile, onProfileChange }: ThemeCustomizerPro
         activeThemeName={currentTheme.nameAr}
         onBackgroundChange={handleBackgroundChange}
         onOverlayOpacityChange={(op) => onProfileChange({ ...profile, bgOverlayOpacity: op })}
+      />
+
+      <CardStylePicker
+        cardStyle={(profile.cardStyle as CardStyle) || "glass"}
+        onCardStyleChange={(st) => handleChange("cardStyle", st)}
       />
 
       <ButtonAndRadiusPicker

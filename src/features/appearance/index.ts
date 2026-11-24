@@ -9,6 +9,7 @@ export * from "./components/ButtonAndRadiusPicker";
 export * from "./components/FontPicker";
 export * from "./components/BackgroundPicker";
 export * from "./components/BackgroundImagePicker";
+export * from "./components/CardStylePicker";
 export * from "./components/ThemeCustomizer";
 export * from "./components/MobilePhoneDrawer";
 export * from "./components/AppearanceHeader";

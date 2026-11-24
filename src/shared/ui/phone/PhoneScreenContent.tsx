@@ -80,7 +80,7 @@ export function PhoneScreenContent({
       {styles.overlayStyle && (
         <div className="absolute inset-0 pointer-events-none z-0" style={styles.overlayStyle} />
       )}
-      <div className="relative z-10 w-full flex flex-col items-center">
+      <div className={`relative z-10 w-full flex flex-col items-center p-3 rounded-2xl transition-all duration-300 ${styles.cardClass}`}>
         {/* Profile Header */}
         <div className="flex flex-col items-center w-full">
           <div className="relative mb-3">
