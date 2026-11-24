@@ -4,6 +4,7 @@ import React from "react";
 import { ProfileData } from "../types/appearance.types";
 import { ThemeConfig } from "../constants/themes";
 import { AvatarUploadField } from "./AvatarUploadField";
+import { AdvancedColorPicker } from "./AdvancedColorPicker";
 
 interface ProfileEditorCardProps {
   profile: ProfileData;
@@ -35,7 +36,7 @@ export function ProfileEditorCard({ profile, currentTheme, onChange }: ProfileEd
         onAvatarChange={(url) => onChange("avatarUrl", url || "")}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
         <div>
           <label className="block text-xs font-semibold text-on-surface mb-1">اسم العرض</label>
           <input
@@ -47,22 +48,11 @@ export function ProfileEditorCard({ profile, currentTheme, onChange }: ProfileEd
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-on-surface mb-1">لون التمييز (Accent Color)</label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={profile.accentColor || currentTheme.accentColor}
-              onChange={(e) => onChange("accentColor", e.target.value)}
-              className="w-11 h-11 rounded-xl bg-surface-container-lowest border border-outline-variant/40 cursor-pointer p-1"
-            />
-            <input
-              type="text"
-              value={profile.accentColor || currentTheme.accentColor}
-              onChange={(e) => onChange("accentColor", e.target.value)}
-              dir="ltr"
-              className="flex-1 h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-sm border border-outline-variant/40 focus:outline-none focus:border-primary text-center font-mono"
-            />
-          </div>
+          <AdvancedColorPicker
+            value={profile.accentColor || currentTheme.accentColor}
+            onChange={(hex) => onChange("accentColor", hex)}
+            label="لون التمييز (Accent Color)"
+          />
         </div>
       </div>
 

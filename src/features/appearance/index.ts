@@ -2,6 +2,8 @@ export * from "./constants/themes";
 export * from "./types/appearance.types";
 export * from "./components/ProfileEditorCard";
 export * from "./components/AvatarUploadField";
+export * from "./components/AdvancedColorPicker";
+export * from "./components/GradientBuilder";
 export * from "./components/ThemePresetsGrid";
 export * from "./components/ButtonAndRadiusPicker";
 export * from "./components/FontPicker";

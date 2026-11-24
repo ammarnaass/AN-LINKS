@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { Check, Palette, Sparkles, Sliders } from "lucide-react";
+import { AdvancedColorPicker } from "./AdvancedColorPicker";
+import { GradientBuilder } from "./GradientBuilder";
 
 export interface BackgroundPickerProps {
   backgroundType: "THEME" | "SOLID" | "GRADIENT";
@@ -129,85 +131,52 @@ export function BackgroundPicker({
 
       {/* SOLID COLOR TAB CONTENT */}
       {backgroundType === "SOLID" && (
-        <div className="space-y-4">
+        <AdvancedColorPicker
+          value={customBackground && customBackground.startsWith("#") ? customBackground : customHex}
+          onChange={handleCustomHexChange}
+          label="اختر لون الخلفية المسمطة بدقة أو من اللوحة"
+          palette={SOLID_PRESETS.map((p) => ({ hex: p.hex, label: p.label }))}
+        />
+      )}
+
+      {/* GRADIENT TAB CONTENT */}
+      {backgroundType === "GRADIENT" && (
+        <div className="space-y-5">
           <div>
-            <label className="block text-xs font-semibold text-on-surface mb-2">ألوان مقترحة (8 خيارات أنيقة)</label>
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-              {SOLID_PRESETS.map((color) => {
-                const isSelected = customBackground?.toLowerCase() === color.hex.toLowerCase();
+            <label className="block text-xs font-semibold text-on-surface mb-2">تدرجات عصرية جاهزة (6 خيارات آمنة)</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {GRADIENT_PRESETS.map((grad) => {
+                const isSelected = customBackground === grad.css;
                 return (
                   <button
-                    key={color.hex}
+                    key={grad.label}
                     type="button"
-                    onClick={() => handleCustomHexChange(color.hex)}
-                    title={color.label}
-                    className={`h-11 rounded-xl border flex items-center justify-center transition-all ${
+                    onClick={() => onBackgroundChange("GRADIENT", grad.css)}
+                    className={`h-16 rounded-xl border p-2 flex flex-col justify-between items-start text-right transition-all overflow-hidden relative ${
                       isSelected
-                        ? "ring-2 ring-primary border-primary scale-105 shadow-md"
-                        : "border-white/10 hover:border-outline-variant"
+                        ? "ring-2 ring-primary border-primary shadow-lg"
+                        : "border-white/15 hover:border-outline-variant"
                     }`}
-                    style={{ backgroundColor: color.hex }}
+                    style={{ background: grad.css }}
                   >
-                    {isSelected && <Check className="w-4 h-4 text-primary drop-shadow stroke-[3]" />}
+                    <span className="text-[11px] font-bold text-white bg-black/40 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                      {grad.label}
+                    </span>
+                    {isSelected && (
+                      <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center shadow">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-on-surface mb-1">أو اختر لوناً مخصصاً (Hex Color)</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={customHex}
-                onChange={(e) => handleCustomHexChange(e.target.value)}
-                className="w-11 h-11 rounded-xl bg-surface-container-lowest border border-outline-variant/40 cursor-pointer p-1"
-              />
-              <input
-                type="text"
-                value={customHex}
-                onChange={(e) => handleCustomHexChange(e.target.value)}
-                dir="ltr"
-                placeholder="#0f131c"
-                className="flex-1 h-11 px-3 bg-surface-container-lowest text-on-surface rounded-xl text-sm border border-outline-variant/40 focus:outline-none focus:border-primary text-center font-mono"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* GRADIENT TAB CONTENT */}
-      {backgroundType === "GRADIENT" && (
-        <div>
-          <label className="block text-xs font-semibold text-on-surface mb-2">تدرجات عصرية جاهزة (6 خيارات آمنة)</label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {GRADIENT_PRESETS.map((grad) => {
-              const isSelected = customBackground === grad.css;
-              return (
-                <button
-                  key={grad.label}
-                  type="button"
-                  onClick={() => onBackgroundChange("GRADIENT", grad.css)}
-                  className={`h-20 rounded-xl border p-2 flex flex-col justify-between items-start text-right transition-all overflow-hidden relative ${
-                    isSelected
-                      ? "ring-2 ring-primary border-primary shadow-lg"
-                      : "border-white/15 hover:border-outline-variant"
-                  }`}
-                  style={{ background: grad.css }}
-                >
-                  <span className="text-[11px] font-bold text-white bg-black/40 px-2 py-0.5 rounded-md backdrop-blur-sm">
-                    {grad.label}
-                  </span>
-                  {isSelected && (
-                    <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center shadow">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          <GradientBuilder
+            value={customBackground}
+            onChange={(grad) => onBackgroundChange("GRADIENT", grad)}
+          />
         </div>
       )}
     </section>
