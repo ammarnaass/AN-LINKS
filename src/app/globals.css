@@ -5,6 +5,10 @@
 @layer base {
   :root {
     --font-cairo: 'Cairo', sans-serif;
+    --font-tajawal: 'Tajawal', sans-serif;
+    --font-plex: 'IBM Plex Sans Arabic', sans-serif;
+    --font-almarai: 'Almarai', sans-serif;
+    --font-readex: 'Readex Pro', sans-serif;
     color-scheme: light;
 
     /* Rawabet Luxury Light Tokens */

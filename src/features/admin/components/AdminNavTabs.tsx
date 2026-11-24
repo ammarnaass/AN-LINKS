@@ -80,10 +80,17 @@ export function AdminNavTabs({
     },
   ];
 
+  const isTabActive = (key: AdminTabKey) => {
+    if (activeTab === key) return true;
+    if (key === "subscriptions" && (activeTab === "plans" || activeTab === "quotas" || activeTab === "coupons")) return true;
+    if (key === "payments" && (activeTab === "gateways" || activeTab === "currencies" || activeTab === "transactions")) return true;
+    return false;
+  };
+
   return (
     <div className="w-full flex items-center gap-1.5 p-1.5 rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-x-auto no-scrollbar font-cairo" dir="rtl">
       {tabs.map((t) => {
-        const isActive = activeTab === t.key;
+        const isActive = isTabActive(t.key);
         return (
           <button
             key={t.key}

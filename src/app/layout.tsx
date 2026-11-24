@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Cairo,
-  Tajawal,
-  IBM_Plex_Sans_Arabic,
-  Almarai,
-  Readex_Pro,
-} from "next/font/google";
+import { Cairo } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/features/auth";
 import { cookies } from "next/headers";
@@ -20,33 +14,6 @@ const cairo = Cairo({
   subsets: ["arabic", "latin"],
   display: "swap",
   variable: "--font-cairo",
-});
-
-const tajawal = Tajawal({
-  subsets: ["arabic"],
-  weight: ["400", "500", "700"],
-  display: "swap",
-  variable: "--font-tajawal",
-});
-
-const ibmPlex = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-plex",
-});
-
-const almarai = Almarai({
-  subsets: ["arabic"],
-  weight: ["300", "400", "700", "800"],
-  display: "swap",
-  variable: "--font-almarai",
-});
-
-const readex = Readex_Pro({
-  subsets: ["arabic", "latin"],
-  display: "swap",
-  variable: "--font-readex",
 });
 
 export const metadata: Metadata = {
@@ -80,7 +47,7 @@ export default async function RootLayout({
     <html
       lang={initialLocale}
       dir={initialDir}
-      className={`dark ${cairo.variable} ${tajawal.variable} ${ibmPlex.variable} ${almarai.variable} ${readex.variable}`}
+      className={`dark ${cairo.variable}`}
       suppressHydrationWarning
     >
       <head>

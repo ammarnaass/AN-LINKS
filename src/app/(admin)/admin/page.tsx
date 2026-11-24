@@ -11,6 +11,12 @@ import {
   AdminUsersTab,
   AdminPaymentsTab,
   AdminSubscriptionsTab,
+  AdminGatewaysTab,
+  AdminPlansTab,
+  AdminQuotasTab,
+  AdminCurrenciesTab,
+  AdminCouponsTab,
+  AdminTransactionsTab,
   AdminSettingsTab,
   AdminReportsTab,
   AdminLinksContainer,
@@ -27,6 +33,12 @@ const TAB_TITLES: Record<AdminTabKey, string> = {
   sessions: "الجلسات النشطة والأجهزة",
   subscriptions: "باقات واشتراكات المنصة والمميزات",
   payments: "المالية وبوابات الدفع الإلكتروني",
+  gateways: "إدارة بوابات الدفع الإلكتروني",
+  plans: "خطط وباقات اشتراكات المنصة",
+  quotas: "الصلاحيات والمحددات المخصصة",
+  currencies: "العملات وأسعار الصرف الرسمية",
+  coupons: "كوبونات وأكواد الخصم الترويجية",
+  transactions: "سجل العمليات المالية والفواتير",
   links: "إدارة الروابط والمنصات وحوكمة المحتوى",
   settings: "إعدادات المنصة والسياسات",
   reports: "مركز البلاغات والاعتدال",
@@ -162,9 +174,16 @@ export default function AdminConsolePage() {
             />
           )}
 
-          {activeTab === "subscriptions" && (
+          {(activeTab === "subscriptions" || activeTab === "plans") && (
             <AdminSubscriptionsTab />
           )}
+
+          {activeTab === "quotas" && <AdminQuotasTab />}
+          {activeTab === "coupons" && <AdminCouponsTab />}
+
+          {activeTab === "gateways" && <AdminGatewaysTab />}
+          {activeTab === "currencies" && <AdminCurrenciesTab />}
+          {activeTab === "transactions" && <AdminTransactionsTab />}
 
           {activeTab === "payments" && (
             <AdminPaymentsTab
