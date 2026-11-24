@@ -24,6 +24,10 @@ model User {
   subscriptions UserSubscription[]
   invoices      FinancialInvoice[]
   auditLogs     FinancialAuditLog[]
+  payoutProfile     CreatorPayoutProfile?
+  payoutRequests    PayoutRequest[]
+  twoFactorAuth     UserTwoFactorAuth?
+  securityAuditLogs SecurityAuditLog[]
 }
 
 model Profile {
@@ -339,5 +343,59 @@ model FinancialAuditLog {
 
   @@index([adminId])
   @@index([entity, entityId])
+}
+
+model CreatorPayoutProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankName        String
+  bankCode        String   // e.g. "80" (Al Rajhi), "10" (SNB), "50" (Alinma)
+  iban            String   // Full validated Saudi IBAN (SA...)
+  beneficiaryName String
+  isVerified      Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PayoutRequest {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount            Float
+  currency          String    @default("SAR")
+  status            String    @default("PENDING") // PENDING, APPROVED, TRANSFERRED, REJECTED
+  transferReference String?
+  rejectionReason   String?
+  requestedAt       DateTime  @default(now())
+  processedAt       DateTime?
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId, status])
+}
+
+model UserTwoFactorAuth {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  secretEncrypted      String    // AES-256-GCM encrypted base32 secret
+  backupCodesEncrypted String    // AES-256-GCM encrypted JSON array of { codeHash, used, usedAt }
+  isEnabled            Boolean   @default(false)
+  verifiedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model SecurityAuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventType String   // LOGIN, PASSWORD_CHANGE, 2FA_ENABLE, 2FA_DISABLE, SESSION_REVOKE, IBAN_UPDATE
+  ipAddress String?
+  userAgent String?
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
