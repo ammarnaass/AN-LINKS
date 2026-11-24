@@ -8,6 +8,13 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/features/auth";
+import { cookies } from "next/headers";
+import {
+  I18nProvider,
+  LOCALE_COOKIE_NAME,
+  normalizeLocale,
+  getDirection,
+} from "@/shared/i18n";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -59,15 +66,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const rawLocale = cookieStore.get(LOCALE_COOKIE_NAME)?.value;
+  const initialLocale = normalizeLocale(rawLocale);
+  const initialDir = getDirection(initialLocale);
+
   return (
     <html
-      lang="ar"
-      dir="rtl"
+      lang={initialLocale}
+      dir={initialDir}
       className={`dark ${cairo.variable} ${tajawal.variable} ${ibmPlex.variable} ${almarai.variable} ${readex.variable}`}
       suppressHydrationWarning
     >
@@ -99,7 +111,9 @@ export default function RootLayout({
       </head>
       <body className="font-plex antialiased min-h-screen bg-surface-container-lowest text-on-surface selection:bg-primary-container selection:text-on-primary-container">
         <AuthProvider>
-          {children}
+          <I18nProvider initialLocale={initialLocale}>
+            {children}
+          </I18nProvider>
         </AuthProvider>
       </body>
     </html>

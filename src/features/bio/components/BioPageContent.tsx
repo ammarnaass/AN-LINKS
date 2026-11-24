@@ -7,6 +7,7 @@ import { LinkButton } from "./LinkButton";
 import { ReportModal } from "./ReportModal";
 import { QrShareModal } from "./QrShareModal";
 import { TrackingPixels } from "./TrackingPixels";
+import { LanguageSwitcher } from "@/shared/ui";
 import { resolveThemeStyles, ResolvedThemeStyles } from "@/features/appearance";
 import { ProfileData, SocialItem, LinkItem } from "../types/bio.types";
 
@@ -77,9 +78,12 @@ function BioFooter({
 }) {
   return (
     <div className="pt-6 w-full flex flex-col items-center gap-3 border-t border-white/5">
-      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-on-surface-variant hover:text-primary transition-colors">
-        <span>⚡ صُمم بواسطة</span>
-        <span className="font-bold text-on-surface">AN LINKS</span>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-on-surface-variant hover:text-primary transition-colors">
+          <span>⚡ صُمم بواسطة</span>
+          <span className="font-bold text-on-surface">AN LINKS</span>
+        </div>
+        <LanguageSwitcher variant="minimal" />
       </div>
 
       {!isPreview && (

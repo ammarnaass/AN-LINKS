@@ -10,4 +10,5 @@ export * from "./ThemePreviewSwatch";
 export * from "./FloatingMetricCard";
 export * from "./BrandLogo";
 export * from "./phone/PhoneMockup";
+export * from "./i18n/LanguageSwitcher";
 

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ThemeToggle, BrandLogo } from "@/shared/ui";
+import { ThemeToggle, BrandLogo, LanguageSwitcher } from "@/shared/ui";
 import { LandingHeaderProps } from "../types/landing.types";
 import { useCurrentUser, UserNavDropdown } from "@/features/auth";
 import { LayoutDashboard } from "lucide-react";
@@ -36,6 +36,7 @@ export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
         </div>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           <ThemeToggle />
 
           {isAuthenticated ? (
