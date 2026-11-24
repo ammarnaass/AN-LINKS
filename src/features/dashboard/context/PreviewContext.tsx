@@ -25,6 +25,7 @@ export interface PreviewState {
   username: string;
   displayName: string;
   bio: string;
+  location?: string | null;
   avatarUrl?: string | null;
   themeKey: string;
   accentColor: string;
@@ -53,6 +54,7 @@ const DEFAULT_PREVIEW: PreviewState = {
   username: "creator",
   displayName: "صانع محتوى",
   bio: "أهلاً بكم في صفحتي الشخصية على منصة AN LINKS",
+  location: null,
   avatarUrl: null,
   themeKey: "layanDark",
   accentColor: "#4edea3",
@@ -98,6 +100,7 @@ export function PreviewProvider({
             username: p.profile.username || prev.username,
             displayName: p.profile.displayName || prev.displayName,
             bio: p.profile.bio ?? prev.bio,
+            location: p.profile.location ?? prev.location,
             avatarUrl: p.profile.avatarUrl ?? prev.avatarUrl,
             themeKey: p.profile.themeKey || prev.themeKey,
             accentColor: p.profile.accentColor || prev.accentColor,

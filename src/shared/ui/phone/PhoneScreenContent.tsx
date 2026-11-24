@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, ExternalLink, Sparkles } from "lucide-react";
+import { CheckCircle2, ExternalLink, Sparkles, MapPin } from "lucide-react";
 import { SocialIcons } from "../SocialIcons";
 import { resolveThemeStyles, BORDER_RADIUS_MAP } from "@/features/appearance";
 
@@ -8,6 +8,7 @@ export interface PhoneScreenContentProps {
   username?: string;
   bio?: string | null;
   avatarUrl?: string | null;
+  location?: string | null;
   links?: Array<{
     id: string;
     title: string;
@@ -38,6 +39,7 @@ export function PhoneScreenContent({
   username,
   bio,
   avatarUrl,
+  location,
   links = [],
   socials = [],
   themeKey,
@@ -114,12 +116,18 @@ export function PhoneScreenContent({
           </div>
 
           <h3 className={`font-bold text-base flex items-center gap-1.5 mb-0.5 ${styles.textPrimaryClass}`}>
-            <span>{displayName || username || "مستخدم منصة روابط"}</span>
+            <span>{displayName || username || "مستخدم منصة AN LINKS"}</span>
           </h3>
           {username && (
-            <p className={`text-xs font-semibold mb-2 ${styles.textSecondaryClass}`} dir="ltr">
+            <p className={`text-xs font-semibold mb-1 ${styles.textSecondaryClass}`} dir="ltr">
               @{username}
             </p>
+          )}
+          {location && (
+            <span className="text-[11px] text-outline flex items-center gap-1 mb-2">
+              <MapPin className="w-3 h-3 text-red-400" />
+              <span>{location}</span>
+            </span>
           )}
           {bio && (
             <p className={`text-xs max-w-[240px] leading-relaxed mb-3 text-center ${styles.textSecondaryClass}`}>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { MapPin } from "lucide-react";
 import { ProfileSettingsInput } from "../../validators/settings.validator";
 
 interface ProfileFieldsFormProps {
@@ -87,6 +88,20 @@ export function ProfileFieldsForm({
             placeholder="+966 5X XXX XXXX"
             className="w-full bg-surface-container px-3.5 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface text-sm text-left focus:outline-none focus:ring-2 focus:ring-primary/40"
             dir="ltr"
+          />
+        </div>
+
+        <div className="space-y-1.5 md:col-span-2">
+          <label className="text-xs font-medium text-on-surface-variant flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-primary" />
+            <span>مكان الإقامة / الدولة والمدينة (الساكن بها)</span>
+          </label>
+          <input
+            type="text"
+            value={profile.location || ""}
+            onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+            placeholder="مثال: الرياض، السعودية أو طرابلس، ليبيا"
+            className="w-full bg-surface-container px-3.5 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
       </div>

@@ -17,6 +17,7 @@ export async function getProfileData(userId: string) {
           displayName: true,
           bio: true,
           phone: true,
+          location: true,
           avatarUrl: true,
         },
       },
@@ -33,6 +34,7 @@ export async function getProfileData(userId: string) {
     displayName: user.profile?.displayName ?? "",
     bio: user.profile?.bio ?? "",
     phone: user.profile?.phone ?? "",
+    location: user.profile?.location ?? "",
     avatarUrl: user.profile?.avatarUrl ?? null,
   };
 }
@@ -78,11 +80,13 @@ export async function updateProfileData(
         displayName: input.displayName.trim(),
         bio: input.bio?.trim() ?? null,
         phone: input.phone?.trim() ?? null,
+        location: input.location?.trim() ?? null,
       },
       update: {
         displayName: input.displayName.trim(),
         bio: input.bio?.trim() ?? null,
         phone: input.phone?.trim() ?? null,
+        location: input.location?.trim() ?? null,
       },
     });
 
@@ -92,6 +96,7 @@ export async function updateProfileData(
       displayName: updatedProfile.displayName,
       bio: updatedProfile.bio,
       phone: updatedProfile.phone,
+      location: updatedProfile.location,
     };
   });
 }

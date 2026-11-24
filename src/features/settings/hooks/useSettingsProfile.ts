@@ -11,6 +11,7 @@ export function useSettingsProfile() {
     email: "",
     bio: "",
     phone: "",
+    location: "",
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,6 +32,7 @@ export function useSettingsProfile() {
             email: res.data.email || "",
             bio: res.data.bio || "",
             phone: res.data.phone || "",
+            location: res.data.location || "",
           });
           setAvatarUrl(res.data.avatarUrl || null);
         }

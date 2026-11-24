@@ -124,6 +124,7 @@ function BioMainFrame({
         displayName={profile.displayName}
         username={username}
         bio={profile.bio}
+        location={profile.location}
         avatarUrl={profile.avatarUrl}
         themeKey={profile.themeKey || undefined}
         socials={socials}

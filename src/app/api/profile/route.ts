@@ -59,7 +59,7 @@ function parseProfileUpdates(body: Record<string, unknown>, data: Record<string,
   for (const f of textFields) {
     if (typeof body[f] === "string") data[f] = (body[f] as string).trim();
   }
-  const nullableFields = ["avatarUrl", "phone"] as const;
+  const nullableFields = ["avatarUrl", "phone", "location"] as const;
   for (const f of nullableFields) {
     if (typeof body[f] === "string") data[f] = (body[f] as string).trim() || null;
     else if (body[f] === null) data[f] = null;
@@ -83,6 +83,7 @@ function buildDefaultProfileData(userId: string, displayName: string, overrides:
     bio: (overrides.bio as string) || "",
     avatarUrl: (overrides.avatarUrl as string) || null,
     phone: (overrides.phone as string) || null,
+    location: (overrides.location as string) || null,
     seoIndexing: typeof overrides.seoIndexing === "boolean" ? overrides.seoIndexing : true,
     themeKey: (overrides.themeKey as string) || "layanDark",
     accentColor: (overrides.accentColor as string) || "#4edea3",

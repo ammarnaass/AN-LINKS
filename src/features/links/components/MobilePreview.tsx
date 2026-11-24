@@ -42,6 +42,7 @@ export function MobilePreview({ profile, username, links, socials }: MobilePrevi
         username={username}
         displayName={profile.displayName}
         bio={profile.bio}
+        location={profile.location}
         avatarUrl={profile.avatarUrl}
         themeKey={profile.themeKey}
         accentColor={profile.accentColor}

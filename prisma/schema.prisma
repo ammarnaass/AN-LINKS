@@ -38,6 +38,7 @@ model Profile {
   bio              String?
   avatarUrl        String?
   phone            String?
+  location         String?
   seoIndexing      Boolean  @default(true)
   themeKey         String   @default("layanDark")
   accentColor      String   @default("#4edea3")

@@ -12,6 +12,7 @@ export interface ProfileCardProps {
   displayName: string;
   username: string;
   bio?: string | null;
+  location?: string | null;
   avatarUrl?: string | null;
   themeKey?: string;
   socials?: SocialItem[];
@@ -103,12 +104,14 @@ function ProfileDetails({
   displayName,
   username,
   bio,
+  location,
   primaryText,
   secondaryText,
 }: {
   displayName: string;
   username: string;
   bio?: string | null;
+  location?: string | null;
   primaryText: string;
   secondaryText: string;
 }) {
@@ -125,10 +128,12 @@ function ProfileDetails({
         <span className="text-xs font-mono font-medium text-primary bg-primary/10 px-2.5 py-0.5 rounded-full dir-ltr" dir="ltr">
           @{username}
         </span>
-        <span className="text-xs text-outline flex items-center gap-1">
-          <MapPin className="w-3 h-3 text-red-400" />
-          <span>المملكة العربية السعودية</span>
-        </span>
+        {location && (
+          <span className="text-xs text-outline flex items-center gap-1">
+            <MapPin className="w-3 h-3 text-red-400" />
+            <span>{location}</span>
+          </span>
+        )}
       </div>
 
       {bio && (
@@ -185,6 +190,7 @@ export function ProfileCard({
   displayName,
   username,
   bio,
+  location,
   avatarUrl,
   themeKey = "layanDark",
   socials = [],
@@ -205,7 +211,7 @@ export function ProfileCard({
     <div className="flex flex-col items-center text-center w-full">
       <ProfileActionBar onOpenQr={onOpenQr} onOpenShare={onOpenShare} />
       <ProfileAvatar avatarUrl={avatarUrl} displayName={displayName} initialLetter={initialLetter} />
-      <ProfileDetails displayName={displayName} username={username} bio={bio} primaryText={primaryText} secondaryText={secondaryText} />
+      <ProfileDetails displayName={displayName} username={username} bio={bio} location={location} primaryText={primaryText} secondaryText={secondaryText} />
       <ProfileStatsBar linksCount={linksCount} socialsCount={socials.length} />
       {socialPosition !== "bottom" && (
         <SocialIconsRow socials={socials} isPreview={isPreview} socialIconClass={iconClass} />

@@ -31,6 +31,7 @@ export async function seedFathiAccount(prismaClient: PrismaClient = prisma) {
       profile: {
         create: {
           displayName: "فتحي القشطي | Fathi Elkashti",
+          location: "ولاية الوادي، الجزائر",
           bio: "تغطية شاملة ومباشرة لأسعار وسوق السيارات المستعملة في الجزائر 🚗🇩🇿 | عروض يومية، بيع وشراء المركبات، واستشارات الفحص - ولاية الوادي (قمار) 📍",
           avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80",
           phone: "+213661234567",
@@ -56,6 +57,7 @@ export async function seedFathiAccount(prismaClient: PrismaClient = prisma) {
     where: { userId: user.id },
     update: {
       displayName: "فتحي القشطي | Fathi Elkashti",
+      location: "ولاية الوادي، الجزائر",
       bio: "تغطية شاملة ومباشرة لأسعار وسوق السيارات المستعملة في الجزائر 🚗🇩🇿 | عروض يومية، بيع وشراء المركبات، واستشارات الفحص - ولاية الوادي (قمار) 📍",
       avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80",
       phone: "+213661234567",
@@ -75,6 +77,7 @@ export async function seedFathiAccount(prismaClient: PrismaClient = prisma) {
     create: {
       userId: user.id,
       displayName: "فتحي القشطي | Fathi Elkashti",
+      location: "ولاية الوادي، الجزائر",
       bio: "تغطية شاملة ومباشرة لأسعار وسوق السيارات المستعملة في الجزائر 🚗🇩🇿 | عروض يومية، بيع وشراء المركبات، واستشارات الفحص - ولاية الوادي (قمار) 📍",
       avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80",
       phone: "+213661234567",

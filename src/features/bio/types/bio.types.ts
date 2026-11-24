@@ -10,6 +10,7 @@ export interface ProfileData {
   displayName: string;
   bio?: string | null;
   avatarUrl?: string | null;
+  location?: string | null;
   themeKey?: string | null;
   accentColor?: string | null;
   buttonStyle?: string | null;

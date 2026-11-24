@@ -14,6 +14,8 @@ export interface ProfileTabProps {
   setEmail?: (val: string) => void;
   phone?: string;
   setPhone?: (val: string) => void;
+  location?: string;
+  setLocation?: (val: string) => void;
   bio?: string;
   setBio?: (val: string) => void;
   seoIndexing?: boolean;
@@ -36,6 +38,7 @@ export function ProfileTab(props?: ProfileTabProps) {
     username: props?.username !== undefined && props?.username !== "" ? props.username : hookProfile.username,
     email: props?.email !== undefined && props?.email !== "" ? props.email : hookProfile.email,
     phone: props?.phone !== undefined && props?.phone !== "" ? props.phone : hookProfile.phone,
+    location: props?.location !== undefined && props?.location !== "" ? props.location : hookProfile.location,
     bio: props?.bio !== undefined && props?.bio !== "" ? props.bio : hookProfile.bio,
   };
 
@@ -46,6 +49,7 @@ export function ProfileTab(props?: ProfileTabProps) {
     if (props?.setUsername) props.setUsername(next.username);
     if (props?.setEmail) props.setEmail(next.email);
     if (props?.setPhone && next.phone) props.setPhone(next.phone);
+    if (props?.setLocation && next.location) props.setLocation(next.location);
     if (props?.setBio && next.bio) props.setBio(next.bio);
   };
 

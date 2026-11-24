@@ -7,6 +7,7 @@ export interface ProfileSettingsInput {
   username: string;
   bio?: string;
   phone?: string;
+  location?: string;
 }
 
 export function validateSettingsProfile(
