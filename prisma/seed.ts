@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { seedFinancials } from "./seed-financials.ts";
 import { seedPlatforms } from "./seed-platforms.ts";
+import { seedFathiAccount } from "./seed-fathi.ts";
 
 const prisma = new PrismaClient();
 
@@ -201,6 +202,9 @@ async function main() {
 
   // 8. Seed Verified Platforms Catalog
   await seedPlatforms(prisma);
+
+  // 9. Seed Fathi Elkashti Creator Account
+  await seedFathiAccount(prisma);
 
   console.log("🎉 Seeding completed successfully!");
 }
