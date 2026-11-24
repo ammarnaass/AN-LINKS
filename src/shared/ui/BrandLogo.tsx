@@ -35,7 +35,10 @@ export function BrandLogo({
   }[size];
 
   const content = (
-    <div className={`flex items-center gap-2.5 group select-none ${className}`}>
+    <div
+      dir="ltr"
+      className={`inline-flex items-center gap-2.5 group select-none ${className}`}
+    >
       {/* Stylized Brand Emblem */}
       <div
         className={`${iconDimensions} bg-surface-container-high border border-outline-variant/30 flex items-center justify-center relative overflow-hidden group-hover:border-primary/50 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.25)] transition-all shrink-0`}
@@ -74,8 +77,8 @@ export function BrandLogo({
 
       {/* Brand Text */}
       {variant !== "icon" && (
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 leading-none">
+        <div className="flex flex-col text-left" dir="ltr">
+          <div className="flex items-center gap-1.5 leading-none" dir="ltr">
             <span
               className={`${titleSize} font-black text-on-surface tracking-tight group-hover:text-primary transition-colors`}
             >
@@ -88,7 +91,7 @@ export function BrandLogo({
             </span>
           </div>
           {showSubtitle && variant === "full" && (
-            <span className="text-[10px] text-primary/80 uppercase tracking-widest font-bold font-mono mt-0.5">
+            <span className="text-[10px] text-primary/80 uppercase tracking-widest font-bold font-mono mt-0.5 text-left" dir="ltr">
               Smart Bio Platform
             </span>
           )}

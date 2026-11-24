@@ -181,7 +181,7 @@ export function PhoneMockup() {
 
           <PhoneBentoTiles />
 
-          <div className="mt-6 flex items-center gap-1 opacity-60">
+          <div dir="ltr" className="mt-6 flex items-center gap-1 opacity-60">
             <span className="text-[11px] text-outline">Powered by</span>
             <span className="text-[11px] text-primary font-bold">AN LINKS</span>
           </div>
