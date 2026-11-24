@@ -91,21 +91,23 @@ describe("Admin Financial & Subscriptions Sidebar Partition Test Suite", () => {
 
   it("should mount all 6 dedicated tab wrapper components without crashing", () => {
     const gatewaysHtml = renderToStaticMarkup(<AdminGatewaysTab />);
-    expect(gatewaysHtml).toContain("بوابات الدفع");
+    expect(gatewaysHtml).toContain("بوابات الدفع والتحصيل الإلكتروني");
+    expect(gatewaysHtml).not.toContain("العملات والصرف");
 
     const plansHtml = renderToStaticMarkup(<AdminPlansTab />);
-    expect(plansHtml).toContain("باقات واشتراكات المنصة");
+    expect(plansHtml).toContain("خطط وباقات اشتراكات المنصة");
 
     const quotasHtml = renderToStaticMarkup(<AdminQuotasTab />);
-    expect(quotasHtml).toContain("باقات واشتراكات المنصة");
+    expect(quotasHtml).toContain("محددات وصلاحيات الباقات (Quotas)");
 
     const currenciesHtml = renderToStaticMarkup(<AdminCurrenciesTab />);
-    expect(currenciesHtml).toBeDefined();
+    expect(currenciesHtml).toContain("العملات الرسمية وأسعار الصرف");
 
     const couponsHtml = renderToStaticMarkup(<AdminCouponsTab />);
-    expect(couponsHtml).toContain("باقات واشتراكات المنصة");
+    expect(couponsHtml).toContain("أكواد وقسائم الخصم الترويجية");
 
     const transactionsHtml = renderToStaticMarkup(<AdminTransactionsTab />);
-    expect(transactionsHtml).toBeDefined();
+    expect(transactionsHtml).toContain("سجل العمليات المالية والفواتير");
+    expect(transactionsHtml).not.toContain("إدارة بوابات الدفع والاشتراكات والعمليات المالية");
   });
 });

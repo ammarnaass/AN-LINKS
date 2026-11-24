@@ -16,12 +16,22 @@ export interface AdminSubscriptionsContainerProps {
   initialSubTab?: SubscriptionSubTab;
   customHook?: ReturnType<typeof useAdminFinancials>;
   className?: string;
+  hideSubNav?: boolean;
+  hideOverviewStats?: boolean;
+  title?: string;
+  subtitle?: string;
+  icon?: React.ReactNode;
 }
 
 export function AdminSubscriptionsContainer({
   initialSubTab = "plans",
   customHook,
   className = "",
+  hideSubNav = false,
+  hideOverviewStats = false,
+  title,
+  subtitle,
+  icon,
 }: AdminSubscriptionsContainerProps) {
   const defaultHook = useAdminFinancials("plans");
   const financials = customHook || defaultHook;
@@ -46,12 +56,14 @@ export function AdminSubscriptionsContainer({
         <div>
           <div className="flex items-center gap-2.5 mb-1">
             <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Package className="w-4 h-4" />
+              {icon || <Package className="w-4 h-4" />}
             </div>
-            <h2 className="text-base sm:text-lg font-bold text-on-surface">إدارة باقات واشتراكات المنصة</h2>
+            <h2 className="text-base sm:text-lg font-bold text-on-surface">
+              {title || "إدارة باقات واشتراكات المنصة"}
+            </h2>
           </div>
           <p className="text-xs text-on-surface-variant">
-            تحكم كامل في خطط الاشتراك (Free, Pro, Business)، المحددات والصلاحيات (Quotas)، وكوبونات الخصم الترويجية
+            {subtitle || "تحكم كامل في خطط الاشتراك (Free, Pro, Business)، المحددات والصلاحيات (Quotas)، وكوبونات الخصم الترويجية"}
           </p>
         </div>
         <AppButton
@@ -96,43 +108,47 @@ export function AdminSubscriptionsContainer({
       )}
 
       {/* Stats Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
-          <div>
-            <span className="text-xs text-on-surface-variant font-medium">إجمالي الباقات</span>
-            <p className="text-xl font-bold font-mono text-on-surface mt-1">{totalPlans}</p>
+      {!hideOverviewStats && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+            <div>
+              <span className="text-xs text-on-surface-variant font-medium">إجمالي الباقات</span>
+              <p className="text-xl font-bold font-mono text-on-surface mt-1">{totalPlans}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <Package className="w-5 h-5" />
+            </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-            <Package className="w-5 h-5" />
+          <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+            <div>
+              <span className="text-xs text-on-surface-variant font-medium">الباقات النشطة</span>
+              <p className="text-xl font-bold font-mono text-emerald-400 mt-1">{activePlans}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <Sparkles className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+            <div>
+              <span className="text-xs text-on-surface-variant font-medium">الكوبونات الفعالة</span>
+              <p className="text-xl font-bold font-mono text-secondary mt-1">{activeCoupons}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
+              <Tag className="w-5 h-5" />
+            </div>
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
-          <div>
-            <span className="text-xs text-on-surface-variant font-medium">الباقات النشطة</span>
-            <p className="text-xl font-bold font-mono text-emerald-400 mt-1">{activePlans}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-            <Sparkles className="w-5 h-5" />
-          </div>
-        </div>
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
-          <div>
-            <span className="text-xs text-on-surface-variant font-medium">الكوبونات الفعالة</span>
-            <p className="text-xl font-bold font-mono text-secondary mt-1">{activeCoupons}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
-            <Tag className="w-5 h-5" />
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Sub Tabs Navigation */}
-      <SubscriptionsSubTabNav
-        activeSubTab={activeSubTab}
-        setActiveSubTab={setActiveSubTab}
-        totalPlans={totalPlans}
-        activeCoupons={activeCoupons}
-      />
+      {!hideSubNav && (
+        <SubscriptionsSubTabNav
+          activeSubTab={activeSubTab}
+          setActiveSubTab={setActiveSubTab}
+          totalPlans={totalPlans}
+          activeCoupons={activeCoupons}
+        />
+      )}
 
       {/* Tab Panels */}
       <div className="w-full" data-testid={`subscription-subtab-${activeSubTab}`}>

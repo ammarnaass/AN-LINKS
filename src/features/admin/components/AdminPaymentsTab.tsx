@@ -15,6 +15,11 @@ export interface AdminPaymentsTabProps {
     updated: Partial<AdminPlatformSettings>
   ) => Promise<boolean>;
   initialSubTab?: FinancialSubTab;
+  hideSubNav?: boolean;
+  hideOverviewStats?: boolean;
+  title?: string;
+  subtitle?: string;
+  icon?: React.ReactNode;
 }
 
 /**
@@ -23,10 +28,22 @@ export interface AdminPaymentsTabProps {
  */
 export function AdminPaymentsTab({
   initialSubTab = "gateways",
+  hideSubNav = false,
+  hideOverviewStats = false,
+  title,
+  subtitle,
+  icon,
 }: AdminPaymentsTabProps = {}) {
   return (
     <div className="w-full">
-      <AdminFinancialsContainer initialSubTab={initialSubTab} />
+      <AdminFinancialsContainer
+        initialSubTab={initialSubTab}
+        hideSubNav={hideSubNav}
+        hideOverviewStats={hideOverviewStats}
+        title={title}
+        subtitle={subtitle}
+        icon={icon}
+      />
     </div>
   );
 }

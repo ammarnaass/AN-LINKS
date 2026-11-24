@@ -21,6 +21,11 @@ export interface AdminFinancialsContainerProps {
   initialModalData?: AdminGatewayDetails | AdminSubscriptionPlanItem | AdminCurrencyItem | null;
   customHook?: ReturnType<typeof useAdminFinancials>;
   className?: string;
+  hideSubNav?: boolean;
+  hideOverviewStats?: boolean;
+  title?: string;
+  subtitle?: string;
+  icon?: React.ReactNode;
 }
 
 export function AdminFinancialsContainer({
@@ -29,6 +34,11 @@ export function AdminFinancialsContainer({
   initialModalData = null,
   customHook,
   className = "",
+  hideSubNav = false,
+  hideOverviewStats = false,
+  title,
+  subtitle,
+  icon,
 }: AdminFinancialsContainerProps) {
   const defaultHook = useAdminFinancials(initialSubTab);
   const financials = customHook || defaultHook;
@@ -63,10 +73,16 @@ export function AdminFinancialsContainer({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-surface-container-low border border-outline-variant/30">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center"><CreditCard className="w-4 h-4" /></div>
-            <h2 className="text-base sm:text-lg font-bold text-on-surface">إدارة بوابات الدفع والاشتراكات والعمليات المالية</h2>
+            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              {icon || <CreditCard className="w-4 h-4" />}
+            </div>
+            <h2 className="text-base sm:text-lg font-bold text-on-surface">
+              {title || "إدارة بوابات الدفع والاشتراكات والعمليات المالية"}
+            </h2>
           </div>
-          <p className="text-xs text-on-surface-variant">منظومة مالية شاملة لإدارة بوابات الدفع، خطط الاشتراكات، الصلاحيات، العملات وأكواد الخصم</p>
+          <p className="text-xs text-on-surface-variant">
+            {subtitle || "منظومة مالية شاملة لإدارة بوابات الدفع، خطط الاشتراكات، الصلاحيات، العملات وأكواد الخصم"}
+          </p>
         </div>
         <AppButton variant="outline" size="sm" onClick={financials.refreshData} isLoading={financials.isLoading} leftIcon={<RotateCcw className="w-3.5 h-3.5" />}>
           تحديث البيانات
@@ -90,8 +106,12 @@ export function AdminFinancialsContainer({
         </div>
       )}
 
-      <FinancialsStatsOverview activeGateways={activeGateways} totalGateways={totalGateways} activePlans={activePlans} totalPlans={totalPlans} totalCurrencies={totalCurrencies} activeCoupons={activeCoupons} totalCoupons={totalCoupons} totalRevenue={totalRevenue} totalInvoices={totalInvoices} />
-      <FinancialsSubTabNav activeSubTab={activeSubTab} setActiveSubTab={setActiveSubTab} activeGateways={activeGateways} totalGateways={totalGateways} totalPlans={totalPlans} totalCurrencies={totalCurrencies} activeCoupons={activeCoupons} totalInvoices={totalInvoices} />
+      {!hideOverviewStats && (
+        <FinancialsStatsOverview activeGateways={activeGateways} totalGateways={totalGateways} activePlans={activePlans} totalPlans={totalPlans} totalCurrencies={totalCurrencies} activeCoupons={activeCoupons} totalCoupons={totalCoupons} totalRevenue={totalRevenue} totalInvoices={totalInvoices} />
+      )}
+      {!hideSubNav && (
+        <FinancialsSubTabNav activeSubTab={activeSubTab} setActiveSubTab={setActiveSubTab} activeGateways={activeGateways} totalGateways={totalGateways} totalPlans={totalPlans} totalCurrencies={totalCurrencies} activeCoupons={activeCoupons} totalInvoices={totalInvoices} />
+      )}
 
       <div className="w-full" data-testid={`subtab-${activeSubTab}`}>
         {activeSubTab === "gateways" && <GatewaysSubTab gateways={financials.gateways} onToggleGateway={financials.toggleGateway} onSaveConfig={financials.updateGatewayConfig} isSaving={financials.isSaving} onOpenConfig={(gw) => setGatewayModalState({ isOpen: true, gateway: gw })} />}
