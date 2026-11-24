@@ -1,7 +1,8 @@
 import React from "react";
-import { CheckCircle2, ExternalLink, Sparkles, MapPin } from "lucide-react";
+import { CheckCircle2, Sparkles, MapPin } from "lucide-react";
 import { SocialIcons } from "../SocialIcons";
 import { resolveThemeStyles, BORDER_RADIUS_MAP } from "@/features/appearance";
+import { PhoneInteractiveLink } from "./PhoneInteractiveLink";
 
 export interface PhoneScreenContentProps {
   displayName?: string;
@@ -142,39 +143,14 @@ export function PhoneScreenContent({
         {/* Dynamic Links List or Empty State */}
         {activeLinks.length > 0 ? (
           <div className="w-full flex flex-col gap-2.5 my-2">
-            {activeLinks.map((link) => {
-              const perLinkStyle: React.CSSProperties = {
-                ...styles.buttonStyleProps,
-                ...(link.customBgColor ? { backgroundColor: link.customBgColor } : {}),
-                ...(link.customTextColor ? { color: link.customTextColor } : {}),
-                ...(link.customBorderColor ? { borderColor: link.customBorderColor, borderWidth: "2px" } : {}),
-              };
-              const shadowClass = link.customShadow === "glow"
-                ? "shadow-[0_0_15px_rgba(78,222,163,0.35)]"
-                : link.customShadow === "strong"
-                ? "shadow-xl"
-                : link.customShadow === "soft"
-                ? "shadow-md"
-                : link.customShadow === "none"
-                ? "shadow-none"
-                : "";
-
-              return (
-                <div
-                  key={link.id}
-                  style={perLinkStyle}
-                  className={`w-full p-2.5 ${resolvedRadius} ${styles.buttonClass} ${shadowClass} flex items-center justify-between transition-all text-xs font-semibold`}
-                >
-                  <div className="flex items-center gap-2 truncate pr-1">
-                    {link.thumbnailUrl && (
-                      <img src={link.thumbnailUrl} alt="" className="w-5 h-5 rounded-md object-cover shrink-0 border border-white/20" />
-                    )}
-                    <span className="truncate">{link.title}</span>
-                  </div>
-                  <ExternalLink className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                </div>
-              );
-            })}
+            {activeLinks.map((link) => (
+              <PhoneInteractiveLink
+                key={link.id}
+                link={link}
+                buttonClass={`${resolvedRadius} ${styles.buttonClass}`}
+                baseStyleProps={styles.buttonStyleProps}
+              />
+            ))}
           </div>
         ) : (
           <div className="w-full text-center py-6 px-4 rounded-xl bg-surface-container-low/60 border border-dashed border-outline-variant/40 my-2">
@@ -189,7 +165,7 @@ export function PhoneScreenContent({
       </div>
 
       {/* Footer Branding */}
-      <div className="pt-4 pb-1 flex items-center gap-1 text-[11px] text-outline mt-auto shrink-0">
+      <div className="pt-4 pb-2 flex items-center gap-1 text-[11px] text-outline mt-auto shrink-0">
         <Sparkles className="w-3 h-3 text-primary" />
         <span>مدعوم بواسطة AN LINKS</span>
       </div>
