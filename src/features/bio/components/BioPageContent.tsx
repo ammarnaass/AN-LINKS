@@ -206,6 +206,7 @@ export function BioPageContent({
 }: BioPageContentProps) {
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const { direction } = useTranslation();
   const styles = resolveThemeStyles(profile);
   const socialPosition = profile.socialPosition || "top";
 
@@ -215,7 +216,7 @@ export function BioPageContent({
     <div
       className={`min-h-screen w-full flex flex-col items-center justify-center p-3 sm:p-6 relative overflow-hidden transition-colors duration-300 ${styles.backgroundClass}`}
       style={styles.backgroundStyle}
-      dir="rtl"
+      dir={direction}
     >
       <TrackingPixels profile={profile} isPreview={isPreview} />
       {styles.overlayStyle && (
