@@ -2,6 +2,7 @@ export interface ThemeConfig {
   id: string;
   name: string;
   nameAr: string;
+  isDark: boolean;
   backgroundClass: string;
   cardClass: string;
   textPrimary: string;
@@ -14,7 +15,7 @@ export interface ThemeConfig {
 
 export const THEMES: Record<string, ThemeConfig> = {
   layanDark: {
-    id: "layanDark", name: "Layan Dark Bento", nameAr: "ليان داكن (Layan Dark)",
+    id: "layanDark", name: "Layan Dark Bento", nameAr: "ليان داكن (Layan Dark)", isDark: true,
     backgroundClass: "bg-[#0f131c]",
     cardClass: "bg-[#181c24]/90 border border-[#3c4a42]/40 backdrop-blur-xl shadow-2xl",
     textPrimary: "text-[#dfe2ee]", textSecondary: "text-[#bbcabf]",
@@ -22,8 +23,17 @@ export const THEMES: Record<string, ThemeConfig> = {
     socialIconClass: "text-[#4edea3] hover:text-[#6ffbbe] bg-[#181c24] border border-[#3c4a42]/40",
     accentColor: "#4edea3", surfaceColor: "#181c24",
   },
+  carbonDark: {
+    id: "carbonDark", name: "Carbon Dark Pro", nameAr: "كربوني داكن (Carbon Dark)", isDark: true,
+    backgroundClass: "bg-[#090d16]",
+    cardClass: "bg-[#111827]/90 border border-[#3b82f6]/30 backdrop-blur-xl shadow-2xl",
+    textPrimary: "text-[#f8fafc]", textSecondary: "text-[#94a3b8]",
+    buttonClass: "bg-[#1e293b] hover:bg-[#334155] text-[#f8fafc] border border-[#3b82f6]/35 shadow-md",
+    socialIconClass: "text-[#60a5fa] hover:text-white bg-[#1e293b] border border-[#3b82f6]/30",
+    accentColor: "#3b82f6", surfaceColor: "#111827",
+  },
   rawabetLight: {
-    id: "rawabetLight", name: "Rawabet Luxury Light", nameAr: "روابط فاخر (Rawabet Light)",
+    id: "rawabetLight", name: "Rawabet Luxury Light", nameAr: "روابط فاخر (Rawabet Light)", isDark: false,
     backgroundClass: "bg-[#faf7f2]",
     cardClass: "bg-white/95 border border-[#e5dfd3] shadow-xl backdrop-blur-md",
     textPrimary: "text-[#1c1917]", textSecondary: "text-[#78716c]",
@@ -31,8 +41,26 @@ export const THEMES: Record<string, ThemeConfig> = {
     socialIconClass: "text-[#b45309] hover:text-[#92400e] bg-white border border-[#e5dfd3]",
     accentColor: "#b45309", surfaceColor: "#ffffff",
   },
+  minimalWarm: {
+    id: "minimalWarm", name: "Minimal Warm", nameAr: "دافئ بسيط (Minimal Warm)", isDark: false,
+    backgroundClass: "bg-gradient-to-b from-[#fdfaf4] to-[#f4ece0]",
+    cardClass: "bg-[#ffffff]/95 border border-[#e7dccb] shadow-xl backdrop-blur-md",
+    textPrimary: "text-[#1c1917]", textSecondary: "text-[#57534e]",
+    buttonClass: "bg-[#f5efe6] hover:bg-[#ebe1d3] text-[#1c1917] border border-[#e7dccb] shadow-sm",
+    socialIconClass: "text-[#d97706] hover:text-[#92400e] bg-white border border-[#e7dccb]",
+    accentColor: "#f59e0b", surfaceColor: "#ffffff",
+  },
+  lavender: {
+    id: "lavender", name: "Lavender Soft", nameAr: "لافندر ناعم (Lavender Soft)", isDark: false,
+    backgroundClass: "bg-gradient-to-b from-[#faf5ff] via-[#f3e8ff] to-[#fce7f3]",
+    cardClass: "bg-white/90 border border-[#e9d5ff] shadow-xl backdrop-blur-md",
+    textPrimary: "text-[#3b0764]", textSecondary: "text-[#7e22ce]",
+    buttonClass: "bg-[#fdf4ff] hover:bg-[#fae8ff] text-[#3b0764] border border-[#f5d0fe] shadow-sm",
+    socialIconClass: "text-[#ec4899] hover:text-[#be185d] bg-white border border-[#fbcfe8]",
+    accentColor: "#ec4899", surfaceColor: "#ffffff",
+  },
   emerald: {
-    id: "emerald", name: "Emerald Dark", nameAr: "نيون الزمرد (Emerald Dark)",
+    id: "emerald", name: "Emerald Dark", nameAr: "نيون الزمرد (Emerald Dark)", isDark: true,
     backgroundClass: "bg-gradient-to-bl from-[#0a0e16] via-[#0f131c] to-[#003824]/30",
     cardClass: "bg-[#181c24]/80 border border-[#10b981]/30 backdrop-blur-md",
     textPrimary: "text-[#dfe2ee]", textSecondary: "text-[#4edea3]",
@@ -41,7 +69,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#10b981", surfaceColor: "#181c24",
   },
   neonPurple: {
-    id: "neonPurple", name: "Neon Violet", nameAr: "بنفسج نيون (Neon Violet)",
+    id: "neonPurple", name: "Neon Violet", nameAr: "بنفسج نيون (Neon Violet)", isDark: true,
     backgroundClass: "bg-gradient-to-bl from-[#0f0c1b] via-[#16102b] to-[#251545]",
     cardClass: "bg-[#1f182c]/80 border border-[#a855f7]/30 backdrop-blur-md",
     textPrimary: "text-[#f3e8ff]", textSecondary: "text-[#c084fc]",
@@ -50,7 +78,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#a855f7", surfaceColor: "#1f182c",
   },
   oceanBlue: {
-    id: "oceanBlue", name: "Ocean Deep", nameAr: "أزرق محيطي (Ocean Deep)",
+    id: "oceanBlue", name: "Ocean Deep", nameAr: "أزرق محيطي (Ocean Deep)", isDark: true,
     backgroundClass: "bg-gradient-to-b from-[#0a0f1d] via-[#0f172a] to-[#0c1f38]",
     cardClass: "bg-[#0f172a]/90 border border-[#38bdf8]/30 backdrop-blur-md shadow-xl",
     textPrimary: "text-[#f0f9ff]", textSecondary: "text-[#7dd3fc]",
@@ -59,7 +87,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#38bdf8", surfaceColor: "#0f172a",
   },
   sunsetFire: {
-    id: "sunsetFire", name: "Sunset Orange", nameAr: "غروب ناري (Sunset Orange)",
+    id: "sunsetFire", name: "Sunset Orange", nameAr: "غروب ناري (Sunset Orange)", isDark: true,
     backgroundClass: "bg-gradient-to-br from-[#1c0d0d] via-[#2a1515] to-[#451212]",
     cardClass: "bg-[#2a1515]/85 border border-[#f97316]/30 backdrop-blur-md shadow-xl",
     textPrimary: "text-[#fff7ed]", textSecondary: "text-[#fdba74]",
@@ -68,7 +96,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#f97316", surfaceColor: "#2a1515",
   },
   desertSand: {
-    id: "desertSand", name: "Najd Desert", nameAr: "رمال نجد (Najd Desert)",
+    id: "desertSand", name: "Najd Desert", nameAr: "رمال نجد (Najd Desert)", isDark: false,
     backgroundClass: "bg-gradient-to-b from-[#fbf8f2] to-[#f4ebe1]",
     cardClass: "bg-[#fdfbf7]/90 border border-[#d6c7b2] shadow-lg backdrop-blur-md",
     textPrimary: "text-[#292524]", textSecondary: "text-[#78716c]",
@@ -77,7 +105,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#d97706", surfaceColor: "#fdfbf7",
   },
   slateMinimal: {
-    id: "slateMinimal", name: "Slate Minimalist", nameAr: "رمادي راقٍ (Slate Minimal)",
+    id: "slateMinimal", name: "Slate Minimalist", nameAr: "رمادي راقٍ (Slate Minimal)", isDark: true,
     backgroundClass: "bg-[#0b0f17]",
     cardClass: "bg-[#1e293b]/90 border border-slate-700/60 backdrop-blur-md shadow-lg",
     textPrimary: "text-slate-100", textSecondary: "text-slate-400",
@@ -86,7 +114,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#94a3b8", surfaceColor: "#1e293b",
   },
   rosePastel: {
-    id: "rosePastel", name: "Rose Gold Pastel", nameAr: "وردي ناعم (Rose Pastel)",
+    id: "rosePastel", name: "Rose Gold Pastel", nameAr: "وردي ناعم (Rose Pastel)", isDark: false,
     backgroundClass: "bg-gradient-to-b from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3]",
     cardClass: "bg-[#fff5f5]/90 border border-rose-200 shadow-md backdrop-blur-md",
     textPrimary: "text-rose-950", textSecondary: "text-rose-600",
@@ -95,7 +123,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#f43f5e", surfaceColor: "#fff5f5",
   },
   cyberDark: {
-    id: "cyberDark", name: "Cyberpunk Dark", nameAr: "سايبر داكن (Cyber Dark)",
+    id: "cyberDark", name: "Cyberpunk Dark", nameAr: "سايبر داكن (Cyber Dark)", isDark: true,
     backgroundClass: "bg-[#050508]",
     cardClass: "bg-[#0a0a12]/90 border border-[#06b6d4]/30 backdrop-blur-md shadow-xl",
     textPrimary: "text-[#ecfeff]", textSecondary: "text-[#22d3ee]",
@@ -104,7 +132,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#06b6d4", surfaceColor: "#0a0a12",
   },
   freshDawn: {
-    id: "freshDawn", name: "Fresh Dawn Teal", nameAr: "شروق منعش (Fresh Dawn)",
+    id: "freshDawn", name: "Fresh Dawn Teal", nameAr: "شروق منعش (Fresh Dawn)", isDark: false,
     backgroundClass: "bg-gradient-to-b from-[#f0fdfa] via-[#ccfbf1] to-[#e6fffa]",
     cardClass: "bg-[#f0fdfa]/90 border border-teal-200 shadow-md backdrop-blur-md",
     textPrimary: "text-teal-950", textSecondary: "text-teal-700",
@@ -113,7 +141,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#0d9488", surfaceColor: "#f0fdfa",
   },
   pureWhite: {
-    id: "pureWhite", name: "Minimal Clean / Pure White", nameAr: "أبيض نقي (Pure White)",
+    id: "pureWhite", name: "Minimal Clean / Pure White", nameAr: "أبيض نقي (Pure White)", isDark: false,
     backgroundClass: "bg-[#f8fafc]",
     cardClass: "bg-[#ffffff] border border-slate-200 shadow-md",
     textPrimary: "text-slate-900", textSecondary: "text-slate-600",
@@ -121,10 +149,8 @@ export const THEMES: Record<string, ThemeConfig> = {
     socialIconClass: "text-slate-700 hover:text-slate-950 bg-white border border-slate-200",
     accentColor: "#2563eb", surfaceColor: "#ffffff",
   },
-
-  // Aliases for backward compatibility with existing data and tests
   default: {
-    id: "default", name: "Minimal Clean", nameAr: "بسيط وواضح (Clean)",
+    id: "default", name: "Minimal Clean", nameAr: "بسيط وواضح (Clean)", isDark: false,
     backgroundClass: "bg-gradient-to-b from-gray-50 to-gray-100",
     cardClass: "bg-white border border-gray-200 shadow-sm",
     textPrimary: "text-gray-900", textSecondary: "text-gray-600",
@@ -133,7 +159,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#3b82f6", surfaceColor: "#ffffff",
   },
   midnight: {
-    id: "midnight", name: "Dark Midnight", nameAr: "منتصف الليل (Midnight)",
+    id: "midnight", name: "Dark Midnight", nameAr: "منتصف الليل (Midnight)", isDark: true,
     backgroundClass: "bg-slate-950",
     cardClass: "bg-slate-900/80 border border-slate-800",
     textPrimary: "text-white", textSecondary: "text-slate-400",
@@ -142,7 +168,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#60a5fa", surfaceColor: "#0f172a",
   },
   sunset: {
-    id: "sunset", name: "Warm Sunset", nameAr: "غروب دافئ (Sunset)",
+    id: "sunset", name: "Warm Sunset", nameAr: "غروب دافئ (Sunset)", isDark: true,
     backgroundClass: "bg-gradient-to-br from-orange-500 via-rose-600 to-purple-800",
     cardClass: "bg-white/10 border border-white/20 backdrop-blur-md",
     textPrimary: "text-white", textSecondary: "text-white/80",
@@ -151,7 +177,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#f97316", surfaceColor: "#2a1515",
   },
   violet: {
-    id: "violet", name: "Cyber Violet", nameAr: "شفق البنفسج (Cyber Violet)",
+    id: "violet", name: "Cyber Violet", nameAr: "شفق البنفسج (Cyber Violet)", isDark: true,
     backgroundClass: "bg-gradient-to-bl from-[#0a0e16] via-[#0f131c] to-[#571bc1]/20",
     cardClass: "bg-[#181c24]/80 border border-[#d0bcff]/30 backdrop-blur-md",
     textPrimary: "text-[#dfe2ee]", textSecondary: "text-[#d0bcff]",
@@ -160,7 +186,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#d0bcff", surfaceColor: "#181c24",
   },
   slate: {
-    id: "slate", name: "Minimal Slate", nameAr: "سليت الحداثة (Minimal Slate)",
+    id: "slate", name: "Minimal Slate", nameAr: "سليت الحداثة (Minimal Slate)", isDark: true,
     backgroundClass: "bg-gradient-to-bl from-[#0a0e16] via-[#1c2028] to-[#262a33]",
     cardClass: "bg-[#181c24]/90 border border-white/10 backdrop-blur-md",
     textPrimary: "text-white", textSecondary: "text-slate-400",
@@ -169,7 +195,7 @@ export const THEMES: Record<string, ThemeConfig> = {
     accentColor: "#94a3b8", surfaceColor: "#181c24",
   },
   gold: {
-    id: "gold", name: "Obsidian Gold", nameAr: "ذهبي فاخر (Obsidian Gold)",
+    id: "gold", name: "Obsidian Gold", nameAr: "ذهبي فاخر (Obsidian Gold)", isDark: true,
     backgroundClass: "bg-gradient-to-bl from-[#0a0e16] via-[#1c160c] to-[#eab308]/20",
     cardClass: "bg-[#1c160c]/90 border border-[#facc15]/30 backdrop-blur-md",
     textPrimary: "text-white", textSecondary: "text-[#fde047]",

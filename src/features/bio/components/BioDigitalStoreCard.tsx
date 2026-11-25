@@ -87,7 +87,7 @@ export function BioDigitalStoreCard({
         return (
           <div
             key={product.id}
-            className="p-4 rounded-2xl border border-white/10 bg-surface-container/45 backdrop-blur-md shadow-lg space-y-3 text-right"
+            className="p-4 rounded-2xl border border-outline-variant/30 bg-surface-container/50 backdrop-blur-md shadow-lg space-y-3 text-right"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-2.5 min-w-0">
@@ -128,7 +128,7 @@ export function BioDigitalStoreCard({
                   value={buyerEmail}
                   onChange={(e) => setBuyerEmail(e.target.value)}
                   placeholder="أدخل بريدك لاستلام الإيصال والملف..."
-                  className="flex-1 bg-surface-container-lowest/85 border border-white/10 rounded-xl px-3 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
+                  className="flex-1 bg-surface-container-lowest/85 border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
                 />
                 <button
                   type="submit"

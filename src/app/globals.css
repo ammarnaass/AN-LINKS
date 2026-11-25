@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root,
+  .bio-theme-light {
     --font-cairo: 'Cairo', sans-serif;
     --font-tajawal: 'Tajawal', sans-serif;
     --font-plex: 'IBM Plex Sans Arabic', sans-serif;
@@ -45,7 +46,8 @@
     --on-background: 19 27 46;                /* #131b2e */
   }
 
-  .dark {
+  .dark,
+  .bio-theme-dark {
     color-scheme: dark;
 
     /* Layan Dark Arabic Bento Tokens */

@@ -135,7 +135,7 @@ export function LinkButton({
 
   const content = (
     <div
-      className={`group relative w-full p-4 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-0.5 active:scale-[0.99] overflow-hidden border border-white/5 ${resolvedRadius} ${resolvedButtonClass} ${shadowClass}`}
+      className={`group relative w-full p-4 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-0.5 active:scale-[0.99] overflow-hidden border border-outline-variant/25 ${resolvedRadius} ${resolvedButtonClass} ${shadowClass}`}
       style={customStyle}
     >
       <LinkInner link={link} highlightBadge={highlightBadge} />

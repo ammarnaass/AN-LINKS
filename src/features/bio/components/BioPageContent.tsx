@@ -85,7 +85,7 @@ function BioFooter({
   const { t } = useTranslation();
 
   return (
-    <div className="pt-6 w-full flex flex-col items-center gap-3 border-t border-white/5">
+    <div className="pt-6 w-full flex flex-col items-center gap-3 border-t border-outline-variant/25">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-on-surface-variant hover:text-primary transition-colors">
           <span>{t("bio.designedWith")}</span>
@@ -214,7 +214,7 @@ export function BioPageContent({
 
   return (
     <div
-      className={`min-h-screen w-full flex flex-col items-center justify-center p-3 sm:p-6 relative overflow-hidden transition-colors duration-300 ${styles.backgroundClass}`}
+      className={`min-h-screen w-full flex flex-col items-center justify-center p-3 sm:p-6 relative overflow-hidden transition-colors duration-300 ${styles.colorModeClass} ${styles.backgroundClass}`}
       style={styles.backgroundStyle}
       dir={direction}
     >

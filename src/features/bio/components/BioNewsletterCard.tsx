@@ -68,7 +68,7 @@ export function BioNewsletterCard({
   }
 
   return (
-    <div className="w-full my-3 p-4 rounded-2xl border border-white/10 bg-surface-container/40 backdrop-blur-md shadow-lg flex flex-col gap-2.5">
+    <div className="w-full my-3 p-4 rounded-2xl border border-outline-variant/30 bg-surface-container/50 backdrop-blur-md shadow-lg flex flex-col gap-2.5">
       <div className="flex items-center gap-2 text-on-surface">
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
@@ -90,7 +90,7 @@ export function BioNewsletterCard({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="أدخل بريدك الإلكتروني..."
           disabled={isLoading}
-          className="flex-1 bg-surface-container-lowest/80 border border-white/10 rounded-xl px-3 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition"
+          className="flex-1 bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition"
         />
         <button
           type="submit"

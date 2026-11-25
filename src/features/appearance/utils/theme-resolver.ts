@@ -4,6 +4,8 @@ import { THEMES, FONTS, BUTTON_STYLES, BUTTON_SHADOWS, CARD_STYLES } from "../co
 import { sanitizeCustomBackground } from "./sanitizer";
 
 export interface ResolvedThemeStyles {
+  isDark: boolean;
+  colorModeClass: "bio-theme-dark" | "bio-theme-light";
   backgroundClass: string;
   backgroundStyle?: React.CSSProperties;
   overlayStyle?: React.CSSProperties;
@@ -118,7 +120,12 @@ export function resolveThemeStyles(
   );
   const cardClass = resolveCardClass(theme.cardClass, profile?.cardStyle);
 
+  const isDark = theme.isDark;
+  const colorModeClass = isDark ? "bio-theme-dark" : "bio-theme-light";
+
   return {
+    isDark,
+    colorModeClass,
     backgroundClass,
     backgroundStyle,
     overlayStyle,

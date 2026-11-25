@@ -45,7 +45,7 @@ function ProfileActionBar({
         <QrCode className="w-4 h-4 group-hover:rotate-6 transition-transform" />
       </button>
 
-      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high/90 border border-white/5 shadow-xs">
+      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high/90 border border-outline-variant/25 shadow-xs">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -80,7 +80,7 @@ function ProfileAvatar({
   return (
     <div className="relative mb-4 group">
       <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary via-tertiary to-secondary opacity-60 blur-md group-hover:opacity-100 group-hover:blur-lg transition duration-500" />
-      <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-surface-container-high ring-2 ring-white/10 shadow-2xl flex items-center justify-center">
+      <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-surface-container-high ring-2 ring-outline-variant/40 shadow-2xl flex items-center justify-center">
         {avatarUrl ? (
           <img
             src={avatarUrl}
@@ -155,7 +155,7 @@ function ProfileStatsBar({
   if (linksCount === undefined && socialsCount === 0) return null;
 
   return (
-    <div className="flex items-center justify-center gap-6 w-full bg-surface-container/60 rounded-xl p-2.5 mb-6 border border-white/5 text-center shadow-xs">
+    <div className="flex items-center justify-center gap-6 w-full bg-surface-container/60 rounded-xl p-2.5 mb-6 border border-outline-variant/25 text-center shadow-xs">
       {linksCount !== undefined && (
         <div className="flex flex-col items-center">
           <span className="text-sm font-bold text-primary">{linksCount.toLocaleString("ar-SA")}</span>
