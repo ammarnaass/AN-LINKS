@@ -11,6 +11,13 @@ interface RouteParams {
   params: Promise<{ gateway: string }>;
 }
 
+function safeTimingCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const { gateway } = await params;
@@ -49,7 +56,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     if (paymentGateway?.webhookSecret) {
       const secret = paymentGateway.webhookSecret;
 
-      if (headerSecret && headerSecret !== secret) {
+      if (!paymentGateway.isTestMode && !headerSig && !headerSecret) {
+        return NextResponse.json(
+          { success: false, error: "Missing webhook signature or secret" },
+          { status: 401 }
+        );
+      }
+
+      if (headerSecret && !safeTimingCompare(headerSecret, secret)) {
         return NextResponse.json(
           { success: false, error: "Invalid webhook secret" },
           { status: 401 }
@@ -58,7 +72,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
       if (headerSig && !paymentGateway.isTestMode) {
         const hmac = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-        if (headerSig !== hmac && headerSig !== secret) {
+        if (!safeTimingCompare(headerSig, hmac) && !safeTimingCompare(headerSig, secret)) {
           return NextResponse.json(
             { success: false, error: "Invalid webhook signature" },
             { status: 401 }

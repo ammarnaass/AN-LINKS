@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/db";
+import { enforceRateLimit } from "@/lib/rate-limiter";
 
 /**
  * Verifies a link's PIN code server-side without exposing the raw PIN in public HTML.
@@ -13,6 +14,13 @@ export async function POST(request: NextRequest) {
     if (!linkId) {
       return NextResponse.json({ success: false, error: "معرّف الرابط مطلوب" }, { status: 400 });
     }
+
+    const limited = enforceRateLimit(
+      request,
+      `verify_pin:${linkId}`,
+      { maxAttempts: 10, windowMs: 5 * 60 * 1000 }
+    );
+    if (limited) return limited;
 
     const link = await prisma.link.findUnique({
       where: { id: linkId },

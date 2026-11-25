@@ -590,6 +590,27 @@ describe("Public Subscription APIs & Webhook Processor", () => {
       expect(json.error).toContain("Invalid signature");
     });
 
+    it("returns 401 when signature/secret is completely missing in live mode", async () => {
+      vi.mocked(prisma.paymentGateway.findUnique).mockResolvedValue({
+        code: "stripe",
+        webhookSecret: "secret_webhook_key_123",
+        isTestMode: false,
+      } as any);
+
+      const req = new NextRequest("http://localhost:3000/api/subscriptions/webhooks/stripe", {
+        method: "POST",
+        body: JSON.stringify({ gatewayTxId: "tx_123" }),
+      });
+
+      const res = await webhookRoute.POST(req, {
+        params: Promise.resolve({ gateway: "stripe" }),
+      });
+      const json = await res.json();
+
+      expect(res.status).toBe(401);
+      expect(json.error).toContain("Missing webhook signature");
+    });
+
     it("returns 400 when transaction identifier is missing", async () => {
       vi.mocked(prisma.paymentGateway.findUnique).mockResolvedValue({
         code: "mada",

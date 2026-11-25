@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth.options";
 import { validateAndProcessImage } from "@/lib/image-processor";
 import { uploadProcessedImage } from "@/lib/storage";
+import { enforceRateLimit } from "@/lib/rate-limiter";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +14,14 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    const limited = enforceRateLimit(
+      request,
+      "image_upload",
+      { maxAttempts: 20, windowMs: 10 * 60 * 1000 },
+      session.user.id
+    );
+    if (limited) return limited;
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

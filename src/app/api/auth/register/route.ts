@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { validateRegistrationInput, hashPassword } from "@/lib/auth";
+import { enforceRateLimit } from "@/lib/rate-limiter";
 
 export async function POST(request: Request) {
   try {
+    const limited = enforceRateLimit(request, "auth_register", {
+      maxAttempts: 10,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (limited) return limited;
+
     const body = await request.json();
     const { email, password, username, displayName } = body;
 

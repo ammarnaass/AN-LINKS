@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/db";
+import { enforceRateLimit } from "@/lib/rate-limiter";
 
 interface RouteParams {
   params: Promise<{ username: string }>;
@@ -13,6 +14,12 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
+    const limited = enforceRateLimit(request, "bio_checkout", {
+      maxAttempts: 15,
+      windowMs: 10 * 60 * 1000,
+    });
+    if (limited) return limited;
+
     const { username } = await params;
     const body = await request.json().catch(() => ({}));
     const productId = typeof body.productId === "string" ? body.productId.trim() : "";
