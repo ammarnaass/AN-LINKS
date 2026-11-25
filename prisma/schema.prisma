@@ -61,6 +61,18 @@ model Profile {
   domainVerified          Boolean   @default(false)
   domainVerificationToken String?
   domainVerifiedAt        DateTime?
+
+  // Avatar Frame & Border Customization
+  avatarFrameShape   String   @default("circle")
+  avatarBorderWidth  String   @default("2")
+  avatarBorderColor  String?
+
+  // Profile Badge Customization
+  badgeEnabled       Boolean  @default(true)
+  badgeShape         String   @default("circle")
+  badgeSize          String   @default("md")
+  badgeColor         String?
+  badgeIcon          String   @default("CheckCircle2")
 }
 
 enum PlatformCategory {

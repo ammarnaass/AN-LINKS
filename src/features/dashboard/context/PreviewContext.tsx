@@ -38,6 +38,14 @@ export interface PreviewState {
   socialPosition: string;
   cardStyle: string;
   bgOverlayOpacity: number;
+  avatarFrameShape: string;
+  avatarBorderWidth: string;
+  avatarBorderColor: string | null;
+  badgeEnabled: boolean;
+  badgeShape: string;
+  badgeSize: string;
+  badgeColor: string | null;
+  badgeIcon: string;
   isLoaded: boolean;
   links: PreviewLinkItem[];
   socials: PreviewSocialItem[];
@@ -67,6 +75,14 @@ const DEFAULT_PREVIEW: PreviewState = {
   socialPosition: "top",
   cardStyle: "glass",
   bgOverlayOpacity: 40,
+  avatarFrameShape: "circle",
+  avatarBorderWidth: "2",
+  avatarBorderColor: null,
+  badgeEnabled: true,
+  badgeShape: "circle",
+  badgeSize: "md",
+  badgeColor: null,
+  badgeIcon: "CheckCircle2",
   isLoaded: false,
   links: [],
   socials: [],
@@ -116,6 +132,14 @@ export function PreviewProvider({
             socialPosition: p.profile.socialPosition || prev.socialPosition,
             cardStyle: p.profile.cardStyle || prev.cardStyle,
             bgOverlayOpacity: p.profile.bgOverlayOpacity ?? prev.bgOverlayOpacity,
+            avatarFrameShape: p.profile.avatarFrameShape || prev.avatarFrameShape,
+            avatarBorderWidth: p.profile.avatarBorderWidth || prev.avatarBorderWidth,
+            avatarBorderColor: p.profile.avatarBorderColor ?? prev.avatarBorderColor,
+            badgeEnabled: p.profile.badgeEnabled ?? prev.badgeEnabled,
+            badgeShape: p.profile.badgeShape || prev.badgeShape,
+            badgeSize: p.profile.badgeSize || prev.badgeSize,
+            badgeColor: p.profile.badgeColor ?? prev.badgeColor,
+            badgeIcon: p.profile.badgeIcon || prev.badgeIcon,
             links: l?.links || [],
             socials: l?.socials || [],
             isLoaded: true,

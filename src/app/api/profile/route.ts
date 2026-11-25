@@ -11,6 +11,10 @@ const VALID_FONTS = new Set(["Cairo", "Tajawal", "IBMPlex", "Almarai", "ReadexPr
 const VALID_BACKGROUND_TYPES = new Set(["THEME", "SOLID", "GRADIENT", "IMAGE"]);
 const VALID_SOCIAL_POSITIONS = new Set(["top", "bottom"]);
 const VALID_CARD_STYLES = new Set(["glass", "solid", "glow", "outline"]);
+const VALID_AVATAR_FRAME_SHAPES = new Set(["circle", "squircle", "hexagon", "octagon", "none"]);
+const VALID_AVATAR_BORDER_WIDTHS = new Set(["0", "2", "4", "6", "8"]);
+const VALID_BADGE_SHAPES = new Set(["circle", "shield", "star", "scallop", "hexagon"]);
+const VALID_BADGE_SIZES = new Set(["sm", "md", "lg", "xl"]);
 
 function validateProfileEnums(body: Record<string, unknown>): string | null {
   if (body.buttonStyle !== undefined && (typeof body.buttonStyle !== "string" || !VALID_BUTTON_STYLES.has(body.buttonStyle))) {
@@ -33,6 +37,18 @@ function validateProfileEnums(body: Record<string, unknown>): string | null {
   }
   if (body.cardStyle !== undefined && (typeof body.cardStyle !== "string" || !VALID_CARD_STYLES.has(body.cardStyle))) {
     return "قيمة نمط البطاقة غير صالحة";
+  }
+  if (body.avatarFrameShape !== undefined && (typeof body.avatarFrameShape !== "string" || !VALID_AVATAR_FRAME_SHAPES.has(body.avatarFrameShape))) {
+    return "قيمة شكل إطار الصورة غير صالحة";
+  }
+  if (body.avatarBorderWidth !== undefined && (typeof body.avatarBorderWidth !== "string" || !VALID_AVATAR_BORDER_WIDTHS.has(body.avatarBorderWidth))) {
+    return "قيمة سمك إطار الصورة غير صالحة";
+  }
+  if (body.badgeShape !== undefined && (typeof body.badgeShape !== "string" || !VALID_BADGE_SHAPES.has(body.badgeShape))) {
+    return "قيمة شكل الشارة غير صالحة";
+  }
+  if (body.badgeSize !== undefined && (typeof body.badgeSize !== "string" || !VALID_BADGE_SIZES.has(body.badgeSize))) {
+    return "قيمة حجم الشارة غير صالحة";
   }
   if (body.bgOverlayOpacity !== undefined && (typeof body.bgOverlayOpacity !== "number" || body.bgOverlayOpacity < 0 || body.bgOverlayOpacity > 100)) {
     return "قيمة نسبة التعتيم يجب أن تكون بين 0 و 100";
@@ -72,10 +88,28 @@ function parseProfileUpdates(body: Record<string, unknown>, data: Record<string,
     if (typeof body[f] === "string") data[f] = (body[f] as string).trim() || null;
     else if (body[f] === null) data[f] = null;
   }
-  const enumFields = ["buttonStyle", "buttonShadow", "borderRadius", "font", "backgroundType", "socialPosition", "cardStyle"] as const;
+  const enumFields = [
+    "buttonStyle",
+    "buttonShadow",
+    "borderRadius",
+    "font",
+    "backgroundType",
+    "socialPosition",
+    "cardStyle",
+    "avatarFrameShape",
+    "avatarBorderWidth",
+    "badgeShape",
+    "badgeSize",
+  ] as const;
   for (const f of enumFields) {
     if (typeof body[f] === "string") data[f] = body[f];
   }
+  const nullableColors = ["avatarBorderColor", "badgeColor", "badgeIcon"] as const;
+  for (const f of nullableColors) {
+    if (typeof body[f] === "string") data[f] = (body[f] as string).trim() || null;
+    else if (body[f] === null) data[f] = null;
+  }
+  if (typeof body.badgeEnabled === "boolean") data.badgeEnabled = body.badgeEnabled;
   if (typeof body.bgOverlayOpacity === "number") {
     data.bgOverlayOpacity = Math.max(0, Math.min(100, Math.round(body.bgOverlayOpacity)));
   }
@@ -109,6 +143,14 @@ function buildDefaultProfileData(userId: string, displayName: string, overrides:
     tiktokPixelId: (overrides.tiktokPixelId as string) || null,
     googleAnalyticsId: (overrides.googleAnalyticsId as string) || null,
     snapchatPixelId: (overrides.snapchatPixelId as string) || null,
+    avatarFrameShape: (overrides.avatarFrameShape as string) || "circle",
+    avatarBorderWidth: (overrides.avatarBorderWidth as string) || "2",
+    avatarBorderColor: (overrides.avatarBorderColor as string) || null,
+    badgeEnabled: typeof overrides.badgeEnabled === "boolean" ? overrides.badgeEnabled : true,
+    badgeShape: (overrides.badgeShape as string) || "circle",
+    badgeSize: (overrides.badgeSize as string) || "md",
+    badgeColor: (overrides.badgeColor as string) || null,
+    badgeIcon: (overrides.badgeIcon as string) || "CheckCircle2",
   };
 }
 

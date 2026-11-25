@@ -17,7 +17,7 @@ interface ThemeCustomizerProps {
 }
 
 export function ThemeCustomizer({ profile, onProfileChange }: ThemeCustomizerProps) {
-  const handleChange = (field: keyof ProfileData, value: string) => {
+  const handleChange = (field: keyof ProfileData, value: string | boolean) => {
     onProfileChange({
       ...profile,
       [field]: value,

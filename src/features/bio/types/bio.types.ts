@@ -5,6 +5,10 @@ export type FontFamily = "Cairo" | "Tajawal" | "IBMPlex" | "Almarai" | "ReadexPr
 export type BackgroundType = "THEME" | "SOLID" | "GRADIENT" | "IMAGE";
 export type SocialPosition = "top" | "bottom";
 export type CardStyle = "glass" | "solid" | "glow" | "outline";
+export type AvatarFrameShape = "circle" | "squircle" | "hexagon" | "octagon" | "none";
+export type AvatarBorderWidth = "0" | "2" | "4" | "6" | "8";
+export type BadgeShape = "circle" | "shield" | "star" | "scallop" | "hexagon";
+export type BadgeSize = "sm" | "md" | "lg" | "xl";
 
 export interface ProfileData {
   displayName: string;
@@ -27,6 +31,14 @@ export interface ProfileData {
   tiktokPixelId?: string | null;
   googleAnalyticsId?: string | null;
   snapchatPixelId?: string | null;
+  avatarFrameShape?: AvatarFrameShape | string | null;
+  avatarBorderWidth?: AvatarBorderWidth | string | null;
+  avatarBorderColor?: string | null;
+  badgeEnabled?: boolean | null;
+  badgeShape?: BadgeShape | string | null;
+  badgeSize?: BadgeSize | string | null;
+  badgeColor?: string | null;
+  badgeIcon?: string | null;
 }
 
 export interface SocialItem {

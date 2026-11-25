@@ -8,3 +8,4 @@ export * from "./components/QrShareModal";
 export * from "./components/ReportModal";
 export * from "./components/BioPageContent";
 export * from "./components/ProfileJsonLd";
+export * from "./components/profile/ProfileBadgeRenderer";

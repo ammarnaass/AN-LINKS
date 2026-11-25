@@ -142,15 +142,21 @@ function BioMainFrame({
         location={profile.location}
         avatarUrl={profile.avatarUrl}
         themeKey={profile.themeKey || undefined}
+        accentColor={profile.accentColor}
+        avatarFrameShape={profile.avatarFrameShape}
+        avatarBorderWidth={profile.avatarBorderWidth}
+        avatarBorderColor={profile.avatarBorderColor}
+        badgeEnabled={profile.badgeEnabled}
+        badgeShape={profile.badgeShape}
+        badgeSize={profile.badgeSize}
+        badgeColor={profile.badgeColor}
+        badgeIcon={profile.badgeIcon}
         socials={socials}
         linksCount={links.length}
         isPreview={isPreview}
         socialPosition={socialPosition}
-        textPrimaryClass={styles.textPrimaryClass}
-        textSecondaryClass={styles.textSecondaryClass}
-        socialIconClass={styles.socialIconClass}
-        onOpenQr={onOpenQr}
-        onOpenShare={onOpenQr}
+        textPrimaryClass={styles.textPrimaryClass} textSecondaryClass={styles.textSecondaryClass}
+        socialIconClass={styles.socialIconClass} onOpenQr={onOpenQr} onOpenShare={onOpenQr}
       />
 
       <BioLinksDeck links={links} profile={profile} buttonClass={styles.buttonClass} isPreview={isPreview} />

@@ -7,6 +7,10 @@ import type {
   BackgroundType,
   SocialPosition,
   CardStyle,
+  AvatarFrameShape,
+  AvatarBorderWidth,
+  BadgeShape,
+  BadgeSize,
 } from "@/features/bio";
 
 export type {
@@ -18,6 +22,10 @@ export type {
   BackgroundType,
   SocialPosition,
   CardStyle,
+  AvatarFrameShape,
+  AvatarBorderWidth,
+  BadgeShape,
+  BadgeSize,
 };
 
 export interface AppearanceCustomizerProps {

@@ -1,7 +1,8 @@
 import React from "react";
-import { CheckCircle2, Sparkles, MapPin } from "lucide-react";
+import { Sparkles, MapPin } from "lucide-react";
 import { SocialIcons } from "../SocialIcons";
-import { resolveThemeStyles, BORDER_RADIUS_MAP } from "@/features/appearance";
+import { resolveThemeStyles, BORDER_RADIUS_MAP, getAvatarFrameStyles } from "@/features/appearance";
+import { ProfileBadgeRenderer } from "@/features/bio";
 import { PhoneInteractiveLink } from "./PhoneInteractiveLink";
 
 export interface PhoneScreenContentProps {
@@ -10,6 +11,14 @@ export interface PhoneScreenContentProps {
   bio?: string | null;
   avatarUrl?: string | null;
   location?: string | null;
+  avatarFrameShape?: string | null;
+  avatarBorderWidth?: string | null;
+  avatarBorderColor?: string | null;
+  badgeEnabled?: boolean | null;
+  badgeShape?: string | null;
+  badgeSize?: string | null;
+  badgeColor?: string | null;
+  badgeIcon?: string | null;
   links?: Array<{
     id: string;
     title: string;
@@ -41,6 +50,14 @@ export function PhoneScreenContent({
   bio,
   avatarUrl,
   location,
+  avatarFrameShape,
+  avatarBorderWidth,
+  avatarBorderColor,
+  badgeEnabled = true,
+  badgeShape,
+  badgeSize,
+  badgeColor,
+  badgeIcon,
   links = [],
   socials = [],
   themeKey,
@@ -67,6 +84,13 @@ export function PhoneScreenContent({
     bgOverlayOpacity,
     cardStyle,
   });
+
+  const frameStyles = getAvatarFrameStyles(
+    avatarFrameShape || "circle",
+    avatarBorderWidth || "2",
+    avatarBorderColor,
+    accentColor || "#4edea3"
+  );
 
   const activeLinks = (links || []).filter((l) => l.isActive !== false);
   const initialLetter = (displayName?.trim()?.charAt(0) || username?.trim()?.charAt(0) || "ر").toUpperCase();
@@ -97,27 +121,35 @@ export function PhoneScreenContent({
         {/* Profile Header */}
         <div className="flex flex-col items-center w-full">
           <div className="relative mb-3">
-            <div className="w-20 h-20 rounded-full ring-2 ring-primary/40 p-1 bg-surface-container-high overflow-hidden shadow-lg flex items-center justify-center">
+            <div
+              className={`w-20 h-20 bg-surface-container-high shadow-lg flex items-center justify-center ${frameStyles.containerClass}`}
+              style={frameStyles.containerStyle}
+            >
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt={displayName || username || "المستخدم"}
-                  className="w-full h-full object-cover rounded-full"
+                  className="w-full h-full object-cover"
                   loading="lazy"
                 />
               ) : (
-                <div className="w-full h-full rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center font-bold text-2xl select-none">
+                <div className="w-full h-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center font-bold text-2xl select-none">
                   {initialLetter}
                 </div>
               )}
             </div>
-            <div className="absolute -bottom-1 -right-1 bg-primary text-on-primary rounded-full p-0.5 shadow">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
           </div>
 
-          <h3 className={`font-bold text-base flex items-center gap-1.5 mb-0.5 ${styles.textPrimaryClass}`}>
+          <h3 className={`font-bold text-base flex items-center justify-center gap-1.5 mb-0.5 ${styles.textPrimaryClass}`}>
             <span>{displayName || username || "مستخدم منصة AN LINKS"}</span>
+            <ProfileBadgeRenderer
+              enabled={badgeEnabled}
+              shape={badgeShape}
+              size={badgeSize}
+              color={badgeColor}
+              icon={badgeIcon}
+              fallbackAccent={accentColor || "#10b981"}
+            />
           </h3>
           {username && (
             <p className={`text-xs font-semibold mb-1 ${styles.textSecondaryClass}`} dir="ltr">

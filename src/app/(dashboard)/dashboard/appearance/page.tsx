@@ -25,6 +25,14 @@ export default function AppearancePage() {
     customBackground: preview.customBackground, buttonShadow: preview.buttonShadow,
     socialPosition: preview.socialPosition, cardStyle: preview.cardStyle,
     bgOverlayOpacity: preview.bgOverlayOpacity,
+    avatarFrameShape: preview.avatarFrameShape,
+    avatarBorderWidth: preview.avatarBorderWidth,
+    avatarBorderColor: preview.avatarBorderColor,
+    badgeEnabled: preview.badgeEnabled,
+    badgeShape: preview.badgeShape,
+    badgeSize: preview.badgeSize,
+    badgeColor: preview.badgeColor,
+    badgeIcon: preview.badgeIcon,
   });
 
   const saveProfile = async (isManual = false) => {
@@ -65,6 +73,8 @@ export default function AppearancePage() {
     preview.borderRadius, preview.font, preview.displayName, preview.bio,
     preview.avatarUrl, preview.backgroundType, preview.customBackground,
     preview.buttonShadow, preview.socialPosition, preview.cardStyle, preview.bgOverlayOpacity,
+    preview.avatarFrameShape, preview.avatarBorderWidth, preview.avatarBorderColor,
+    preview.badgeEnabled, preview.badgeShape, preview.badgeSize, preview.badgeColor, preview.badgeIcon,
   ]);
 
   const handleManualSave = () => {
@@ -84,6 +94,14 @@ export default function AppearancePage() {
       customBackground: p.customBackground !== undefined ? p.customBackground : null,
       buttonShadow: p.buttonShadow || "none", socialPosition: p.socialPosition || "top",
       cardStyle: p.cardStyle || "glass", bgOverlayOpacity: p.bgOverlayOpacity ?? 40,
+      avatarFrameShape: p.avatarFrameShape || "circle",
+      avatarBorderWidth: p.avatarBorderWidth || "2",
+      avatarBorderColor: p.avatarBorderColor !== undefined ? p.avatarBorderColor : null,
+      badgeEnabled: p.badgeEnabled ?? true,
+      badgeShape: p.badgeShape || "circle",
+      badgeSize: p.badgeSize || "md",
+      badgeColor: p.badgeColor !== undefined ? p.badgeColor : null,
+      badgeIcon: p.badgeIcon || "CheckCircle2",
     });
   };
 
@@ -125,6 +143,14 @@ export default function AppearancePage() {
               backgroundType={preview.backgroundType} customBackground={preview.customBackground}
               buttonShadow={preview.buttonShadow} socialPosition={preview.socialPosition}
               cardStyle={preview.cardStyle} bgOverlayOpacity={preview.bgOverlayOpacity}
+              avatarFrameShape={preview.avatarFrameShape}
+              avatarBorderWidth={preview.avatarBorderWidth}
+              avatarBorderColor={preview.avatarBorderColor}
+              badgeEnabled={preview.badgeEnabled}
+              badgeShape={preview.badgeShape}
+              badgeSize={preview.badgeSize}
+              badgeColor={preview.badgeColor}
+              badgeIcon={preview.badgeIcon}
               links={preview.links} socials={preview.socials}
             />
           </div>

@@ -49,6 +49,14 @@ export function MobilePhoneDrawer({ isOpen, onClose, preview }: MobilePhoneDrawe
           socialPosition={preview.socialPosition}
           cardStyle={preview.cardStyle}
           bgOverlayOpacity={preview.bgOverlayOpacity}
+          avatarFrameShape={preview.avatarFrameShape}
+          avatarBorderWidth={preview.avatarBorderWidth}
+          avatarBorderColor={preview.avatarBorderColor}
+          badgeEnabled={preview.badgeEnabled}
+          badgeShape={preview.badgeShape}
+          badgeSize={preview.badgeSize}
+          badgeColor={preview.badgeColor}
+          badgeIcon={preview.badgeIcon}
           links={preview.links}
           socials={preview.socials}
         />

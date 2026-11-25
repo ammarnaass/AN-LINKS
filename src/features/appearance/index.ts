@@ -13,6 +13,11 @@ export * from "./components/CardStylePicker";
 export * from "./components/ThemeCustomizer";
 export * from "./components/MobilePhoneDrawer";
 export * from "./components/AppearanceHeader";
+export * from "./constants/avatar-badge.constants";
+export * from "./utils/avatar-frame.utils";
+export * from "./components/profile/AvatarFrameControls";
+export * from "./components/profile/ProfileBadgeControls";
+export * from "./components/profile/BadgeIconPickerModal";
 export * from "./utils/sanitizer";
 export * from "./utils/theme-resolver";
 
