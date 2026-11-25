@@ -8,10 +8,11 @@ import { ReportModal } from "./ReportModal";
 import { QrShareModal } from "./QrShareModal";
 import { TrackingPixels } from "./TrackingPixels";
 import { BioNewsletterCard } from "./BioNewsletterCard";
+import { BioDigitalStoreCard } from "./BioDigitalStoreCard";
 import { LanguageSwitcher } from "@/shared/ui";
 import { useTranslation } from "@/shared/i18n";
 import { resolveThemeStyles, ResolvedThemeStyles } from "@/features/appearance";
-import { ProfileData, SocialItem, LinkItem } from "../types/bio.types";
+import { ProfileData, SocialItem, LinkItem, DigitalProductItem } from "../types/bio.types";
 
 export type { ProfileData };
 
@@ -20,6 +21,7 @@ export interface BioPageContentProps {
   username: string;
   links?: LinkItem[];
   socials?: SocialItem[];
+  products?: DigitalProductItem[];
   isPreview?: boolean;
 }
 
@@ -109,6 +111,7 @@ interface BioMainFrameProps {
   username: string;
   links: LinkItem[];
   socials: SocialItem[];
+  products: DigitalProductItem[];
   styles: ResolvedThemeStyles;
   socialPosition: string;
   isPreview: boolean;
@@ -121,6 +124,7 @@ function BioMainFrame({
   username,
   links,
   socials,
+  products,
   styles,
   socialPosition,
   isPreview,
@@ -150,6 +154,13 @@ function BioMainFrame({
       />
 
       <BioLinksDeck links={links} profile={profile} buttonClass={styles.buttonClass} isPreview={isPreview} />
+
+      <BioDigitalStoreCard
+        username={username}
+        products={products}
+        accentColor={profile.accentColor}
+        isPreview={isPreview}
+      />
 
       <BioNewsletterCard
         username={username}
@@ -190,6 +201,7 @@ export function BioPageContent({
   username,
   links = [],
   socials = [],
+  products = [],
   isPreview = false,
 }: BioPageContentProps) {
   const [isQrOpen, setIsQrOpen] = useState(false);
@@ -215,6 +227,7 @@ export function BioPageContent({
         username={username}
         links={links}
         socials={socials}
+        products={products}
         styles={styles}
         socialPosition={socialPosition}
         isPreview={isPreview}

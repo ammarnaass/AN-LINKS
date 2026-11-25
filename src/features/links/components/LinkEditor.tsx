@@ -10,7 +10,7 @@ import { reorderLinkItems } from "../validators/link.validator";
 interface LinkEditorProps {
   links: LinkData[];
   onLinksChange: (newLinks: LinkData[]) => void;
-  onAddLink?: (input: { title: string; url: string; platformId?: string | null; category?: string }) => Promise<LinkData | void>;
+  onAddLink?: (input: { title: string; url: string; type?: string; platformId?: string | null; category?: string }) => Promise<LinkData | void>;
   onUpdateLink?: (id: string, updated: Partial<LinkData>) => Promise<void>;
   onDeleteLink?: (id: string) => Promise<void>;
   filter?: "all" | "active" | "draft";
@@ -37,6 +37,7 @@ export function LinkEditor({
       await onAddLink({
         title: newLink.title,
         url: newLink.url,
+        type: newLink.type,
         platformId: newLink.platformId,
         category: newLink.category,
       });

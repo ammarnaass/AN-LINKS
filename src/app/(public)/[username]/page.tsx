@@ -67,6 +67,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         username={data.user.username}
         links={data.links}
         socials={data.socials}
+        products={data.products}
         isPreview={false}
       />
     </main>

@@ -8,6 +8,7 @@ import { validateLinkInput } from "../validators/link.validator";
 import { detectPlatform, DEFAULT_PLATFORM_PATTERNS } from "../services/platform-detector";
 import { getSocialIcon } from "@/shared/ui";
 import { LinkAppearanceCustomizer } from "./LinkAppearanceCustomizer";
+import { LinkScheduleAndLockPanel } from "./LinkScheduleAndLockPanel";
 import { LinkInlineEdit } from "./LinkInlineEdit";
 import { LinkCardActions } from "./LinkCardActions";
 
@@ -201,7 +202,10 @@ export function LinkCardItem({ link, index, totalCount, onUpdate, onDelete, onMo
       </div>
 
       {isCustomizing && (
-        <LinkAppearanceCustomizer link={link} onUpdate={onUpdate} />
+        <>
+          <LinkAppearanceCustomizer link={link} onUpdate={onUpdate} />
+          <LinkScheduleAndLockPanel link={link} onUpdate={onUpdate} />
+        </>
       )}
     </div>
   );

@@ -43,6 +43,16 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         ...(typeof body.customTextColor !== "undefined" ? { customTextColor: body.customTextColor } : {}),
         ...(typeof body.customBorderColor !== "undefined" ? { customBorderColor: body.customBorderColor } : {}),
         ...(typeof body.customShadow !== "undefined" ? { customShadow: body.customShadow } : {}),
+        ...(typeof body.scheduledStart !== "undefined"
+          ? { scheduledStart: body.scheduledStart ? new Date(body.scheduledStart) : null }
+          : {}),
+        ...(typeof body.scheduledEnd !== "undefined"
+          ? { scheduledEnd: body.scheduledEnd ? new Date(body.scheduledEnd) : null }
+          : {}),
+        ...(typeof body.pinCode !== "undefined"
+          ? { pinCode: body.pinCode ? body.pinCode.trim() : null }
+          : {}),
+        ...(typeof body.isSensitive === "boolean" ? { isSensitive: body.isSensitive } : {}),
       },
     });
 

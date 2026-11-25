@@ -43,6 +43,10 @@ export interface LinkData {
   customTextColor?: string | null;
   customBorderColor?: string | null;
   customShadow?: string | null;
+  scheduledStart?: string | null;
+  scheduledEnd?: string | null;
+  pinCode?: string | null;
+  isSensitive?: boolean;
 }
 
 export interface SocialItem {
@@ -72,6 +76,10 @@ export interface CreateLinkInput {
   customTextColor?: string | null;
   customBorderColor?: string | null;
   customShadow?: string | null;
+  scheduledStart?: string | null;
+  scheduledEnd?: string | null;
+  pinCode?: string | null;
+  isSensitive?: boolean;
 }
 
 export interface UpdateLinkInput {
@@ -90,6 +98,10 @@ export interface UpdateLinkInput {
   customTextColor?: string | null;
   customBorderColor?: string | null;
   customShadow?: string | null;
+  scheduledStart?: string | null;
+  scheduledEnd?: string | null;
+  pinCode?: string | null;
+  isSensitive?: boolean;
 }
 
 export interface BatchReorderInput {

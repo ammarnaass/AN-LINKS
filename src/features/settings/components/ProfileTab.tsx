@@ -7,6 +7,7 @@ import { ProfileFieldsForm } from "./profile/ProfileFieldsForm";
 import { MarketingPixelsCard } from "./profile/MarketingPixelsCard";
 import { CustomDomainCard } from "./profile/CustomDomainCard";
 import { SubscribersListCard } from "./profile/SubscribersListCard";
+import { DigitalProductsCard } from "./profile/DigitalProductsCard";
 
 export interface ProfileTabProps {
   displayName?: string;
@@ -98,6 +99,8 @@ export function ProfileTab(props?: ProfileTabProps) {
       <CustomDomainCard />
 
       <SubscribersListCard />
+
+      <DigitalProductsCard />
     </section>
   );
 }

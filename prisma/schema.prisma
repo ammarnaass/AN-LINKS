@@ -118,6 +118,10 @@ model Link {
   customTextColor   String?
   customBorderColor String?
   customShadow      String?
+  scheduledStart    DateTime?
+  scheduledEnd      DateTime?
+  pinCode           String?
+  isSensitive       Boolean         @default(false)
   createdAt         DateTime        @default(now())
   updatedAt   DateTime        @default(now()) @updatedAt
 
@@ -437,5 +441,40 @@ model CreatorSubscriber {
   @@unique([creatorId, email])
   @@index([creatorId, createdAt])
 }
+
+model DigitalProduct {
+  id          String         @id @default(cuid())
+  creatorId   String
+  title       String
+  description String?
+  price       Float
+  currency    String         @default("SAR")
+  productType String         @default("DIGITAL") // DIGITAL | TIP
+  fileUrl     String?
+  isActive    Boolean        @default(true)
+  salesCount  Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  orders      DigitalOrder[]
+
+  @@index([creatorId, isActive])
+}
+
+model DigitalOrder {
+  id          String         @id @default(cuid())
+  productId   String
+  product     DigitalProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  creatorId   String
+  buyerEmail  String
+  amount      Float
+  currency    String         @default("SAR")
+  status      String         @default("PAID")
+  deliveryUrl String?
+  createdAt   DateTime       @default(now())
+
+  @@index([creatorId, createdAt])
+  @@index([productId])
+}
+
 
 

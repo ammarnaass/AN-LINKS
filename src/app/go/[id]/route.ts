@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/db";
 import { recordLinkClick } from "@/features/analytics/services/tracking.service";
 import { appendTrackingParams } from "@/shared/utils/url-sanitizer";
+import { isLinkWithinSchedule } from "@/features/bio/utils/link-schedule";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -23,8 +24,24 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    if (!link || !link.isActive || link.isArchived || link.user?.isSuspended) {
+    if (
+      !link ||
+      !link.isActive ||
+      link.isArchived ||
+      link.user?.isSuspended ||
+      !isLinkWithinSchedule(link)
+    ) {
       return NextResponse.redirect(new URL("/not-found", request.url));
+    }
+
+    if (link.pinCode) {
+      const suppliedPin = request.nextUrl.searchParams.get("pin")?.trim();
+      if (suppliedPin !== link.pinCode) {
+        return NextResponse.json(
+          { success: false, error: "هذا الرابط محمي برمز سري (PIN)" },
+          { status: 403 }
+        );
+      }
     }
 
     const rawCountry = request.headers.get("cf-ipcountry") || request.headers.get("x-vercel-ip-country");

@@ -1,9 +1,12 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Globe } from "lucide-react";
+import { ArrowLeft, Globe, Lock, ShieldAlert } from "lucide-react";
 import { THEMES, BUTTON_STYLES, BUTTON_SHADOWS, BORDER_RADIUS_MAP } from "@/features/appearance";
 import { LinkItem } from "../types/bio.types";
 import { BioSectionHeader, BioYouTubeEmbed, BioSpotifyEmbed } from "./BioMediaEmbeds";
+import { LinkGateModal } from "./LinkGateModal";
 
 export type { LinkItem };
 
@@ -47,6 +50,17 @@ function LinkInner({
                 {highlightBadge}
               </span>
             )}
+            {link.hasPin && (
+              <span title="محمي برمز PIN" className="text-amber-400 shrink-0">
+                <Lock className="w-3.5 h-3.5" />
+              </span>
+            )}
+            {link.isSensitive && (
+              <span title="محتوى حساس +18" className="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-400 text-[9px] font-bold shrink-0 flex items-center gap-0.5">
+                <ShieldAlert className="w-2.5 h-2.5" />
+                <span>+18</span>
+              </span>
+            )}
           </div>
           <span className="text-[11px] text-on-surface-variant truncate opacity-80" dir="ltr">
             {link.url.replace(/^https?:\/\//, "")}
@@ -88,6 +102,8 @@ export function LinkButton({
   isPreview = false,
   highlightBadge,
 }: LinkButtonProps) {
+  const [isGateOpen, setIsGateOpen] = useState(false);
+
   if (link.type === "HEADER") {
     return <BioSectionHeader title={link.title} />;
   }
@@ -127,6 +143,28 @@ export function LinkButton({
   );
 
   if (isPreview) return <div className="w-full cursor-pointer">{content}</div>;
+
+  if (link.hasPin || link.isSensitive) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setIsGateOpen(true)}
+          className={`block w-full text-right focus:outline-none focus:ring-2 focus:ring-primary ${resolvedRadius}`}
+        >
+          {content}
+        </button>
+        <LinkGateModal
+          isOpen={isGateOpen}
+          onClose={() => setIsGateOpen(false)}
+          linkId={link.id}
+          linkTitle={link.title}
+          hasPin={Boolean(link.hasPin)}
+          isSensitive={Boolean(link.isSensitive)}
+        />
+      </>
+    );
+  }
 
   return (
     <Link

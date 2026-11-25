@@ -74,7 +74,7 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const handleAddLink = async (input: { title: string; url: string; platformId?: string | null; category?: string }) => {
+  const handleAddLink = async (input: { title: string; url: string; type?: string; platformId?: string | null; category?: string }) => {
     try {
       const created = await createLinkClient(input);
       setLinks((prev) => [...prev, created]);
@@ -98,6 +98,10 @@ export default function DashboardPage() {
         customTextColor: updated.customTextColor,
         customBorderColor: updated.customBorderColor,
         customShadow: updated.customShadow,
+        scheduledStart: updated.scheduledStart,
+        scheduledEnd: updated.scheduledEnd,
+        pinCode: updated.pinCode,
+        isSensitive: updated.isSensitive,
       });
       setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, ...updated } : l)));
     } catch (err) {

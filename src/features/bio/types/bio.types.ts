@@ -49,6 +49,18 @@ export interface LinkItem {
   customTextColor?: string | null;
   customBorderColor?: string | null;
   customShadow?: string | null;
+  hasPin?: boolean;
+  isSensitive?: boolean;
+}
+
+export interface DigitalProductItem {
+  id: string;
+  title: string;
+  description?: string | null;
+  price: number;
+  currency: string;
+  productType: string;
+  salesCount: number;
 }
 
 export interface ProfileMetadataInput {

@@ -1,5 +1,6 @@
 import { prisma } from "@/shared/db";
 import { ProfileMetadataInput } from "../types/bio.types";
+import { isLinkWithinSchedule } from "../utils/link-schedule";
 
 export function generateProfileMetadata(input: ProfileMetadataInput) {
   const title = `${input.displayName} (@${input.username}) | AN LINKS`;
@@ -38,7 +39,7 @@ export async function getPublicProfileData(username: string) {
     include: {
       profile: true,
       links: {
-        where: { isActive: true },
+        where: { isActive: true, isArchived: false },
         orderBy: { position: "asc" },
       },
       socials: {
@@ -51,14 +52,49 @@ export async function getPublicProfileData(username: string) {
     return null;
   }
 
+  const now = new Date();
+  const visibleLinks = user.links
+    .filter((l) => isLinkWithinSchedule(l, now))
+    .map((l) => ({
+      id: l.id,
+      title: l.title,
+      url: l.url,
+      type: l.type,
+      isActive: l.isActive,
+      position: l.position,
+      icon: l.icon,
+      thumbnailUrl: l.thumbnailUrl,
+      customBgColor: l.customBgColor,
+      customTextColor: l.customTextColor,
+      customBorderColor: l.customBorderColor,
+      customShadow: l.customShadow,
+      hasPin: Boolean(l.pinCode),
+      isSensitive: Boolean(l.isSensitive),
+    }));
+
+  const products = await prisma.digitalProduct.findMany({
+    where: { creatorId: user.id, isActive: true },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      price: true,
+      currency: true,
+      productType: true,
+      salesCount: true,
+    },
+  });
+
   return {
     user: {
       id: user.id,
       username: user.username,
     },
     profile: user.profile,
-    links: user.links,
+    links: visibleLinks,
     socials: user.socials,
+    products,
   };
 }
 

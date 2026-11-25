@@ -33,6 +33,7 @@ export async function GET() {
       userId: l.userId,
       title: l.title,
       url: l.url,
+      type: l.type,
       icon: l.icon,
       position: l.position,
       isActive: l.isActive,
@@ -63,6 +64,10 @@ export async function GET() {
       customTextColor: l.customTextColor,
       customBorderColor: l.customBorderColor,
       customShadow: l.customShadow,
+      scheduledStart: l.scheduledStart ? l.scheduledStart.toISOString() : null,
+      scheduledEnd: l.scheduledEnd ? l.scheduledEnd.toISOString() : null,
+      pinCode: l.pinCode,
+      isSensitive: l.isSensitive,
     }));
 
     return NextResponse.json({
@@ -113,6 +118,10 @@ export async function POST(request: NextRequest) {
         customTextColor: body.customTextColor || null,
         customBorderColor: body.customBorderColor || null,
         customShadow: body.customShadow || null,
+        scheduledStart: body.scheduledStart ? new Date(body.scheduledStart) : null,
+        scheduledEnd: body.scheduledEnd ? new Date(body.scheduledEnd) : null,
+        pinCode: body.pinCode?.trim() || null,
+        isSensitive: body.isSensitive ?? false,
       },
       include: {
         platform: true,
