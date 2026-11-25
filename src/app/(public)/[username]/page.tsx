@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import {
   getPublicProfileData,
   generateProfileMetadata,
-  BioPageContent,
-  ProfileJsonLd,
-} from "@/features/bio";
+} from "@/features/bio/services/profile.service";
+import { BioPageContent } from "@/features/bio/components/BioPageContent";
+import { ProfileJsonLd } from "@/features/bio/components/ProfileJsonLd";
 import type { Metadata } from "next";
 
 interface PageProps {

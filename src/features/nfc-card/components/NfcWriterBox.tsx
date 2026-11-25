@@ -1,25 +1,51 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Wifi, Copy, Check, ExternalLink, Smartphone } from "lucide-react";
+import React, { useEffect, useState, useMemo } from "react";
+import { Wifi, Copy, Check, ExternalLink, Smartphone, Globe, Laptop } from "lucide-react";
 import { AppCard, AppButton } from "@/shared/ui";
 
 interface NfcWriterBoxProps {
   nfcTapUrl: string;
 }
 
+type UrlMode = "current" | "prod" | "custom";
+
 export function NfcWriterBox({ nfcTapUrl }: NfcWriterBoxProps) {
   const [webNfcSupported, setWebNfcSupported] = useState(false);
   const [nfcWriteState, setNfcWriteState] = useState<"idle" | "writing" | "done" | "error">("idle");
   const [nfcWriteMsg, setNfcWriteMsg] = useState<string | null>(null);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [urlMode, setUrlMode] = useState<UrlMode>("current");
+  const [clientOrigin, setClientOrigin] = useState<string>("");
 
   useEffect(() => {
     setWebNfcSupported(typeof window !== "undefined" && "NDEFReader" in window);
+    if (typeof window !== "undefined") {
+      setClientOrigin(window.location.origin);
+    }
   }, []);
 
+  const cardPath = useMemo(() => {
+    try {
+      const u = new URL(nfcTapUrl);
+      return `${u.pathname}${u.search}`;
+    } catch {
+      return nfcTapUrl;
+    }
+  }, [nfcTapUrl]);
+
+  const effectiveTapUrl = useMemo(() => {
+    if (urlMode === "prod") {
+      return `https://anlinks.dev${cardPath}`;
+    }
+    if (urlMode === "current" && clientOrigin) {
+      return `${clientOrigin}${cardPath}`;
+    }
+    return nfcTapUrl;
+  }, [urlMode, clientOrigin, cardPath, nfcTapUrl]);
+
   const handleCopyTapUrl = () => {
-    navigator.clipboard?.writeText(nfcTapUrl).catch(() => {});
+    navigator.clipboard?.writeText(effectiveTapUrl).catch(() => {});
     setCopiedUrl(true);
     setTimeout(() => setCopiedUrl(false), 2000);
   };
@@ -35,7 +61,7 @@ export function NfcWriterBox({ nfcTapUrl }: NfcWriterBoxProps) {
         }
       ).NDEFReader;
       const ndef = new NdefCtor();
-      await ndef.write({ records: [{ recordType: "url", data: nfcTapUrl }] });
+      await ndef.write({ records: [{ recordType: "url", data: effectiveTapUrl }] });
       setNfcWriteState("done");
       setNfcWriteMsg("تمت كتابة رابط بطاقتك على شريحة NFC بنجاح!");
     } catch (err) {
@@ -48,9 +74,41 @@ export function NfcWriterBox({ nfcTapUrl }: NfcWriterBoxProps) {
 
   return (
     <AppCard className="p-5 sm:p-6 bg-surface-container-low border-outline-variant/25 space-y-4">
-      <div className="flex items-center gap-2.5">
-        <Wifi className="w-4 h-4 text-primary rotate-90" />
-        <h3 className="text-sm font-bold text-on-surface">رابط البرمجة والكتابة على شريحة NFC</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <Wifi className="w-4 h-4 text-primary rotate-90" />
+          <h3 className="text-sm font-bold text-on-surface">رابط البرمجة والكتابة على شريحة NFC</h3>
+        </div>
+
+        {/* Origin Selector */}
+        <div className="inline-flex p-1 rounded-xl bg-surface-container border border-outline-variant/25 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setUrlMode("current")}
+            className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+              urlMode === "current"
+                ? "bg-primary text-on-primary shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface"
+            }`}
+            title="رابط المتصفح الحالي أو الشبكة المحلية"
+          >
+            <Laptop className="w-3 h-3" />
+            <span>الشبكة الحالية (LAN)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setUrlMode("prod")}
+            className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+              urlMode === "prod"
+                ? "bg-primary text-on-primary shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface"
+            }`}
+            title="رابط الإنتاج الرسمي الجاهز لطباعة البطاقات"
+          >
+            <Globe className="w-3 h-3" />
+            <span>النطاق الرسمي</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -58,7 +116,7 @@ export function NfcWriterBox({ nfcTapUrl }: NfcWriterBoxProps) {
           className="flex-1 min-w-0 text-xs font-mono bg-surface-container px-3 py-2 rounded-xl text-primary truncate border border-outline-variant/25"
           dir="ltr"
         >
-          {nfcTapUrl}
+          {effectiveTapUrl}
         </code>
         <AppButton
           type="button"
@@ -70,7 +128,7 @@ export function NfcWriterBox({ nfcTapUrl }: NfcWriterBoxProps) {
           {copiedUrl ? "تم النسخ" : "نسخ الرابط"}
         </AppButton>
         <a
-          href={nfcTapUrl}
+          href={effectiveTapUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-high hover:bg-surface-container text-xs font-semibold text-on-surface transition"

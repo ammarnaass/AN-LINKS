@@ -11,7 +11,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const srcParam = request.nextUrl.searchParams.get("src");
   const source = srcParam === "qr" ? "qr" : "nfc";
 
-  const resolution = await resolveNfcScan(code, source);
+  const host = request.headers.get("host") || request.nextUrl.host;
+  const proto = request.headers.get("x-forwarded-proto") || "http";
+  const requestOrigin = `${proto}://${host}`;
+
+  const resolution = await resolveNfcScan(code, source, requestOrigin);
 
   if (resolution.status === "NOT_FOUND") {
     return NextResponse.redirect(new URL("/", request.url));

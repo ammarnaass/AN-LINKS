@@ -35,7 +35,8 @@ export type NfcScanResolution =
 
 export async function resolveNfcScan(
   cardCode: string,
-  source: "nfc" | "qr"
+  source: "nfc" | "qr",
+  requestOrigin?: string
 ): Promise<NfcScanResolution> {
   const card = await prisma.nfcCard.findUnique({
     where: { cardCode },
@@ -56,7 +57,7 @@ export async function resolveNfcScan(
     },
   });
 
-  const origin = getNfcAppOrigin();
+  const origin = requestOrigin?.replace(/\/$/, "") || getNfcAppOrigin();
   const bioUrl = `${origin}/${card.user.username}?source=${source}`;
 
   if (card.targetMode === "VCARD") {

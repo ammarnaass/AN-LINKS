@@ -3,10 +3,21 @@ import { NextRequest, NextResponse } from "next/server";
 const ROOT_DOMAINS = [
   "localhost",
   "127.0.0.1",
+  "0.0.0.0",
   "anlinks.dev",
   "www.anlinks.dev",
   "app.anlinks.dev",
 ];
+
+function isInternalOrLocalHost(hostname: string): boolean {
+  if (ROOT_DOMAINS.includes(hostname)) return true;
+  // Match private IPv4 ranges: 127.*, 10.*, 192.168.*, 172.16-31.*
+  if (/^(127\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(hostname)) return true;
+  // Match IPv6 localhost
+  if (hostname === "::1" || hostname === "[::1]") return true;
+  if (hostname.endsWith(".local") || hostname.endsWith(".internal")) return true;
+  return false;
+}
 
 export function middleware(request: NextRequest) {
   const hostHeader = request.headers.get("host") || "";
@@ -15,7 +26,7 @@ export function middleware(request: NextRequest) {
 
   const isCustomDomain =
     hostname &&
-    !ROOT_DOMAINS.includes(hostname) &&
+    !isInternalOrLocalHost(hostname) &&
     !hostname.endsWith(".anlinks.dev") &&
     !hostname.endsWith(".vercel.app");
 
