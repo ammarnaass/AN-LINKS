@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { UserNavDropdown } from "@/features/auth";
+import { UserNavDropdown, UserNavMenu } from "@/features/auth";
 
 vi.mock("next-auth/react", () => ({
   useSession: vi.fn(),
@@ -73,6 +73,33 @@ describe("UserNavDropdown Component & Session Reactive State", () => {
     expect(html).toContain("مدير النظام");
     expect(html).toContain("@sysadmin");
     expect(html).toContain('title="مدير النظام"');
+  });
+
+  it("should render UserNavMenu with NFC studio, settings, and profile preview links", () => {
+    const html = renderToStaticMarkup(
+      React.createElement(UserNavMenu, {
+        user: {
+          name: "فيصل",
+          username: "faisal_creator",
+          email: "faisal@anlinks.dev",
+        },
+        isAdmin: true,
+        onClose: vi.fn(),
+      })
+    );
+
+    expect(html).toContain("فيصل");
+    expect(html).toContain("faisal@anlinks.dev");
+    expect(html).toContain("مدير النظام (Admin)");
+    expect(html).toContain('href="/admin"');
+    expect(html).toContain('href="/dashboard"');
+    expect(html).toContain('href="/dashboard/appearance"');
+    expect(html).toContain('href="/dashboard/nfc-card"');
+    expect(html).toContain("بطاقة NFC والباركود");
+    expect(html).toContain('href="/dashboard/analytics"');
+    expect(html).toContain('href="/dashboard/settings"');
+    expect(html).toContain('href="/faisal_creator"');
+    expect(html).toContain("تسجيل الخروج");
   });
 });
 

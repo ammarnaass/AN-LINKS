@@ -6,4 +6,5 @@ export * from "./components/RegisterForm";
 export * from "./components/AuthSideBanner";
 export * from "./components/AuthProvider";
 export * from "./components/UserNavDropdown";
+export * from "./components/UserNavMenu";
 export * from "./hooks/useCurrentUser";
