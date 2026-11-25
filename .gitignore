@@ -37,4 +37,7 @@ next-env.d.ts
 # superpowers sdd
 .superpowers/
 
+# local credentials reference
+ACCOUNTS.md
+
 stitch_arabic_bio_link_platform*/
