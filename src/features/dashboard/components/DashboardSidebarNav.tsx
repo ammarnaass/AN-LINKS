@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Link2, Palette, BarChart3, Settings, Shield, Globe, ExternalLink, LucideIcon } from "lucide-react";
+import { Link2, Palette, BarChart3, Settings, Shield, Globe, ExternalLink, Nfc, LucideIcon } from "lucide-react";
 
 export interface DashboardNavItem {
   href: string;
@@ -14,6 +14,7 @@ export interface DashboardNavItem {
 export const DASHBOARD_NAV_ITEMS: DashboardNavItem[] = [
   { href: "/dashboard", label: "الروابط", icon: Link2, exact: true },
   { href: "/dashboard/appearance", label: "المظهر", icon: Palette },
+  { href: "/dashboard/nfc-card", label: "بطاقة NFC", icon: Nfc },
   { href: "/dashboard/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
 ];

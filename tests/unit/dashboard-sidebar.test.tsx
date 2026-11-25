@@ -23,15 +23,17 @@ vi.mock("next-auth/react", () => ({
 }));
 
 describe("Dashboard Sidebar Suite", () => {
-  it("renders all 4 dashboard navigation links in sidebar", () => {
+  it("renders all 5 dashboard navigation links in sidebar", () => {
     const html = renderToStaticMarkup(<DashboardSidebar currentPath="/dashboard" />);
-    expect(DASHBOARD_NAV_ITEMS).toHaveLength(4);
+    expect(DASHBOARD_NAV_ITEMS).toHaveLength(5);
     expect(html).toContain('href="/dashboard"');
     expect(html).toContain('href="/dashboard/appearance"');
+    expect(html).toContain('href="/dashboard/nfc-card"');
     expect(html).toContain('href="/dashboard/analytics"');
     expect(html).toContain('href="/dashboard/settings"');
     expect(html).toContain("الروابط");
     expect(html).toContain("المظهر");
+    expect(html).toContain("بطاقة NFC");
     expect(html).toContain("التحليلات");
     expect(html).toContain("الإعدادات");
   });
