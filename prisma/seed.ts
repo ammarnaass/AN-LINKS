@@ -4,6 +4,7 @@ import { seedFinancials } from "./seed-financials.ts";
 import { seedPlatforms } from "./seed-platforms.ts";
 import { seedFathiAccount } from "./seed-fathi.ts";
 import { seedFamousCreators } from "./seed-creators.ts";
+import { seedNotifications } from "./seed-notifications.ts";
 
 const prisma = new PrismaClient();
 
@@ -225,6 +226,9 @@ async function main() {
 
   // 10. Seed VIP Famous Creators Showcases
   await seedFamousCreators(prisma);
+
+  // 11. Seed System Notifications
+  await seedNotifications(prisma);
 
   console.log("🎉 Seeding completed successfully!");
 }

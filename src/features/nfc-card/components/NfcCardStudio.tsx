@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Palette, SlidersHorizontal, QrCode, Save, Check, AlertCircle } from "lucide-react";
+import { Palette, SlidersHorizontal, QrCode, Save, Check, AlertCircle, Printer } from "lucide-react";
 import { AppButton } from "@/shared/ui";
 import { NfcCardConfigDTO, UpdateNfcCardInput } from "../types/nfc.types";
 import { NfcCardPreview } from "./NfcCardPreview";
 import { NfcDesignPanel } from "./NfcDesignPanel";
 import { NfcSettingsPanel } from "./NfcSettingsPanel";
 import { BarcodeAndQrPanel } from "./BarcodeAndQrPanel";
+import { NfcPrintModal } from "./NfcPrintModal";
 
 type StudioTab = "design" | "settings" | "barcode";
 
@@ -22,6 +23,7 @@ export function NfcCardStudio() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [liveQrSvg, setLiveQrSvg] = useState<string>("");
   const [liveQrPng, setLiveQrPng] = useState<string>("");
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/nfc-card")
@@ -158,16 +160,28 @@ export function NfcCardStudio() {
           </p>
         </div>
 
-        <AppButton
-          type="button"
-          variant="primary"
-          size="md"
-          isLoading={isSaving}
-          onClick={() => void handleSave()}
-          leftIcon={isSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-        >
-          {isSaved ? "تم الحفظ!" : isDirty ? "حفظ التعديلات *" : "حفظ البطاقة"}
-        </AppButton>
+        <div className="flex items-center gap-2.5">
+          <AppButton
+            type="button"
+            variant="outline"
+            size="md"
+            onClick={() => setIsPrintModalOpen(true)}
+            leftIcon={<Printer className="w-4 h-4" />}
+          >
+            طباعة وتصدير
+          </AppButton>
+
+          <AppButton
+            type="button"
+            variant="primary"
+            size="md"
+            isLoading={isSaving}
+            onClick={() => void handleSave()}
+            leftIcon={isSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+          >
+            {isSaved ? "تم الحفظ!" : isDirty ? "حفظ التعديلات *" : "حفظ البطاقة"}
+          </AppButton>
+        </div>
       </div>
 
       {errorMsg && (
@@ -213,6 +227,13 @@ export function NfcCardStudio() {
           <NfcCardPreview card={card} liveQrSvg={liveQrSvg} />
         </div>
       </div>
+
+      <NfcPrintModal
+        card={card}
+        liveQrSvg={liveQrSvg}
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+      />
     </div>
   );
 }

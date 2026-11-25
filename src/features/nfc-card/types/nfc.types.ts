@@ -78,7 +78,15 @@ export const NFC_CARD_MATERIALS: NfcCardMaterialPreset[] = [
   },
 ];
 
-export const NFC_CARD_SHAPES: { key: NfcCardShape; labelAr: string; radiusClass: string }[] = [
+export type NfcMaterialOption = NfcCardMaterialPreset;
+
+export interface NfcCardShapeOption {
+  key: NfcCardShape;
+  labelAr: string;
+  radiusClass: string;
+}
+
+export const NFC_CARD_SHAPES: NfcCardShapeOption[] = [
   { key: "rounded", labelAr: "زوايا قياسية (CR80)", radiusClass: "rounded-2xl" },
   { key: "pill", labelAr: "دائرية ناعمة", radiusClass: "rounded-[28px]" },
   { key: "sharp", labelAr: "حادة هندسية", radiusClass: "rounded-md" },
