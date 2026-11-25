@@ -15,24 +15,25 @@ describe("UserNavDropdown Component & Session Reactive State", () => {
     vi.clearAllMocks();
   });
 
-  it("should render nothing (null) when user is unauthenticated", () => {
+  it("should render login action button when user is unauthenticated", () => {
     vi.mocked(useSession).mockReturnValue({
       data: null,
       status: "unauthenticated",
     } as any);
 
     const html = renderToStaticMarkup(React.createElement(UserNavDropdown));
-    expect(html).toBe("");
+    expect(html).toContain('href="/login"');
+    expect(html).toContain("تسجيل الدخول");
   });
 
-  it("should render nothing (null) when session is loading", () => {
+  it("should render loading skeleton when session is loading", () => {
     vi.mocked(useSession).mockReturnValue({
       data: null,
       status: "loading",
     } as any);
 
     const html = renderToStaticMarkup(React.createElement(UserNavDropdown));
-    expect(html).toBe("");
+    expect(html).toContain("animate-pulse");
   });
 
   it("should render avatar and username when user is authenticated as client", () => {

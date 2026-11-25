@@ -118,11 +118,27 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = (user as unknown as { username: string }).username;
         token.role = (user as unknown as { role: string }).role;
+        token.name = user.name ?? null;
+        token.picture = (user as unknown as { image?: string }).image || null;
         token.sessionToken = (token.jti as string) || `${user.id}_${Date.now()}`;
         try {
           await recordSession(user.id, token.sessionToken as string);
         } catch (err) {
           console.error("Session recording error in jwt callback:", err);
+        }
+      }
+
+      // Sync latest profile avatar if not already on token
+      if (token.id && !token.picture) {
+        try {
+          const profile = await prisma.profile.findUnique({
+            where: { userId: token.id as string },
+            select: { avatarUrl: true, displayName: true },
+          });
+          if (profile?.avatarUrl) token.picture = profile.avatarUrl;
+          if (profile?.displayName && !token.name) token.name = profile.displayName;
+        } catch {
+          // ignore lookup errors
         }
       }
 
@@ -148,6 +164,12 @@ export const authOptions: NextAuthOptions = {
         (session.user as unknown as { username: string }).username = token.username as string;
         (session.user as unknown as { role: string }).role = token.role as string;
         (session.user as unknown as { sessionToken: string }).sessionToken = token.sessionToken as string;
+        if (token.picture) {
+          session.user.image = token.picture as string;
+        }
+        if (token.name) {
+          session.user.name = token.name as string;
+        }
       }
       return session;
     },

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/features/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/features/auth/server/auth.options";
 import { cookies } from "next/headers";
 import {
   I18nProvider,
@@ -9,6 +11,7 @@ import {
   getDirection,
 } from "@/shared/i18n";
 import { CookieConsentBanner } from "@/shared/ui";
+import { NotificationToastContainer } from "@/features/notifications";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || "https://anlinks.dev"),
@@ -32,6 +35,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
   const rawLocale = cookieStore.get(LOCALE_COOKIE_NAME)?.value;
   const initialLocale = normalizeLocale(rawLocale);
@@ -75,10 +79,11 @@ export default async function RootLayout({
         />
       </head>
       <body className="font-plex antialiased min-h-screen bg-surface-container-lowest text-on-surface selection:bg-primary-container selection:text-on-primary-container">
-        <AuthProvider>
+        <AuthProvider session={session}>
           <I18nProvider initialLocale={initialLocale}>
             {children}
             <CookieConsentBanner />
+            <NotificationToastContainer />
           </I18nProvider>
         </AuthProvider>
       </body>

@@ -30,19 +30,21 @@ export interface UserNavMenuProps {
 }
 
 export function UserNavMenu({ user, isAdmin, onClose }: UserNavMenuProps) {
+  const [imgError, setImgError] = React.useState(false);
   const displayName = user.name || user.username || "المستخدم";
   const userInitial = displayName.charAt(0).toUpperCase();
 
   return (
-    <div className="absolute left-0 mt-2 w-72 rounded-2xl bg-surface-container-lowest/95 backdrop-blur-2xl border border-outline-variant/40 shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+    <div className="absolute left-0 rtl:left-0 rtl:right-auto ltr:right-0 ltr:left-auto mt-2 w-72 rounded-2xl bg-surface-container-lowest/95 backdrop-blur-2xl border border-outline-variant/40 shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
       {/* User Profile Header */}
       <div className="p-3 rounded-xl bg-surface-container-low border border-white/5 space-y-2">
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
-            {user.image ? (
+            {user.image && !imgError ? (
               <img
                 src={user.image}
                 alt={displayName}
+                onError={() => setImgError(true)}
                 className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/40"
               />
             ) : (

@@ -13,6 +13,7 @@ export type AdminTabKey =
   | "links"
   | "settings"
   | "auth_providers"
+  | "notifications"
   | "reports";
 
 export type GatewayId =

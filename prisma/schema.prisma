@@ -525,6 +525,53 @@ model NfcCard {
   @@index([cardCode])
 }
 
+enum NotificationType {
+  ANNOUNCEMENT
+  SUCCESS
+  WARNING
+  URGENT
+  PROMO
+  CUSTOM
+}
+
+enum NotificationTarget {
+  ALL
+  CREATORS_ONLY
+  VISITORS_ONLY
+  ADMINS_ONLY
+}
+
+enum NotificationPosition {
+  BOTTOM_LEFT
+  TOP_LEFT
+  BOTTOM_CENTER
+}
+
+model SystemNotification {
+  id                 String               @id @default(cuid())
+  title              String
+  message            String
+  type               NotificationType     @default(ANNOUNCEMENT)
+  color              String               @default("#6366f1")
+  bgColor            String?
+  icon               String?
+  position           NotificationPosition @default(BOTTOM_LEFT)
+  target             NotificationTarget   @default(ALL)
+  actionLabel        String?
+  actionUrl          String?
+  isActive           Boolean              @default(true)
+  priority           Int                  @default(0)
+  autoDismissSeconds Int?                 @default(10)
+  startsAt           DateTime             @default(now())
+  expiresAt          DateTime?
+  viewCount          Int                  @default(0)
+  clickCount         Int                  @default(0)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@index([isActive, target, startsAt, expiresAt])
+}
+
 
 
 

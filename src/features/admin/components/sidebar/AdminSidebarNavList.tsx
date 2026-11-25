@@ -15,6 +15,7 @@ import {
   Tag,
   Receipt,
   KeyRound,
+  Bell,
 } from "lucide-react";
 import { AdminTabKey } from "../AdminNavTabs";
 
@@ -57,6 +58,7 @@ export function AdminSidebarNavList({
     { key: "links", label: "إدارة الروابط والمنصات", icon: <Link2 className="w-4 h-4 shrink-0" />, badge: linksCount > 0 ? linksCount : undefined },
     { key: "settings", label: "إعدادات المنصة", icon: <Settings className="w-4 h-4 shrink-0" /> },
     { key: "auth_providers", label: "إعدادات الدخول (OAuth)", icon: <KeyRound className="w-4 h-4 shrink-0" /> },
+    { key: "notifications", label: "نظام الإشعارات", icon: <Bell className="w-4 h-4 shrink-0" /> },
     { key: "reports", label: "البلاغات والاعتدال", icon: <AlertTriangle className="w-4 h-4 shrink-0" />, badge: pendingReportsCount > 0 ? pendingReportsCount : undefined, badgeColor: "bg-error text-white font-bold" },
   ];
 

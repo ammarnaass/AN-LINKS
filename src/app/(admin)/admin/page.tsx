@@ -19,6 +19,7 @@ import {
   AdminTransactionsTab,
   AdminSettingsTab,
   AdminAuthProvidersTab,
+  AdminNotificationsTab,
   AdminReportsTab,
   AdminLinksContainer,
   DEFAULT_PLATFORM_SETTINGS,
@@ -43,6 +44,7 @@ const TAB_TITLES: Record<AdminTabKey, string> = {
   links: "إدارة الروابط والمنصات وحوكمة المحتوى",
   settings: "إعدادات المنصة والسياسات",
   auth_providers: "إعدادات نظام الدخول الخارجي (Google / Facebook / Apple)",
+  notifications: "نظام الإشعارات المباشرة والتنبيهات",
   reports: "مركز البلاغات والاعتدال",
 };
 
@@ -205,6 +207,8 @@ export default function AdminConsolePage() {
           )}
 
           {activeTab === "auth_providers" && <AdminAuthProvidersTab />}
+
+          {activeTab === "notifications" && <AdminNotificationsTab />}
 
           {activeTab === "reports" && (
             <AdminReportsTab
