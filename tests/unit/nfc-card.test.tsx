@@ -96,7 +96,11 @@ describe("Creator NFC Card, Design, Settings & Barcode Suite", () => {
     }
 
     await updateUserNfcCard(testUserId, {
-      material: "royal_gold",
+      material: "custom",
+      customBgColor: "#1e1b4b",
+      customTextColor: "#fde68a",
+      cardShape: "pill",
+      cardPattern: "chip",
       orientation: "vertical",
       targetMode: "DIRECT_URL",
       customTargetUrl: "https://example.com/shop",
@@ -125,7 +129,11 @@ describe("Creator NFC Card, Design, Settings & Barcode Suite", () => {
     const refreshed = await getOrCreateUserNfcCard(testUserId);
     expect(refreshed.tapCount).toBe(2);
     expect(refreshed.qrScanCount).toBe(1);
-    expect(refreshed.material).toBe("royal_gold");
+    expect(refreshed.material).toBe("custom");
+    expect(refreshed.customBgColor).toBe("#1e1b4b");
+    expect(refreshed.customTextColor).toBe("#fde68a");
+    expect(refreshed.cardShape).toBe("pill");
+    expect(refreshed.cardPattern).toBe("chip");
     expect(refreshed.orientation).toBe("vertical");
     expect(refreshed.barcodeValue).toBe("VIP-2026");
   });

@@ -2,9 +2,13 @@ import QRCode from "qrcode";
 import { prisma } from "@/shared/db";
 import {
   NFC_CARD_MATERIALS,
+  NFC_CARD_PATTERNS,
+  NFC_CARD_SHAPES,
   NfcCardConfigDTO,
   NfcCardMaterial,
   NfcCardOrientation,
+  NfcCardPattern,
+  NfcCardShape,
   NfcTargetMode,
   UpdateNfcCardInput,
 } from "../types/nfc.types";
@@ -15,6 +19,8 @@ export type { NfcScanResolution } from "./nfc-scan.service";
 
 const VALID_MATERIALS = new Set<string>(NFC_CARD_MATERIALS.map((m) => m.key));
 const VALID_ORIENTATIONS = new Set<string>(["horizontal", "vertical"]);
+const VALID_SHAPES = new Set<string>(NFC_CARD_SHAPES.map((s) => s.key));
+const VALID_PATTERNS = new Set<string>(NFC_CARD_PATTERNS.map((p) => p.key));
 const VALID_MODES = new Set<string>(["BIO_PAGE", "DIRECT_URL", "VCARD"]);
 
 function sanitizeHexColor(value: string | undefined, fallback: string): string {
@@ -76,6 +82,10 @@ async function toNfcCardDto(
       ? row.orientation
       : "horizontal") as NfcCardOrientation,
     accentColor: row.accentColor,
+    customBgColor: row.customBgColor || "#111827",
+    customTextColor: row.customTextColor || "#ffffff",
+    cardShape: (VALID_SHAPES.has(row.cardShape) ? row.cardShape : "rounded") as NfcCardShape,
+    cardPattern: (VALID_PATTERNS.has(row.cardPattern) ? row.cardPattern : "glow") as NfcCardPattern,
     showAvatar: row.showAvatar,
     showNfcIcon: row.showNfcIcon,
     showQrOnBack: row.showQrOnBack,
@@ -157,6 +167,14 @@ export async function updateUserNfcCard(
           ? input.orientation
           : current.orientation,
       accentColor: sanitizeHexColor(input.accentColor, current.accentColor),
+      customBgColor: sanitizeHexColor(input.customBgColor, current.customBgColor),
+      customTextColor: sanitizeHexColor(input.customTextColor, current.customTextColor),
+      cardShape:
+        input.cardShape && VALID_SHAPES.has(input.cardShape) ? input.cardShape : current.cardShape,
+      cardPattern:
+        input.cardPattern && VALID_PATTERNS.has(input.cardPattern)
+          ? input.cardPattern
+          : current.cardPattern,
       showAvatar: input.showAvatar !== undefined ? Boolean(input.showAvatar) : current.showAvatar,
       showNfcIcon:
         input.showNfcIcon !== undefined ? Boolean(input.showNfcIcon) : current.showNfcIcon,

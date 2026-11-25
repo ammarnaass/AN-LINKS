@@ -3,9 +3,12 @@ export type NfcCardMaterial =
   | "brushed_metal"
   | "emerald_glass"
   | "pearl_minimal"
-  | "royal_gold";
+  | "royal_gold"
+  | "custom";
 
 export type NfcCardOrientation = "horizontal" | "vertical";
+export type NfcCardShape = "rounded" | "pill" | "sharp";
+export type NfcCardPattern = "glow" | "chip" | "grid" | "waves" | "none";
 export type NfcTargetMode = "BIO_PAGE" | "DIRECT_URL" | "VCARD";
 
 export interface NfcCardMaterialPreset {
@@ -64,6 +67,29 @@ export const NFC_CARD_MATERIALS: NfcCardMaterialPreset[] = [
     borderClass: "border-amber-400/40",
     previewSwatch: "#78350f",
   },
+  {
+    key: "custom",
+    labelAr: "لون مخصص حر",
+    bgClass: "",
+    textClass: "",
+    mutedClass: "opacity-75",
+    borderClass: "border-white/20",
+    previewSwatch: "linear-gradient(135deg,#0ea5e9,#10b981)",
+  },
+];
+
+export const NFC_CARD_SHAPES: { key: NfcCardShape; labelAr: string; radiusClass: string }[] = [
+  { key: "rounded", labelAr: "زوايا قياسية (CR80)", radiusClass: "rounded-2xl" },
+  { key: "pill", labelAr: "دائرية ناعمة", radiusClass: "rounded-[28px]" },
+  { key: "sharp", labelAr: "حادة هندسية", radiusClass: "rounded-md" },
+];
+
+export const NFC_CARD_PATTERNS: { key: NfcCardPattern; labelAr: string }[] = [
+  { key: "glow", labelAr: "توهج محيطي" },
+  { key: "chip", labelAr: "شريحة ذكية" },
+  { key: "grid", labelAr: "شبكة تقنية" },
+  { key: "waves", labelAr: "موجات" },
+  { key: "none", labelAr: "بسيط سادة" },
 ];
 
 export interface NfcCardConfigDTO {
@@ -79,6 +105,10 @@ export interface NfcCardConfigDTO {
   material: NfcCardMaterial;
   orientation: NfcCardOrientation;
   accentColor: string;
+  customBgColor: string;
+  customTextColor: string;
+  cardShape: NfcCardShape;
+  cardPattern: NfcCardPattern;
   showAvatar: boolean;
   showNfcIcon: boolean;
   showQrOnBack: boolean;
@@ -105,6 +135,10 @@ export interface UpdateNfcCardInput {
   material?: NfcCardMaterial;
   orientation?: NfcCardOrientation;
   accentColor?: string;
+  customBgColor?: string;
+  customTextColor?: string;
+  cardShape?: NfcCardShape;
+  cardPattern?: NfcCardPattern;
   showAvatar?: boolean;
   showNfcIcon?: boolean;
   showQrOnBack?: boolean;

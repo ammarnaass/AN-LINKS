@@ -1,13 +1,16 @@
 "use client";
 
 import React from "react";
-import { Palette, Layout, Sparkles } from "lucide-react";
+import { Palette, Layout, Sparkles, Shapes } from "lucide-react";
 import { AppCard, AppInput } from "@/shared/ui";
 import {
   NFC_CARD_MATERIALS,
+  NFC_CARD_PATTERNS,
+  NFC_CARD_SHAPES,
   NfcCardConfigDTO,
   UpdateNfcCardInput,
 } from "../types/nfc.types";
+import { NfcCustomColorsBox } from "./NfcCustomColorsBox";
 
 const ACCENT_SWATCHES = ["#4edea3", "#38bdf8", "#f59e0b", "#a855f7", "#f43f5e", "#ffffff"];
 
@@ -46,11 +49,11 @@ export function NfcDesignPanel({ card, onPatch }: NfcDesignPanelProps) {
         />
       </div>
 
-      {/* Material Presets */}
-      <div className="space-y-2.5">
+      {/* Material Presets & Free Custom Color */}
+      <div className="space-y-3">
         <label className="text-xs font-bold text-on-surface flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-primary" />
-          <span>خامة ولون البطاقة</span>
+          <span>خامة ولون خلفية البطاقة</span>
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
           {NFC_CARD_MATERIALS.map((mat) => {
@@ -68,17 +71,48 @@ export function NfcDesignPanel({ card, onPatch }: NfcDesignPanelProps) {
               >
                 <span
                   className="w-5 h-5 rounded-full border border-white/20 shrink-0"
-                  style={{ backgroundColor: mat.previewSwatch }}
+                  style={{ background: mat.previewSwatch }}
                 />
                 <span className="text-xs font-semibold truncate">{mat.labelAr}</span>
               </button>
             );
           })}
         </div>
+
+        {card.material === "custom" && (
+          <NfcCustomColorsBox
+            customBgColor={card.customBgColor}
+            customTextColor={card.customTextColor}
+            onPatch={onPatch}
+          />
+        )}
       </div>
 
-      {/* Orientation & Accent Color */}
+      {/* Shape (Corners) & Orientation */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-on-surface flex items-center gap-1.5">
+            <Shapes className="w-3.5 h-3.5 text-primary" />
+            <span>شكل وزوايا البطاقة</span>
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {NFC_CARD_SHAPES.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => onPatch({ cardShape: item.key })}
+                className={`py-2 px-2 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
+                  card.cardShape === item.key
+                    ? "border-primary bg-primary/15 text-primary"
+                    : "border-outline-variant/25 bg-surface-container text-on-surface-variant"
+                }`}
+              >
+                {item.labelAr}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-2">
           <label className="text-xs font-bold text-on-surface flex items-center gap-1.5">
             <Layout className="w-3.5 h-3.5 text-primary" />
@@ -100,6 +134,29 @@ export function NfcDesignPanel({ card, onPatch }: NfcDesignPanelProps) {
                 }`}
               >
                 {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Surface Pattern & Accent Color */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-on-surface">نمط وتفاصيل الوجه</label>
+          <div className="flex flex-wrap gap-1.5">
+            {NFC_CARD_PATTERNS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => onPatch({ cardPattern: p.key })}
+                className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition cursor-pointer ${
+                  card.cardPattern === p.key
+                    ? "border-primary bg-primary/15 text-primary"
+                    : "border-outline-variant/25 bg-surface-container text-on-surface-variant"
+                }`}
+              >
+                {p.labelAr}
               </button>
             ))}
           </div>
@@ -133,7 +190,6 @@ export function NfcDesignPanel({ card, onPatch }: NfcDesignPanelProps) {
         </div>
       </div>
 
-      {/* Element Visibility Switches */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-outline-variant/20">
         {toggles.map((t) => (
           <label

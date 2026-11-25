@@ -2,7 +2,11 @@
 
 import React, { useMemo, useState } from "react";
 import { Wifi, RotateCw, ShieldAlert } from "lucide-react";
-import { NFC_CARD_MATERIALS, NfcCardConfigDTO } from "../types/nfc.types";
+import {
+  NFC_CARD_MATERIALS,
+  NFC_CARD_SHAPES,
+  NfcCardConfigDTO,
+} from "../types/nfc.types";
 import { generateCode128Svg } from "../utils/code128";
 
 interface NfcCardPreviewProps {
@@ -10,11 +14,47 @@ interface NfcCardPreviewProps {
   liveQrSvg?: string;
 }
 
+function CardPatternOverlay({ pattern, accent }: { pattern: string; accent: string }) {
+  if (pattern === "none") return null;
+  if (pattern === "grid") {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0 opacity-15"
+        style={{
+          backgroundImage: `linear-gradient(to right, ${accent}55 1px, transparent 1px), linear-gradient(to bottom, ${accent}55 1px, transparent 1px)`,
+          backgroundSize: "22px 22px",
+        }}
+      />
+    );
+  }
+  if (pattern === "waves") {
+    return (
+      <svg
+        className="pointer-events-none absolute inset-0 w-full h-full opacity-20"
+        viewBox="0 0 400 250"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path d="M0 170 Q110 110 210 165 T400 140 L400 250 L0 250 Z" fill={accent} />
+        <path d="M0 205 Q140 155 260 195 T400 180 L400 250 L0 250 Z" fill={accent} opacity="0.6" />
+      </svg>
+    );
+  }
+  return (
+    <div
+      className="pointer-events-none absolute -top-16 -left-16 w-48 h-48 rounded-full opacity-25 blur-2xl"
+      style={{ backgroundColor: accent }}
+    />
+  );
+}
+
 export function NfcCardPreview({ card, liveQrSvg }: NfcCardPreviewProps) {
   const [face, setFace] = useState<"front" | "back">("front");
   const material =
     NFC_CARD_MATERIALS.find((m) => m.key === card.material) || NFC_CARD_MATERIALS[0];
+  const shape = NFC_CARD_SHAPES.find((s) => s.key === card.cardShape) || NFC_CARD_SHAPES[0];
   const isVertical = card.orientation === "vertical";
+  const isCustom = card.material === "custom";
 
   const barcodeSvg = useMemo(
     () =>
@@ -70,17 +110,18 @@ export function NfcCardPreview({ card, liveQrSvg }: NfcCardPreviewProps) {
       <div className="flex items-center justify-center p-4 sm:p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/20 overflow-hidden print:border-0 print:p-0">
         <div
           id="nfc-printable-card"
-          className={`relative rounded-2xl border shadow-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between p-5 sm:p-6 ${
+          style={
+            isCustom
+              ? { backgroundColor: card.customBgColor, color: card.customTextColor }
+              : undefined
+          }
+          className={`relative ${shape.radiusClass} border shadow-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between p-5 sm:p-6 ${
             material.bgClass
           } ${material.textClass} ${material.borderClass} ${
             isVertical ? "w-[265px] aspect-[1/1.586]" : "w-full max-w-[420px] aspect-[1.586/1]"
           }`}
         >
-          {/* Ambient accent glow */}
-          <div
-            className="pointer-events-none absolute -top-16 -left-16 w-48 h-48 rounded-full opacity-25 blur-2xl"
-            style={{ backgroundColor: card.accentColor }}
-          />
+          <CardPatternOverlay pattern={card.cardPattern} accent={card.accentColor} />
           <div
             className="pointer-events-none absolute bottom-0 inset-x-0 h-1"
             style={{ backgroundColor: card.accentColor }}
@@ -96,11 +137,17 @@ export function NfcCardPreview({ card, liveQrSvg }: NfcCardPreviewProps) {
                   />
                   <span className="text-[11px] font-black tracking-widest uppercase">AN LINKS</span>
                 </div>
-                {card.showNfcIcon && (
-                  <div className="flex items-center gap-1 opacity-85" title="NFC Contactless">
-                    <Wifi className="w-5 h-5 rotate-90" style={{ color: card.accentColor }} />
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  {card.cardPattern === "chip" && (
+                    <div
+                      className="w-8 h-6 rounded-md bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-600 border border-amber-700/40 shadow-inner"
+                      aria-label="Smart Chip"
+                    />
+                  )}
+                  {card.showNfcIcon && (
+                    <Wifi className="w-5 h-5 rotate-90 opacity-85" style={{ color: card.accentColor }} />
+                  )}
+                </div>
               </div>
 
               <div
