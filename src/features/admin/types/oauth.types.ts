@@ -33,3 +33,9 @@ export interface RuntimeOAuthProviderConfig {
   clientSecret: string;
   extraConfig?: OAuthExtraConfig;
 }
+
+export interface PublicOAuthProviderStatus {
+  provider: OAuthProviderKey;
+  label: string;
+  isEnabled: boolean;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { KeyRound, AlertCircle, Lock } from "lucide-react";
+import { KeyRound, AlertCircle, Lock, Eye } from "lucide-react";
 import { AppBadge } from "@/shared/ui";
 import { AdminOAuthProviderDTO, OAuthProviderKey } from "../types/oauth.types";
 import { OAuthProviderCard, ProviderFormState } from "./oauth/OAuthProviderCard";
@@ -13,7 +13,8 @@ export function AdminAuthProvidersTab() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [savedKey, setSavedKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [globalError, setGlobalError] = useState<string | null>(null);
+  const [cardErrors, setCardErrors] = useState<Record<string, string | null>>({});
 
   const hydrateForms = (list: AdminOAuthProviderDTO[]) => {
     const next: Record<string, ProviderFormState> = {};
@@ -38,15 +39,17 @@ export function AdminAuthProvidersTab() {
           hydrateForms(data.providers);
         }
       })
-      .catch(() => setErrorMsg("تعذر تحميل إعدادات مزودي الدخول"))
+      .catch(() => setGlobalError("تعذر تحميل إعدادات مزودي الدخول"))
       .finally(() => setIsLoading(false));
   }, []);
 
-  const handleSaveProvider = async (providerKey: OAuthProviderKey) => {
+  const handleSaveProvider = async (providerKey: OAuthProviderKey, overrideEnabled?: boolean) => {
     const form = forms[providerKey];
     if (!form) return;
 
-    setErrorMsg(null);
+    const targetEnabled = overrideEnabled !== undefined ? overrideEnabled : form.isEnabled;
+    setGlobalError(null);
+    setCardErrors((prev) => ({ ...prev, [providerKey]: null }));
     setSavingKey(providerKey);
 
     try {
@@ -55,7 +58,7 @@ export function AdminAuthProvidersTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: providerKey,
-          isEnabled: form.isEnabled,
+          isEnabled: targetEnabled,
           clientId: form.clientId,
           clientSecret: form.clientSecret || undefined,
           extraConfig:
@@ -66,7 +69,10 @@ export function AdminAuthProvidersTab() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setErrorMsg(data.error || "فشل حفظ بيانات المزود");
+        setCardErrors((prev) => ({
+          ...prev,
+          [providerKey]: data.error || "فشل حفظ بيانات المزود",
+        }));
         return;
       }
       setProviders(data.providers);
@@ -74,7 +80,7 @@ export function AdminAuthProvidersTab() {
       setSavedKey(providerKey);
       setTimeout(() => setSavedKey(null), 2500);
     } catch {
-      setErrorMsg("تعذر الاتصال بالخادم");
+      setCardErrors((prev) => ({ ...prev, [providerKey]: "تعذر الاتصال بالخادم" }));
     } finally {
       setSavingKey(null);
     }
@@ -96,7 +102,7 @@ export function AdminAuthProvidersTab() {
   }
 
   return (
-    <div className="space-y-6 font-cairo" dir="rtl">
+    <div className="space-y-5 font-cairo" dir="rtl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 rounded-2xl bg-surface-container-low border border-outline-variant/30">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
@@ -119,10 +125,34 @@ export function AdminAuthProvidersTab() {
         </AppBadge>
       </div>
 
-      {errorMsg && (
+      {/* Live Preview Strip */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-surface-container border border-outline-variant/25">
+        <div className="flex items-center gap-2 text-xs font-bold text-on-surface">
+          <Eye className="w-4 h-4 text-primary shrink-0" />
+          <span>حالة الظهور في شاشتي الدخول والتسجيل (/login و /register):</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {providers.map((p) => {
+            const isLive = Boolean(p.isEnabled && p.clientId && p.hasSecret);
+            const isPartial = Boolean(p.hasSecret && !p.clientId);
+            return (
+              <AppBadge
+                key={p.provider}
+                variant={isLive ? "success" : isPartial ? "warning" : "neutral"}
+                size="sm"
+              >
+                {p.provider.toUpperCase()}:{" "}
+                {isLive ? "مفعّل وظاهر" : isPartial ? "ينقصه Client ID" : "معطّل"}
+              </AppBadge>
+            );
+          })}
+        </div>
+      </div>
+
+      {globalError && (
         <div className="p-3.5 rounded-2xl bg-error-container/20 border border-error/30 text-error text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{errorMsg}</span>
+          <span>{globalError}</span>
         </div>
       )}
 
@@ -140,9 +170,11 @@ export function AdminAuthProvidersTab() {
               key={item.provider}
               item={item}
               form={form}
-              onChange={(patch) =>
-                setForms((prev) => ({ ...prev, [item.provider]: { ...form, ...patch } }))
-              }
+              cardError={cardErrors[item.provider]}
+              onChange={(patch) => {
+                setCardErrors((prev) => ({ ...prev, [item.provider]: null }));
+                setForms((prev) => ({ ...prev, [item.provider]: { ...form, ...patch } }));
+              }}
               onSave={handleSaveProvider}
               onCopyCallback={handleCopyCallback}
               isSaving={savingKey === item.provider}

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Copy, Check, Save, ShieldCheck } from "lucide-react";
+import { Copy, Check, Save, ShieldCheck, AlertTriangle, AlertCircle } from "lucide-react";
 import { AppCard, AppButton, AppInput, AppBadge } from "@/shared/ui";
 import { AdminOAuthProviderDTO, OAuthProviderKey } from "../../types/oauth.types";
 import { ProviderBrandIcon } from "./ProviderBrandIcon";
@@ -17,8 +17,9 @@ export interface ProviderFormState {
 interface OAuthProviderCardProps {
   item: AdminOAuthProviderDTO;
   form: ProviderFormState;
+  cardError?: string | null;
   onChange: (patch: Partial<ProviderFormState>) => void;
-  onSave: (provider: OAuthProviderKey) => void;
+  onSave: (provider: OAuthProviderKey, overrideEnabled?: boolean) => void;
   onCopyCallback: (provider: OAuthProviderKey, url: string) => void;
   isSaving: boolean;
   isSaved: boolean;
@@ -28,6 +29,7 @@ interface OAuthProviderCardProps {
 export function OAuthProviderCard({
   item,
   form,
+  cardError,
   onChange,
   onSave,
   onCopyCallback,
@@ -35,18 +37,22 @@ export function OAuthProviderCard({
   isSaved,
   isCopied,
 }: OAuthProviderCardProps) {
+  const hasAnySecret = Boolean(form.clientSecret.trim() || item.hasSecret);
+  const isReadyToPublish = Boolean(form.clientId.trim() && hasAnySecret);
+  const missingClientIdWithSecret = Boolean(!form.clientId.trim() && hasAnySecret);
+
   return (
     <AppCard className="p-6 bg-surface-container-low border-outline-variant/30 space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-2xl bg-surface-container-high border border-outline-variant/30 flex items-center justify-center shrink-0">
             <ProviderBrandIcon provider={item.provider} />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h4 className="font-bold text-sm text-on-surface">{item.displayNameAr}</h4>
               <AppBadge variant={form.isEnabled ? "success" : "neutral"} size="sm">
-                {form.isEnabled ? "مفعّل" : "معطّل"}
+                {form.isEnabled ? "مفعّل وظاهر في شاشة الدخول" : "معطّل"}
               </AppBadge>
               {item.hasSecret && (
                 <AppBadge variant="primary" size="sm">
@@ -63,16 +69,32 @@ export function OAuthProviderCard({
 
         <button
           type="button"
+          role="switch"
+          aria-checked={form.isEnabled}
           onClick={() => onChange({ isEnabled: !form.isEnabled })}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+          className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 border ${
             form.isEnabled
-              ? "bg-primary text-on-primary shadow-sm"
-              : "bg-surface-container text-on-surface-variant hover:text-on-surface"
+              ? "bg-primary/15 border-primary/40 text-primary"
+              : "bg-surface-container border-outline-variant/30 text-on-surface-variant hover:text-on-surface"
           }`}
         >
-          {form.isEnabled ? "تعطيل المزود" : "تفعيل المزود"}
+          <span
+            className={`w-8 h-4.5 rounded-full p-0.5 transition-colors flex items-center ${
+              form.isEnabled ? "bg-primary justify-end" : "bg-outline-variant/40 justify-start"
+            }`}
+          >
+            <span className="w-3.5 h-3.5 rounded-full bg-white shadow-sm" />
+          </span>
+          <span>{form.isEnabled ? "مفعّل" : "تفعيل المزود"}</span>
         </button>
       </div>
+
+      {missingClientIdWithSecret && (
+        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>يوجد مفتاح سري محفوظ، ولكن ينقص إدخال Client ID وتفعيل المزود ليظهر في شاشتي الدخول والتسجيل.</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <AppInput
@@ -121,6 +143,13 @@ export function OAuthProviderCard({
         </div>
       )}
 
+      {cardError && (
+        <div className="p-3 rounded-xl bg-error-container/20 border border-error/30 text-error text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{cardError}</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-outline-variant/20">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-[11px] font-bold text-on-surface-variant shrink-0">Callback URL:</span>
@@ -137,16 +166,30 @@ export function OAuthProviderCard({
           </button>
         </div>
 
-        <AppButton
-          type="button"
-          variant="primary"
-          size="sm"
-          isLoading={isSaving}
-          onClick={() => onSave(item.provider)}
-          leftIcon={isSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-        >
-          {isSaved ? "تم الحفظ!" : "حفظ إعدادات المزود"}
-        </AppButton>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {!form.isEnabled && isReadyToPublish && (
+            <AppButton
+              type="button"
+              variant="primary"
+              size="sm"
+              isLoading={isSaving}
+              onClick={() => onSave(item.provider, true)}
+              leftIcon={<Save className="w-4 h-4" />}
+            >
+              حفظ وتفعيل المزود
+            </AppButton>
+          )}
+          <AppButton
+            type="button"
+            variant={!form.isEnabled && isReadyToPublish ? "outline" : "primary"}
+            size="sm"
+            isLoading={isSaving}
+            onClick={() => onSave(item.provider)}
+            leftIcon={isSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+          >
+            {isSaved ? "تم الحفظ!" : "حفظ إعدادات المزود"}
+          </AppButton>
+        </div>
       </div>
     </AppCard>
   );

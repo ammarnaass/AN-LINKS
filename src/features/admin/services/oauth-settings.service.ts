@@ -6,6 +6,7 @@ import {
   AdminOAuthProviderDTO,
   UpdateOAuthProviderInput,
   RuntimeOAuthProviderConfig,
+  PublicOAuthProviderStatus,
 } from "../types/oauth.types";
 
 const PROVIDER_META: Record<
@@ -230,4 +231,18 @@ export async function getActiveRuntimeOAuthConfigs(): Promise<RuntimeOAuthProvid
       return envCreds ? [{ provider, ...envCreds }] : [];
     });
   }
+}
+
+/**
+ * Returns public-safe activation flags for Google, Facebook, and Apple
+ * without exposing any credentials or secrets.
+ */
+export async function getPublicOAuthStatuses(): Promise<PublicOAuthProviderStatus[]> {
+  const active = await getActiveRuntimeOAuthConfigs();
+  const activeSet = new Set(active.map((a) => a.provider));
+  return SUPPORTED_PROVIDERS.map((provider) => ({
+    provider,
+    label: provider === "google" ? "Google" : provider === "facebook" ? "Facebook" : "Apple",
+    isEnabled: activeSet.has(provider),
+  }));
 }

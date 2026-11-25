@@ -10,6 +10,8 @@ import {
 } from "@/features/admin/services/oauth-settings.service";
 import { buildDynamicAuthOptions } from "@/features/auth/server/auth.options";
 import { GET as adminOAuthGet, PUT as adminOAuthPut } from "@/app/api/admin/auth-providers/route";
+import { GET as publicOAuthStatusGet } from "@/app/api/auth/oauth-status/route";
+import { SocialOAuthButtons } from "@/features/auth/components/GoogleAuthButton";
 import { AdminSidebarNavList } from "@/features/admin/components/sidebar/AdminSidebarNavList";
 import { AdminAuthProvidersTab } from "@/features/admin/components/AdminAuthProvidersTab";
 import { prisma } from "@/shared/db";
@@ -149,5 +151,28 @@ describe("Admin OAuth Providers (Google, Facebook, Apple) Suite", () => {
 
     const tabHtml = renderToStaticMarkup(<AdminAuthProvidersTab />);
     expect(tabHtml).toContain("animate-pulse");
+  });
+
+  it("exposes safe public oauth-status and always renders Google, Facebook, and Apple in auth UI", async () => {
+    const res = await publicOAuthStatusGet();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.providers.map((p: { provider: string }) => p.provider)).toEqual([
+      "google",
+      "facebook",
+      "apple",
+    ]);
+
+    const loginButtonsHtml = renderToStaticMarkup(<SocialOAuthButtons mode="login" />);
+    expect(loginButtonsHtml).toContain("Google");
+    expect(loginButtonsHtml).toContain("Facebook");
+    expect(loginButtonsHtml).toContain("Apple");
+    expect(loginButtonsHtml).toContain("بانتظار التفعيل");
+
+    const registerButtonsHtml = renderToStaticMarkup(<SocialOAuthButtons mode="register" />);
+    expect(registerButtonsHtml).toContain("التسجيل عبر Google");
+    expect(registerButtonsHtml).toContain("التسجيل عبر Facebook");
+    expect(registerButtonsHtml).toContain("التسجيل عبر Apple");
   });
 });
