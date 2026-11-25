@@ -1,85 +1,28 @@
 import { prisma } from "@/shared/db";
 import { encryptSecret, decryptSecret } from "@/shared/lib/crypto";
 import {
-  OAuthProviderKey,
-  OAuthExtraConfig,
   AdminOAuthProviderDTO,
   UpdateOAuthProviderInput,
   RuntimeOAuthProviderConfig,
   PublicOAuthProviderStatus,
 } from "../types/oauth.types";
+import {
+  PROVIDER_META,
+  SUPPORTED_PROVIDERS,
+  isValidOAuthProvider,
+  maskSecret,
+  getCallbackUrl,
+  getEnvCredentials,
+  parseExtraConfig,
+} from "./oauth-provider-meta";
 
-const PROVIDER_META: Record<
-  OAuthProviderKey,
-  {
-    displayNameAr: string;
-    descriptionAr: string;
-    envIdKey: string;
-    envSecretKey: string;
-  }
-> = {
-  google: {
-    displayNameAr: "تسجيل الدخول عبر جوجل (Google)",
-    descriptionAr: "ربط حسابات Google Cloud OAuth 2.0 لتسجيل الدخول بنقرة واحدة",
-    envIdKey: "GOOGLE_CLIENT_ID",
-    envSecretKey: "GOOGLE_CLIENT_SECRET",
-  },
-  facebook: {
-    displayNameAr: "تسجيل الدخول عبر فيسبوك (Facebook)",
-    descriptionAr: "ربط تطبيق Meta for Developers (Facebook Login) للمصادقة السريعة",
-    envIdKey: "FACEBOOK_CLIENT_ID",
-    envSecretKey: "FACEBOOK_CLIENT_SECRET",
-  },
-  apple: {
-    displayNameAr: "تسجيل الدخول عبر أبل (Sign in with Apple)",
-    descriptionAr: "ربط Apple Developer Services ID ومفاتيح التوقيع الخاصة لأجهزة iOS والويب",
-    envIdKey: "APPLE_ID",
-    envSecretKey: "APPLE_SECRET",
-  },
-};
+export { isValidOAuthProvider };
 
-const SUPPORTED_PROVIDERS: OAuthProviderKey[] = ["google", "facebook", "apple"];
 const RUNTIME_CACHE_TTL_MS = 30_000;
-
 let runtimeCache: { data: RuntimeOAuthProviderConfig[]; expiresAt: number } | null = null;
 
 export function invalidateOAuthProviderCache() {
   runtimeCache = null;
-}
-
-export function isValidOAuthProvider(value: string): value is OAuthProviderKey {
-  return SUPPORTED_PROVIDERS.includes(value as OAuthProviderKey);
-}
-
-function maskSecret(plainSecret: string): string {
-  const trimmed = plainSecret.trim();
-  if (!trimmed) return "";
-  if (trimmed.length <= 4) return "••••••••";
-  return `••••••••••••${trimmed.slice(-4)}`;
-}
-
-function getCallbackUrl(provider: OAuthProviderKey): string {
-  const baseUrl = (process.env.NEXTAUTH_URL || "https://anlinks.dev").replace(/\/$/, "");
-  return `${baseUrl}/api/auth/callback/${provider}`;
-}
-
-function getEnvCredentials(provider: OAuthProviderKey): { clientId: string; clientSecret: string } | null {
-  const meta = PROVIDER_META[provider];
-  const clientId = process.env[meta.envIdKey]?.trim();
-  const clientSecret = process.env[meta.envSecretKey]?.trim();
-  if (clientId && clientSecret) {
-    return { clientId, clientSecret };
-  }
-  return null;
-}
-
-function parseExtraConfig(raw: unknown): OAuthExtraConfig {
-  if (!raw || typeof raw !== "object") return {};
-  const obj = raw as Record<string, unknown>;
-  return {
-    teamId: typeof obj.teamId === "string" ? obj.teamId : "",
-    keyId: typeof obj.keyId === "string" ? obj.keyId : "",
-  };
 }
 
 /**
@@ -94,6 +37,7 @@ export async function getAdminOAuthProviders(): Promise<AdminOAuthProviderDTO[]>
     const meta = PROVIDER_META[provider];
     const row = rowMap.get(provider);
     const envCreds = getEnvCredentials(provider);
+    const extraConfig = parseExtraConfig(row?.extraConfig);
 
     let secretPreview = "";
     if (row?.clientSecretEncrypted) {
@@ -110,19 +54,20 @@ export async function getAdminOAuthProviders(): Promise<AdminOAuthProviderDTO[]>
       displayNameAr: row?.displayNameAr || meta.displayNameAr,
       descriptionAr: meta.descriptionAr,
       isEnabled: row ? row.isEnabled : Boolean(envCreds),
+      showWhenDisabled: extraConfig.showWhenDisabled !== false,
       clientId: row?.clientId || envCreds?.clientId || "",
       hasSecret: hasDbSecret || Boolean(envCreds),
       secretPreview: hasDbSecret ? secretPreview : envCreds ? maskSecret(envCreds.clientSecret) : "",
       callbackUrl: getCallbackUrl(provider),
       configuredViaEnv: !row && Boolean(envCreds),
-      extraConfig: parseExtraConfig(row?.extraConfig),
+      extraConfig,
       updatedAt: row?.updatedAt?.toISOString(),
     };
   });
 }
 
 /**
- * Validates and persists OAuth provider credentials with AES-256-GCM encryption at rest.
+ * Validates and persists OAuth provider credentials & auth screen visibility.
  */
 export async function updateOAuthProviderConfig(
   input: UpdateOAuthProviderInput
@@ -152,12 +97,19 @@ export async function updateOAuthProviderConfig(
     nextEncryptedSecret = encryptSecret(envCreds.clientSecret);
   }
 
-  const extraPayload = input.extraConfig
-    ? {
-        teamId: input.extraConfig.teamId?.trim() || "",
-        keyId: input.extraConfig.keyId?.trim() || "",
-      }
-    : undefined;
+  const prevExtra = parseExtraConfig(existing?.extraConfig);
+  const nextShowWhenDisabled =
+    typeof input.showWhenDisabled === "boolean"
+      ? input.showWhenDisabled
+      : typeof input.extraConfig?.showWhenDisabled === "boolean"
+        ? input.extraConfig.showWhenDisabled
+        : prevExtra.showWhenDisabled !== false;
+
+  const extraPayload = {
+    teamId: input.extraConfig?.teamId !== undefined ? input.extraConfig.teamId.trim() : prevExtra.teamId || "",
+    keyId: input.extraConfig?.keyId !== undefined ? input.extraConfig.keyId.trim() : prevExtra.keyId || "",
+    showWhenDisabled: nextShowWhenDisabled,
+  };
 
   await prisma.oAuthProviderConfig.upsert({
     where: { provider: input.provider },
@@ -173,7 +125,7 @@ export async function updateOAuthProviderConfig(
       isEnabled: Boolean(input.isEnabled),
       clientId: nextClientId || null,
       clientSecretEncrypted: nextEncryptedSecret,
-      ...(extraPayload ? { extraConfig: extraPayload } : {}),
+      extraConfig: extraPayload,
     },
   });
 
@@ -183,7 +135,6 @@ export async function updateOAuthProviderConfig(
 
 /**
  * Resolves active decrypted OAuth provider credentials for NextAuth runtime.
- * Combines DB-configured providers with optional .env fallbacks.
  */
 export async function getActiveRuntimeOAuthConfigs(): Promise<RuntimeOAuthProviderConfig[]> {
   const now = Date.now();
@@ -225,7 +176,6 @@ export async function getActiveRuntimeOAuthConfigs(): Promise<RuntimeOAuthProvid
     runtimeCache = { data: active, expiresAt: now + RUNTIME_CACHE_TTL_MS };
     return active;
   } catch {
-    // Fallback strictly to environment variables if DB is temporarily unreachable
     return SUPPORTED_PROVIDERS.flatMap((provider) => {
       const envCreds = getEnvCredentials(provider);
       return envCreds ? [{ provider, ...envCreds }] : [];
@@ -234,15 +184,29 @@ export async function getActiveRuntimeOAuthConfigs(): Promise<RuntimeOAuthProvid
 }
 
 /**
- * Returns public-safe activation flags for Google, Facebook, and Apple
+ * Returns public-safe activation & visibility flags for Google, Facebook, and Apple
  * without exposing any credentials or secrets.
  */
 export async function getPublicOAuthStatuses(): Promise<PublicOAuthProviderStatus[]> {
   const active = await getActiveRuntimeOAuthConfigs();
   const activeSet = new Set(active.map((a) => a.provider));
+
+  let visibilityMap = new Map<string, boolean>();
+  try {
+    const rows = await prisma.oAuthProviderConfig.findMany({
+      select: { provider: true, extraConfig: true },
+    });
+    visibilityMap = new Map(
+      rows.map((r) => [r.provider, parseExtraConfig(r.extraConfig).showWhenDisabled !== false])
+    );
+  } catch {
+    // Keep default visibility true if DB query fails temporarily
+  }
+
   return SUPPORTED_PROVIDERS.map((provider) => ({
     provider,
-    label: provider === "google" ? "Google" : provider === "facebook" ? "Facebook" : "Apple",
+    label: PROVIDER_META[provider].label,
     isEnabled: activeSet.has(provider),
+    showWhenDisabled: visibilityMap.get(provider) ?? true,
   }));
 }

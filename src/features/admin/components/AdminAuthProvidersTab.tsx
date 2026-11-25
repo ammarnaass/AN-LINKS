@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { KeyRound, AlertCircle, Lock, Eye } from "lucide-react";
+import { KeyRound, AlertCircle, Lock } from "lucide-react";
 import { AppBadge } from "@/shared/ui";
 import { AdminOAuthProviderDTO, OAuthProviderKey } from "../types/oauth.types";
 import { OAuthProviderCard, ProviderFormState } from "./oauth/OAuthProviderCard";
+import { OAuthVisibilityBar } from "./oauth/OAuthVisibilityBar";
 
 export function AdminAuthProvidersTab() {
   const [providers, setProviders] = useState<AdminOAuthProviderDTO[]>([]);
@@ -21,6 +22,7 @@ export function AdminAuthProvidersTab() {
     for (const p of list) {
       next[p.provider] = {
         isEnabled: p.isEnabled,
+        showWhenDisabled: p.showWhenDisabled !== false,
         clientId: p.clientId || "",
         clientSecret: "",
         teamId: p.extraConfig?.teamId || "",
@@ -43,11 +45,10 @@ export function AdminAuthProvidersTab() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const handleSaveProvider = async (providerKey: OAuthProviderKey, overrideEnabled?: boolean) => {
-    const form = forms[providerKey];
-    if (!form) return;
-
-    const targetEnabled = overrideEnabled !== undefined ? overrideEnabled : form.isEnabled;
+  const persistProvider = async (
+    providerKey: OAuthProviderKey,
+    payload: { isEnabled: boolean; showWhenDisabled: boolean; form?: ProviderFormState }
+  ) => {
     setGlobalError(null);
     setCardErrors((prev) => ({ ...prev, [providerKey]: null }));
     setSavingKey(providerKey);
@@ -58,12 +59,13 @@ export function AdminAuthProvidersTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: providerKey,
-          isEnabled: targetEnabled,
-          clientId: form.clientId,
-          clientSecret: form.clientSecret || undefined,
+          isEnabled: payload.isEnabled,
+          showWhenDisabled: payload.showWhenDisabled,
+          clientId: payload.form?.clientId,
+          clientSecret: payload.form?.clientSecret || undefined,
           extraConfig:
-            providerKey === "apple"
-              ? { teamId: form.teamId, keyId: form.keyId }
+            providerKey === "apple" && payload.form
+              ? { teamId: payload.form.teamId, keyId: payload.form.keyId }
               : undefined,
         }),
       });
@@ -81,6 +83,43 @@ export function AdminAuthProvidersTab() {
       setTimeout(() => setSavedKey(null), 2500);
     } catch {
       setCardErrors((prev) => ({ ...prev, [providerKey]: "تعذر الاتصال بالخادم" }));
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  const handleSaveProvider = (providerKey: OAuthProviderKey, overrideEnabled?: boolean) => {
+    const form = forms[providerKey];
+    if (!form) return;
+    const isEnabled = overrideEnabled !== undefined ? overrideEnabled : form.isEnabled;
+    void persistProvider(providerKey, { isEnabled, showWhenDisabled: form.showWhenDisabled, form });
+  };
+
+  const handleToggleVisibility = (providerKey: OAuthProviderKey, showWhenDisabled: boolean) => {
+    const form = forms[providerKey];
+    if (!form) return;
+    void persistProvider(providerKey, { isEnabled: form.isEnabled, showWhenDisabled, form });
+  };
+
+  const handleBulkVisibility = async (showWhenDisabled: boolean) => {
+    const disabledList = providers.filter((p) => !p.isEnabled);
+    if (disabledList.length === 0) return;
+    setSavingKey("bulk");
+    try {
+      let latest: AdminOAuthProviderDTO[] | null = null;
+      for (const p of disabledList) {
+        const res = await fetch("/api/admin/auth-providers", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider: p.provider, isEnabled: false, showWhenDisabled }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) latest = data.providers;
+      }
+      if (latest) {
+        setProviders(latest);
+        hydrateForms(latest);
+      }
     } finally {
       setSavingKey(null);
     }
@@ -125,29 +164,11 @@ export function AdminAuthProvidersTab() {
         </AppBadge>
       </div>
 
-      {/* Live Preview Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-surface-container border border-outline-variant/25">
-        <div className="flex items-center gap-2 text-xs font-bold text-on-surface">
-          <Eye className="w-4 h-4 text-primary shrink-0" />
-          <span>حالة الظهور في شاشتي الدخول والتسجيل (/login و /register):</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {providers.map((p) => {
-            const isLive = Boolean(p.isEnabled && p.clientId && p.hasSecret);
-            const isPartial = Boolean(p.hasSecret && !p.clientId);
-            return (
-              <AppBadge
-                key={p.provider}
-                variant={isLive ? "success" : isPartial ? "warning" : "neutral"}
-                size="sm"
-              >
-                {p.provider.toUpperCase()}:{" "}
-                {isLive ? "مفعّل وظاهر" : isPartial ? "ينقصه Client ID" : "معطّل"}
-              </AppBadge>
-            );
-          })}
-        </div>
-      </div>
+      <OAuthVisibilityBar
+        providers={providers}
+        isBusy={savingKey !== null}
+        onToggleBulk={(nextShow) => void handleBulkVisibility(nextShow)}
+      />
 
       {globalError && (
         <div className="p-3.5 rounded-2xl bg-error-container/20 border border-error/30 text-error text-xs flex items-center gap-2">
@@ -160,6 +181,7 @@ export function AdminAuthProvidersTab() {
         {providers.map((item) => {
           const form = forms[item.provider] || {
             isEnabled: item.isEnabled,
+            showWhenDisabled: item.showWhenDisabled !== false,
             clientId: item.clientId,
             clientSecret: "",
             teamId: "",
@@ -176,8 +198,9 @@ export function AdminAuthProvidersTab() {
                 setForms((prev) => ({ ...prev, [item.provider]: { ...form, ...patch } }));
               }}
               onSave={handleSaveProvider}
+              onToggleVisibility={handleToggleVisibility}
               onCopyCallback={handleCopyCallback}
-              isSaving={savingKey === item.provider}
+              isSaving={savingKey === item.provider || savingKey === "bulk"}
               isSaved={savedKey === item.provider}
               isCopied={copiedKey === item.provider}
             />

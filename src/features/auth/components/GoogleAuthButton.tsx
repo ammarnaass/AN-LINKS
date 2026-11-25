@@ -9,12 +9,13 @@ interface OAuthStatusItem {
   provider: SupportedOAuthId;
   label: string;
   isEnabled: boolean;
+  showWhenDisabled: boolean;
 }
 
 const DEFAULT_STATUSES: OAuthStatusItem[] = [
-  { provider: "google", label: "Google", isEnabled: false },
-  { provider: "facebook", label: "Facebook", isEnabled: false },
-  { provider: "apple", label: "Apple", isEnabled: false },
+  { provider: "google", label: "Google", isEnabled: false, showWhenDisabled: true },
+  { provider: "facebook", label: "Facebook", isEnabled: false, showWhenDisabled: true },
+  { provider: "apple", label: "Apple", isEnabled: false, showWhenDisabled: true },
 ];
 
 const PROVIDER_CLASSES: Record<SupportedOAuthId, string> = {
@@ -78,16 +79,21 @@ export function GoogleAuthButton({ mode = "login" }: { label?: string; mode?: "l
         const merged = DEFAULT_STATUSES.map((base) => {
           const fromApi = apiList.find((x) => x.provider === base.provider);
           const isEnabled = Boolean(providerMap[base.provider] || fromApi?.isEnabled);
-          return { ...base, isEnabled };
+          const showWhenDisabled =
+            fromApi && typeof fromApi.showWhenDisabled === "boolean"
+              ? fromApi.showWhenDisabled
+              : true;
+          return { ...base, isEnabled, showWhenDisabled };
         });
         setStatuses(merged);
       })
       .finally(() => setLoaded(true));
   }, []);
 
-  const enabledItems = statuses.filter((s) => s.isEnabled);
-  const itemsToRender = enabledItems.length > 0 ? enabledItems : statuses;
-  const isSetupPending = loaded && enabledItems.length === 0;
+  const itemsToRender = statuses.filter((s) => s.isEnabled || s.showWhenDisabled);
+  if (itemsToRender.length === 0) return null;
+
+  const isSetupPending = loaded && itemsToRender.every((s) => !s.isEnabled);
   const prefix = mode === "register" ? "التسجيل عبر" : "المتابعة عبر";
 
   const handleClick = async (item: OAuthStatusItem) => {

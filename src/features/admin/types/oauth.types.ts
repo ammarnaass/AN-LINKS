@@ -3,6 +3,7 @@ export type OAuthProviderKey = "google" | "facebook" | "apple";
 export interface OAuthExtraConfig {
   teamId?: string;
   keyId?: string;
+  showWhenDisabled?: boolean;
 }
 
 export interface AdminOAuthProviderDTO {
@@ -10,6 +11,7 @@ export interface AdminOAuthProviderDTO {
   displayNameAr: string;
   descriptionAr: string;
   isEnabled: boolean;
+  showWhenDisabled: boolean;
   clientId: string;
   hasSecret: boolean;
   secretPreview: string;
@@ -22,6 +24,7 @@ export interface AdminOAuthProviderDTO {
 export interface UpdateOAuthProviderInput {
   provider: OAuthProviderKey;
   isEnabled: boolean;
+  showWhenDisabled?: boolean;
   clientId?: string;
   clientSecret?: string;
   extraConfig?: OAuthExtraConfig;
@@ -38,4 +41,5 @@ export interface PublicOAuthProviderStatus {
   provider: OAuthProviderKey;
   label: string;
   isEnabled: boolean;
+  showWhenDisabled: boolean;
 }

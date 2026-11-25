@@ -1,13 +1,23 @@
 "use client";
 
 import React from "react";
-import { Copy, Check, Save, ShieldCheck, AlertTriangle, AlertCircle } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Save,
+  ShieldCheck,
+  AlertTriangle,
+  AlertCircle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { AppCard, AppButton, AppInput, AppBadge } from "@/shared/ui";
 import { AdminOAuthProviderDTO, OAuthProviderKey } from "../../types/oauth.types";
 import { ProviderBrandIcon } from "./ProviderBrandIcon";
 
 export interface ProviderFormState {
   isEnabled: boolean;
+  showWhenDisabled: boolean;
   clientId: string;
   clientSecret: string;
   teamId: string;
@@ -20,6 +30,7 @@ interface OAuthProviderCardProps {
   cardError?: string | null;
   onChange: (patch: Partial<ProviderFormState>) => void;
   onSave: (provider: OAuthProviderKey, overrideEnabled?: boolean) => void;
+  onToggleVisibility: (provider: OAuthProviderKey, showWhenDisabled: boolean) => void;
   onCopyCallback: (provider: OAuthProviderKey, url: string) => void;
   isSaving: boolean;
   isSaved: boolean;
@@ -32,6 +43,7 @@ export function OAuthProviderCard({
   cardError,
   onChange,
   onSave,
+  onToggleVisibility,
   onCopyCallback,
   isSaving,
   isSaved,
@@ -54,6 +66,11 @@ export function OAuthProviderCard({
               <AppBadge variant={form.isEnabled ? "success" : "neutral"} size="sm">
                 {form.isEnabled ? "مفعّل وظاهر في شاشة الدخول" : "معطّل"}
               </AppBadge>
+              {!form.isEnabled && (
+                <AppBadge variant={form.showWhenDisabled ? "warning" : "neutral"} size="sm">
+                  {form.showWhenDisabled ? "ظاهر كـ «بانتظار التفعيل»" : "مخفي عن شاشة الدخول"}
+                </AppBadge>
+              )}
               {item.hasSecret && (
                 <AppBadge variant="primary" size="sm">
                   <span className="flex items-center gap-1">
@@ -67,26 +84,54 @@ export function OAuthProviderCard({
           </div>
         </div>
 
-        <button
-          type="button"
-          role="switch"
-          aria-checked={form.isEnabled}
-          onClick={() => onChange({ isEnabled: !form.isEnabled })}
-          className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 border ${
-            form.isEnabled
-              ? "bg-primary/15 border-primary/40 text-primary"
-              : "bg-surface-container border-outline-variant/30 text-on-surface-variant hover:text-on-surface"
-          }`}
-        >
-          <span
-            className={`w-8 h-4.5 rounded-full p-0.5 transition-colors flex items-center ${
-              form.isEnabled ? "bg-primary justify-end" : "bg-outline-variant/40 justify-start"
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {!form.isEnabled && (
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={() => onToggleVisibility(item.provider, !form.showWhenDisabled)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border disabled:opacity-60 ${
+                form.showWhenDisabled
+                  ? "bg-surface-container border-outline-variant/30 text-on-surface hover:border-primary/40"
+                  : "bg-error-container/15 border-error/30 text-error hover:bg-error-container/25"
+              }`}
+              title="التحكم في إظهار أو إخفاء الزر في شاشات الدخول والتسجيل أثناء التعطيل"
+            >
+              {form.showWhenDisabled ? (
+                <>
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span>إخفاء من شاشة الدخول</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>إظهار في شاشة الدخول</span>
+                </>
+              )}
+            </button>
+          )}
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.isEnabled}
+            onClick={() => onChange({ isEnabled: !form.isEnabled })}
+            className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 border ${
+              form.isEnabled
+                ? "bg-primary/15 border-primary/40 text-primary"
+                : "bg-surface-container border-outline-variant/30 text-on-surface-variant hover:text-on-surface"
             }`}
           >
-            <span className="w-3.5 h-3.5 rounded-full bg-white shadow-sm" />
-          </span>
-          <span>{form.isEnabled ? "مفعّل" : "تفعيل المزود"}</span>
-        </button>
+            <span
+              className={`w-8 h-5 rounded-full p-0.5 transition-colors flex items-center ${
+                form.isEnabled ? "bg-primary justify-end" : "bg-outline-variant/40 justify-start"
+              }`}
+            >
+              <span className="w-3.5 h-3.5 rounded-full bg-white shadow-sm" />
+            </span>
+            <span>{form.isEnabled ? "مفعّل" : "تفعيل المزود"}</span>
+          </button>
+        </div>
       </div>
 
       {missingClientIdWithSecret && (

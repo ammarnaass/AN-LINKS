@@ -175,4 +175,21 @@ describe("Admin OAuth Providers (Google, Facebook, Apple) Suite", () => {
     expect(registerButtonsHtml).toContain("التسجيل عبر Facebook");
     expect(registerButtonsHtml).toContain("التسجيل عبر Apple");
   });
+
+  it("allows admin to hide or show disabled OAuth providers on auth screens without requiring keys", async () => {
+    await updateOAuthProviderConfig({
+      provider: "apple",
+      isEnabled: false,
+      showWhenDisabled: false,
+    });
+
+    const res = await publicOAuthStatusGet();
+    const body = await res.json();
+    const apple = body.providers.find((p: { provider: string }) => p.provider === "apple");
+    const google = body.providers.find((p: { provider: string }) => p.provider === "google");
+
+    expect(apple.isEnabled).toBe(false);
+    expect(apple.showWhenDisabled).toBe(false);
+    expect(google.showWhenDisabled).toBe(true);
+  });
 });

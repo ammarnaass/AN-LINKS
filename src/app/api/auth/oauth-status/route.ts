@@ -13,9 +13,9 @@ export async function GET() {
       {
         success: true,
         providers: [
-          { provider: "google", label: "Google", isEnabled: false },
-          { provider: "facebook", label: "Facebook", isEnabled: false },
-          { provider: "apple", label: "Apple", isEnabled: false },
+          { provider: "google", label: "Google", isEnabled: false, showWhenDisabled: true },
+          { provider: "facebook", label: "Facebook", isEnabled: false, showWhenDisabled: true },
+          { provider: "apple", label: "Apple", isEnabled: false, showWhenDisabled: true },
         ],
       },
       { headers: { "Cache-Control": "no-store" } }

@@ -39,6 +39,8 @@ export async function PUT(request: NextRequest) {
     const providers = await updateOAuthProviderConfig({
       provider,
       isEnabled: Boolean(body.isEnabled),
+      showWhenDisabled:
+        typeof body.showWhenDisabled === "boolean" ? body.showWhenDisabled : undefined,
       clientId: typeof body.clientId === "string" ? body.clientId : undefined,
       clientSecret: typeof body.clientSecret === "string" ? body.clientSecret : undefined,
       extraConfig:
