@@ -5,7 +5,7 @@ import {
   processPaymentSuccess,
   processPaymentFailure,
   processSubscriptionCancellation,
-} from "@/features/subscriptions/services/webhook-lifecycle.service";
+} from "@/features/subscriptions";
 
 vi.mock("@/shared/db", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

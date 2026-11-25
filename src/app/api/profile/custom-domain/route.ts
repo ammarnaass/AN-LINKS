@@ -6,7 +6,7 @@ import {
   setCustomDomain,
   verifyCustomDomain,
   removeCustomDomain,
-} from "@/features/domains/services/dns-verification.service";
+} from "@/features/domains";
 
 export async function GET() {
   try {

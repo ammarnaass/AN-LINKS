@@ -5,7 +5,7 @@ import {
   processPaymentSuccess,
   processPaymentFailure,
   processSubscriptionCancellation,
-} from "@/features/subscriptions/services/webhook-lifecycle.service";
+} from "@/features/subscriptions";
 
 interface RouteParams {
   params: Promise<{ gateway: string }>;

@@ -9,7 +9,7 @@ import {
   verifyCustomDomain,
   getUserCustomDomain,
   removeCustomDomain,
-} from "@/features/domains/services/dns-verification.service";
+} from "@/features/domains";
 import { getPublicProfileByDomain } from "@/features/bio/services/profile.service";
 import { GET, POST, PUT, DELETE } from "@/app/api/profile/custom-domain/route";
 
