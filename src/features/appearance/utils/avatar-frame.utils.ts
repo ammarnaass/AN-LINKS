@@ -93,43 +93,28 @@ export function getBadgeStyles(
   };
 }
 
-export function renderBadgeIconComponent(iconName: string = "CheckCircle2", iconPx: number = 14) {
-  const props = {
+const ICON_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
+  BadgeCheck,
+  ShieldCheck,
+  Crown,
+  Award,
+  Trophy,
+  Star,
+  Sparkles,
+  Flame,
+  Zap,
+  Rocket,
+  Diamond,
+  Heart,
+  Gem,
+  Check,
+  CheckCircle2,
+};
+
+export function renderBadgeIconComponent(iconName: string = "CheckCircle2", iconPx: number = 14): React.ReactElement {
+  const IconComp = ICON_COMPONENT_MAP[iconName] || CheckCircle2;
+  return React.createElement(IconComp, {
     style: { width: `${iconPx}px`, height: `${iconPx}px` },
     className: "text-white fill-white/20 shrink-0",
-  };
-
-  switch (iconName) {
-    case "BadgeCheck":
-      return <BadgeCheck {...props} />;
-    case "ShieldCheck":
-      return <ShieldCheck {...props} />;
-    case "Crown":
-      return <Crown {...props} />;
-    case "Award":
-      return <Award {...props} />;
-    case "Trophy":
-      return <Trophy {...props} />;
-    case "Star":
-      return <Star {...props} />;
-    case "Sparkles":
-      return <Sparkles {...props} />;
-    case "Flame":
-      return <Flame {...props} />;
-    case "Zap":
-      return <Zap {...props} />;
-    case "Rocket":
-      return <Rocket {...props} />;
-    case "Diamond":
-      return <Diamond {...props} />;
-    case "Heart":
-      return <Heart {...props} />;
-    case "Gem":
-      return <Gem {...props} />;
-    case "Check":
-      return <Check {...props} />;
-    case "CheckCircle2":
-    default:
-      return <CheckCircle2 {...props} />;
-  }
+  });
 }
