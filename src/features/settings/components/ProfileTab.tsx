@@ -6,6 +6,7 @@ import { AvatarUploadCard } from "./profile/AvatarUploadCard";
 import { ProfileFieldsForm } from "./profile/ProfileFieldsForm";
 import { MarketingPixelsCard } from "./profile/MarketingPixelsCard";
 import { CustomDomainCard } from "./profile/CustomDomainCard";
+import { SubscribersListCard } from "./profile/SubscribersListCard";
 
 export interface ProfileTabProps {
   displayName?: string;
@@ -95,6 +96,8 @@ export function ProfileTab(props?: ProfileTabProps) {
       />
 
       <CustomDomainCard />
+
+      <SubscribersListCard />
     </section>
   );
 }

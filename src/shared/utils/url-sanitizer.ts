@@ -89,3 +89,38 @@ export function sanitizeUrl(rawUrl: string): SanitizeUrlResult {
   }
 }
 
+const ALLOWED_PASSTHROUGH_PARAMS = new Set([
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "ref",
+  "fbclid",
+  "gclid",
+  "ttclid",
+]);
+
+/**
+ * Forwards safe marketing attribution & UTM query parameters onto the destination link URL
+ * without overwriting query parameters already present on the creator's target URL.
+ */
+export function appendTrackingParams(
+  targetUrl: string,
+  incomingParams: URLSearchParams
+): URL {
+  const destination = new URL(targetUrl);
+  incomingParams.forEach((value, key) => {
+    const cleanKey = key.toLowerCase().trim();
+    if (
+      (ALLOWED_PASSTHROUGH_PARAMS.has(cleanKey) || cleanKey.startsWith("utm_")) &&
+      !destination.searchParams.has(key) &&
+      value.trim().length > 0
+    ) {
+      destination.searchParams.set(key, value.trim());
+    }
+  });
+  return destination;
+}
+
+

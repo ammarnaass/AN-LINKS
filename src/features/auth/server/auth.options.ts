@@ -1,8 +1,10 @@
 import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/shared/db";
 import { recordSession } from "./session.service";
+import { provisionOAuthUser } from "./oauth-provision.service";
 import { verifyTwoFactorCodeOrBackup } from "@/features/settings/server/two-factor.service";
 
 export async function hashPassword(password: string): Promise<string> {
@@ -23,6 +25,14 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   providers: [
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -76,8 +86,30 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        const provisioned = await provisionOAuthUser(user.email, user.name, user.image);
+        if (!provisioned) return false;
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      if (account?.provider === "google" && user?.email) {
+        const provisioned = await provisionOAuthUser(user.email, user.name, user.image);
+        if (provisioned) {
+          token.id = provisioned.id;
+          token.username = provisioned.username;
+          token.role = provisioned.role;
+          token.name = provisioned.name;
+          token.picture = provisioned.image;
+          token.sessionToken = (token.jti as string) || `${provisioned.id}_${Date.now()}`;
+          try {
+            await recordSession(provisioned.id, token.sessionToken as string);
+          } catch (err) {
+            console.error("OAuth session recording error:", err);
+          }
+        }
+      } else if (user) {
         token.id = user.id;
         token.username = (user as unknown as { username: string }).username;
         token.role = (user as unknown as { role: string }).role;

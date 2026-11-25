@@ -3,6 +3,7 @@ import {
   getPublicProfileData,
   generateProfileMetadata,
   BioPageContent,
+  ProfileJsonLd,
 } from "@/features/bio";
 import type { Metadata } from "next";
 
@@ -56,6 +57,11 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   return (
     <main className="w-full min-h-screen">
+      <ProfileJsonLd
+        profile={data.profile}
+        username={data.user.username}
+        socials={data.socials}
+      />
       <BioPageContent
         profile={data.profile}
         username={data.user.username}

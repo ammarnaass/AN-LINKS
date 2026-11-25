@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "المستخدم غير موجود" }, { status: 404 });
     }
 
-    const rangeDays = 14;
+    const rawRange = Number(request.nextUrl.searchParams.get("range"));
+    const rangeDays = rawRange === 7 || rawRange === 30 ? rawRange : 14;
     const sinceDate = new Date();
     sinceDate.setDate(sinceDate.getDate() - rangeDays);
 

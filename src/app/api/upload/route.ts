@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth.options";
 import { validateAndProcessImage } from "@/lib/image-processor";
-import fs from "fs/promises";
-import path from "path";
+import { uploadProcessedImage } from "@/lib/storage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,17 +35,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save to public/uploads
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadsDir, { recursive: true });
-
     const filename = `avatar-${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
-    const filePath = path.join(uploadsDir, filename);
-    await fs.writeFile(filePath, result.buffer);
+    const uploaded = await uploadProcessedImage(result.buffer, filename, "image/webp");
 
     return NextResponse.json({
       success: true,
-      url: `/uploads/${filename}`,
+      url: uploaded.url,
+      provider: uploaded.provider,
     });
   } catch (error) {
     console.error("Upload error:", error);

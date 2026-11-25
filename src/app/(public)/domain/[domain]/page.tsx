@@ -3,6 +3,7 @@ import {
   getPublicProfileByDomain,
   generateProfileMetadata,
   BioPageContent,
+  ProfileJsonLd,
 } from "@/features/bio";
 import type { Metadata } from "next";
 
@@ -56,6 +57,12 @@ export default async function CustomDomainBioPage({ params }: PageProps) {
 
   return (
     <main className="w-full min-h-screen">
+      <ProfileJsonLd
+        profile={data.profile}
+        username={data.user.username}
+        socials={data.socials}
+        canonicalOrigin={`https://${domain}`}
+      />
       <BioPageContent
         profile={data.profile}
         username={data.user.username}

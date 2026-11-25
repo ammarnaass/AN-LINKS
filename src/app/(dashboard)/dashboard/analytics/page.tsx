@@ -34,7 +34,8 @@ export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/analytics")
+    setIsLoading(true);
+    fetch(`/api/analytics?range=${range}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.success && data.analytics) {
@@ -43,7 +44,7 @@ export default function AnalyticsPage() {
       })
       .catch((err) => console.error("Analytics fetch error:", err))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [range]);
 
   const totalViews = analytics?.totalViews ?? 0;
   const totalClicks = analytics?.totalClicks ?? 0;

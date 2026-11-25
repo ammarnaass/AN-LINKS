@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { prisma } from "@/shared/db";
 import { hashPassword } from "../server/auth.options";
+import { sendPasswordResetEmail } from "@/lib/mailer";
 
 export interface PasswordResetResult {
   ok: boolean;
@@ -38,8 +39,7 @@ export async function createPasswordResetToken(email: string): Promise<PasswordR
     },
   });
 
-  // In production, dispatch via SMTP/Resend. In dev/test, token is returned or logged
-  console.log(`[AUTH] Password reset requested for ${cleanEmail}. Token: ${token}`);
+  await sendPasswordResetEmail(cleanEmail, token);
 
   return { ok: true, token };
 }

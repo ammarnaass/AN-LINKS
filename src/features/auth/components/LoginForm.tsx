@@ -7,6 +7,7 @@ import { LogIn, AlertCircle, Mail, Lock } from "lucide-react";
 import { loginWithCredentials } from "../services/auth.service";
 import { setAuthCache } from "../hooks/useCurrentUser";
 import { AppButton, AppInput } from "@/shared/ui";
+import { GoogleAuthButton } from "./GoogleAuthButton";
 
 export function LoginForm() {
   const router = useRouter();
@@ -132,6 +133,8 @@ export function LoginForm() {
           {isLoading ? "جاري التحقق..." : "تسجيل الدخول"}
         </AppButton>
       </form>
+
+      <GoogleAuthButton label="تسجيل الدخول السريع عبر Google" />
     </div>
   );
 }

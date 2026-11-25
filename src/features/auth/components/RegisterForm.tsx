@@ -8,6 +8,7 @@ import { validateUsernameFormat } from "../validators/auth.validator";
 import { registerAccount, loginWithCredentials } from "../services/auth.service";
 import { setAuthCache } from "../hooks/useCurrentUser";
 import { AppButton, AppInput } from "@/shared/ui";
+import { GoogleAuthButton } from "./GoogleAuthButton";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -178,6 +179,8 @@ export function RegisterForm() {
           {isLoading ? "جاري إنشاء الحساب..." : "إنشاء الحساب مجاناً"}
         </AppButton>
       </form>
+
+      <GoogleAuthButton label="التسجيل السريع عبر Google" />
     </div>
   );
 }

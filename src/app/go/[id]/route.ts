@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/db";
 import { recordLinkClick } from "@/features/analytics/services/tracking.service";
+import { appendTrackingParams } from "@/shared/utils/url-sanitizer";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -40,8 +41,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       referer,
     }).catch(() => {});
 
-    // 302 Temporary Redirect to target destination (policy: do not block if platform.isEnabled === false)
-    return NextResponse.redirect(new URL(link.url), 302);
+    // 302 Temporary Redirect to target destination while preserving UTM tracking params
+    const destinationUrl = appendTrackingParams(link.url, request.nextUrl.searchParams);
+    return NextResponse.redirect(destinationUrl, 302);
   } catch (error) {
     console.error("Redirect error:", error);
     return NextResponse.redirect(new URL("/", request.url));
