@@ -28,6 +28,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/an_links?schema=public
       NEXTAUTH_SECRET: ci-test-secret-key-at-least-32-chars
       NEXTAUTH_URL: http://localhost:3000
+      PAYMENT_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
     steps:
       - name: Checkout Repository

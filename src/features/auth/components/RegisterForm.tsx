@@ -180,7 +180,7 @@ export function RegisterForm() {
         </AppButton>
       </form>
 
-      <GoogleAuthButton label="التسجيل السريع عبر Google" />
+      <GoogleAuthButton mode="register" />
     </div>
   );
 }

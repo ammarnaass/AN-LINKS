@@ -476,5 +476,18 @@ model DigitalOrder {
   @@index([productId])
 }
 
+model OAuthProviderConfig {
+  id                    String   @id @default(cuid())
+  provider              String   @unique // "google" | "facebook" | "apple"
+  displayNameAr         String
+  isEnabled             Boolean  @default(false)
+  clientId              String?
+  clientSecretEncrypted String?
+  extraConfig           Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+
 
 

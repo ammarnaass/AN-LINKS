@@ -18,6 +18,7 @@ import {
   AdminCouponsTab,
   AdminTransactionsTab,
   AdminSettingsTab,
+  AdminAuthProvidersTab,
   AdminReportsTab,
   AdminLinksContainer,
   DEFAULT_PLATFORM_SETTINGS,
@@ -41,6 +42,7 @@ const TAB_TITLES: Record<AdminTabKey, string> = {
   transactions: "سجل العمليات المالية والفواتير",
   links: "إدارة الروابط والمنصات وحوكمة المحتوى",
   settings: "إعدادات المنصة والسياسات",
+  auth_providers: "إعدادات نظام الدخول الخارجي (Google / Facebook / Apple)",
   reports: "مركز البلاغات والاعتدال",
 };
 
@@ -201,6 +203,8 @@ export default function AdminConsolePage() {
               onUpdateSettings={handleSaveSettings}
             />
           )}
+
+          {activeTab === "auth_providers" && <AdminAuthProvidersTab />}
 
           {activeTab === "reports" && (
             <AdminReportsTab

@@ -2,10 +2,15 @@ import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
+import AppleProvider from "next-auth/providers/apple";
 import { prisma } from "@/shared/db";
 import { recordSession } from "./session.service";
 import { provisionOAuthUser } from "./oauth-provision.service";
 import { verifyTwoFactorCodeOrBackup } from "@/features/settings/server/two-factor.service";
+import { getActiveRuntimeOAuthConfigs } from "@/features/admin/services/oauth-settings.service";
+
+const OAUTH_PROVIDER_KEYS = new Set(["google", "facebook", "apple"]);
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10);
@@ -87,14 +92,14 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === "google") {
+      if (account?.provider && OAUTH_PROVIDER_KEYS.has(account.provider)) {
         const provisioned = await provisionOAuthUser(user.email, user.name, user.image);
         if (!provisioned) return false;
       }
       return true;
     },
     async jwt({ token, user, account }) {
-      if (account?.provider === "google" && user?.email) {
+      if (account?.provider && OAUTH_PROVIDER_KEYS.has(account.provider) && user?.email) {
         const provisioned = await provisionOAuthUser(user.email, user.name, user.image);
         if (provisioned) {
           token.id = provisioned.id;
@@ -149,4 +154,37 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || "default_development_secret_key_change_in_production",
 };
+
+/**
+ * Builds NextAuthOptions dynamically with active Google, Facebook, and Apple providers
+ * configured via the System Admin dashboard or environment variables.
+ */
+export async function buildDynamicAuthOptions(): Promise<NextAuthOptions> {
+  const runtimeConfigs = await getActiveRuntimeOAuthConfigs();
+  const credentialsProvider = authOptions.providers[authOptions.providers.length - 1];
+
+  const dynamicOAuthProviders = runtimeConfigs.map((cfg) => {
+    if (cfg.provider === "facebook") {
+      return FacebookProvider({
+        clientId: cfg.clientId,
+        clientSecret: cfg.clientSecret,
+      });
+    }
+    if (cfg.provider === "apple") {
+      return AppleProvider({
+        clientId: cfg.clientId,
+        clientSecret: cfg.clientSecret,
+      });
+    }
+    return GoogleProvider({
+      clientId: cfg.clientId,
+      clientSecret: cfg.clientSecret,
+    });
+  });
+
+  return {
+    ...authOptions,
+    providers: [...dynamicOAuthProviders, credentialsProvider],
+  };
+}
 

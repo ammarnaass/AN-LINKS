@@ -22,6 +22,8 @@ export * from "./components/financials/AdminTransactionsTab";
 export * from "./components/subscriptions/AdminSubscriptionsContainer";
 export * from "./components/subscriptions/SubscriptionsSubTabNav";
 export * from "./components/AdminSettingsTab";
+export * from "./components/AdminAuthProvidersTab";
+export * from "./types/oauth.types";
 export * from "./components/AdminReportsTab";
 export * from "./components/AdminSessionsTab";
 export * from "./components/AdminSidebar";

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BarChart3, Users, CreditCard, Settings, AlertTriangle, ShieldCheck, Link2, Package } from "lucide-react";
+import { BarChart3, Users, CreditCard, Settings, AlertTriangle, ShieldCheck, Link2, Package, KeyRound } from "lucide-react";
 import { AdminTabKey } from "../types/admin.types";
 
 export type { AdminTabKey };
@@ -70,6 +70,11 @@ export function AdminNavTabs({
       key: "settings",
       label: "إعدادات المنصة",
       icon: <Settings className="w-4 h-4 shrink-0" />,
+    },
+    {
+      key: "auth_providers",
+      label: "إعدادات الدخول (OAuth)",
+      icon: <KeyRound className="w-4 h-4 shrink-0" />,
     },
     {
       key: "reports",
