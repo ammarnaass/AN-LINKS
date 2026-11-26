@@ -3,6 +3,7 @@
 import React from "react";
 import { MapPin } from "lucide-react";
 import { ProfileSettingsInput } from "../../validators/settings.validator";
+import { AiBioSuggestButton } from "./AiBioSuggestButton";
 
 interface ProfileFieldsFormProps {
   profile: ProfileSettingsInput;
@@ -107,7 +108,14 @@ export function ProfileFieldsForm({
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-on-surface-variant">النبذة التعريفية (Bio)</label>
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium text-on-surface-variant">النبذة التعريفية (Bio)</label>
+          <AiBioSuggestButton
+            displayName={profile.displayName}
+            currentBio={profile.bio}
+            onSuggest={(b) => setProfile({ ...profile, bio: b })}
+          />
+        </div>
         <textarea
           rows={3}
           value={profile.bio || ""}

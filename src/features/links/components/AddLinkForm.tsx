@@ -8,6 +8,7 @@ import { LinkData, LinkType } from "../types/links.types";
 import { detectPlatform } from "../services/platform-detector";
 import { detectAutoLinkType } from "../utils/media-embed";
 import { getSocialIcon, YoutubeIcon } from "@/shared/ui";
+import { AiLinkSuggestButton } from "./AiLinkSuggestButton";
 
 interface AddLinkFormProps {
   onAdd: (newLink: LinkData) => Promise<void> | void;
@@ -143,9 +144,14 @@ export function AddLinkForm({ onAdd, onCancel, existingCount }: AddLinkFormProps
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-on-surface-variant mb-1">
-            {linkType === "HEADER" ? "نص عنوان القسم" : "عنوان الرابط / الفيديو"}
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-xs font-medium text-on-surface-variant">
+              {linkType === "HEADER" ? "نص عنوان القسم" : "عنوان الرابط / الفيديو"}
+            </label>
+            {linkType !== "HEADER" && (
+              <AiLinkSuggestButton url={newUrl} onSuggest={(t) => setNewTitle(t)} />
+            )}
+          </div>
           <input
             type="text"
             placeholder={linkType === "HEADER" ? "مثال: روابط المتاجر والمنتجات" : "مثال: قناتي على يوتيوب"}

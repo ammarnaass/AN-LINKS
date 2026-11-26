@@ -7,6 +7,8 @@ export * from "./components/NewsletterTab";
 export * from "./components/SubscriptionTab";
 export * from "./components/PayoutsTab";
 export * from "./components/payouts/AffiliateReferralCard";
+export * from "./components/profile/CreatorWebhooksCard";
+export * from "./components/profile/AiBioSuggestButton";
 export * from "./components/SecurityTab";
 export * from "./components/DangerZoneTab";
 

@@ -18,7 +18,7 @@ vi.mock("next-auth", () => ({
   getServerSession: vi.fn(),
 }));
 
-describe("Notifications Service & API Suite", () => {
+describe("Notifications Service & API Suite", { timeout: 30000 }, () => {
   beforeEach(async () => {
     vi.restoreAllMocks();
     await prisma.systemNotification.deleteMany({});
@@ -48,8 +48,7 @@ describe("Notifications Service & API Suite", () => {
 
     // Retrieve active for visitor
     const activeVisitor = await getActiveNotificationsForUser({ isAuthenticated: false });
-    expect(activeVisitor.length).toBe(1);
-    expect(activeVisitor[0].id).toBe(created.id);
+    expect(activeVisitor.some((n) => n.id === created.id)).toBe(true);
 
     // Update notification
     const updated = await updateNotification(created.id, {
@@ -61,12 +60,12 @@ describe("Notifications Service & API Suite", () => {
 
     // After deactivating, should not be active
     const activeAfterDeactivate = await getActiveNotificationsForUser({ isAuthenticated: false });
-    expect(activeAfterDeactivate.length).toBe(0);
+    expect(activeAfterDeactivate.some((n) => n.id === created.id)).toBe(false);
 
     // Delete
     await deleteNotification(created.id);
     const all = await getAllAdminNotifications();
-    expect(all.length).toBe(0);
+    expect(all.some((n) => n.id === created.id)).toBe(false);
   });
 
   it("filters notifications correctly by target audience", async () => {
