@@ -1,6 +1,6 @@
 import React from "react";
 import { AdminPlanQuotaConfig } from "../../../../types/admin.types";
-import { Globe, EyeOff, Palette, BarChart2, Headphones, Code } from "lucide-react";
+import { Globe, EyeOff, Palette, BarChart2, Headphones, Code, Calendar, Webhook, Sparkles } from "lucide-react";
 
 export interface PlanQuotasFeatureSwitchesProps {
   quotas: AdminPlanQuotaConfig;
@@ -19,6 +19,9 @@ const FEATURES: Array<{
   { key: "allowDetailedAnalytics", title: "تحليلات تفصيلية جغرافية (Detailed Analytics)", description: "خريطة الزوار، مصادر الزيارات ونوع الأجهزة والمتصفحات", icon: <BarChart2 className="w-4 h-4" /> },
   { key: "allowPrioritySupport", title: "أولوية الدعم الفني (VIP Priority Support)", description: "رد سريع خلال ساعة ومسار تذاكر مباشر", icon: <Headphones className="w-4 h-4" /> },
   { key: "customCssAllowed", title: "تخصيص كامل بأكواد CSS (Custom CSS)", description: "إمكانية حقن أكواد CSS مخصصة لتنسيق الصفحة", icon: <Code className="w-4 h-4" /> },
+  { key: "allowAppointments", title: "حجز الاستشارات والمواعيد (Appointments)", description: "إتاحة بيع جلسات استشارية ومواعيد تقويمية مجدولة", icon: <Calendar className="w-4 h-4" /> },
+  { key: "allowOutgoingWebhooks", title: "خطافات الويب (Outgoing Webhooks)", description: "تصدير المبيعات والمشتركين لـ Zapier و Make", icon: <Webhook className="w-4 h-4" /> },
+  { key: "allowAiCopilot", title: "مساعد الذكاء الاصطناعي (AI Copilot)", description: "توليد النبذة التعريفية وعناوين الروابط آلياً", icon: <Sparkles className="w-4 h-4" /> },
 ];
 
 export function PlanQuotasFeatureSwitches({

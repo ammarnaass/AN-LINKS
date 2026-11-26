@@ -18,6 +18,9 @@ export interface AdminPlanQuotaConfig {
   allowPrioritySupport: boolean;
   customCssAllowed: boolean;
   storeCommissionRate: number;
+  allowAppointments?: boolean;
+  allowOutgoingWebhooks?: boolean;
+  allowAiCopilot?: boolean;
 }
 
 export interface AdminSubscriptionPlanItem {
