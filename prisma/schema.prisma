@@ -29,6 +29,14 @@ model User {
   twoFactorAuth     UserTwoFactorAuth?
   securityAuditLogs SecurityAuditLog[]
   nfcCard           NfcCard?
+  referralCode      String?      @unique
+  referredById      String?
+  referredBy        User?        @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals         User[]       @relation("UserReferrals")
+  consultations     ConsultationService[]
+  availabilityRules AvailabilityRule[]
+  appointmentBookings AppointmentBooking[]
+  webhookEndpoints  CreatorWebhookEndpoint[]
 }
 
 model Profile {
@@ -79,6 +87,9 @@ model Profile {
   newsletterTitle      String?
   newsletterSubtitle   String?
   newsletterButtonText String?
+  welcomeSubject       String?
+  welcomeBody          String?
+  welcomeGiftUrl       String?
 }
 
 enum PlatformCategory {
@@ -299,6 +310,9 @@ model PlanQuota {
   allowPrioritySupport   Boolean          @default(false) // دعم فني مخصص
   customCssAllowed       Boolean          @default(false)
   storeCommissionRate    Float            @default(5.0) // نسبة عمولة المنصة من مبيعات المتجر الرقمي للمستخدم
+  allowAppointments      Boolean          @default(false)
+  allowOutgoingWebhooks  Boolean          @default(false)
+  allowAiCopilot         Boolean          @default(false)
 }
 
 model CurrencyConfig {
@@ -605,6 +619,92 @@ model SystemNotification {
 
   @@index([isActive, target, startsAt, expiresAt])
 }
+
+model ConsultationService {
+  id              String               @id @default(cuid())
+  creatorId       String
+  creator         User                 @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  durationMinutes Int                  @default(30)
+  price           Float
+  currency        String               @default("SAR")
+  isActive        Boolean              @default(true)
+  bookings        AppointmentBooking[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([creatorId, isActive])
+}
+
+model AvailabilityRule {
+  id          String   @id @default(cuid())
+  creatorId   String
+  creator     User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  dayOfWeek   Int      // 0 (Sun) - 6 (Sat)
+  startTime   String   // "09:00"
+  endTime     String   // "17:00"
+  slotMinutes Int      @default(30)
+  isActive    Boolean  @default(true)
+
+  @@index([creatorId, dayOfWeek])
+}
+
+model AppointmentBooking {
+  id          String              @id @default(cuid())
+  serviceId   String
+  service     ConsultationService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  creatorId   String
+  creator     User                @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  clientName  String
+  clientEmail String
+  clientPhone String?
+  startTime   DateTime
+  endTime     DateTime
+  status      String              @default("PENDING_PAYMENT") // PENDING_PAYMENT | CONFIRMED | CANCELLED | EXPIRED
+  lockedUntil DateTime?           // مهلة قفل الحجز المؤقت (10 دقائق)
+  paymentId   String?             @unique
+  meetingUrl  String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([creatorId, startTime, endTime])
+  @@index([status, lockedUntil])
+}
+
+model CreatorWebhookEndpoint {
+  id              String          @id @default(cuid())
+  creatorId       String
+  creator         User            @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  url             String
+  secretEncrypted String
+  events          String[]        // ["order.completed", "lead.collected", "booking.confirmed"]
+  isActive        Boolean         @default(true)
+  deliveries      WebhookOutbox[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([creatorId, isActive])
+}
+
+model WebhookOutbox {
+  id           String                 @id @default(cuid())
+  endpointId   String
+  endpoint     CreatorWebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  event        String
+  payload      Json
+  status       String                 @default("PENDING") // PENDING | DELIVERED | FAILED
+  attempts     Int                    @default(0)
+  maxAttempts  Int                    @default(5)
+  nextRetryAt  DateTime               @default(now())
+  responseCode Int?
+  lastError    String?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  @@index([status, nextRetryAt])
+}
+
 
 
 
