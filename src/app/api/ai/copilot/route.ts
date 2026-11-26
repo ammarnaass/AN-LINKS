@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/features/auth";
+import { authOptions } from "@/features/auth/server/auth.options";
 import { prisma } from "@/shared/db";
 import { enforceRateLimit } from "@/lib/rate-limiter";
 

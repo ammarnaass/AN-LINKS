@@ -6,12 +6,14 @@ import { PayoutBalanceCard } from "./payouts/PayoutBalanceCard";
 import { PayoutIbanForm } from "./payouts/PayoutIbanForm";
 import { PayoutWithdrawModal } from "./payouts/PayoutWithdrawModal";
 import { PayoutHistoryTable } from "./payouts/PayoutHistoryTable";
+import { AffiliateReferralCard } from "./payouts/AffiliateReferralCard";
 
 export function PayoutsTab() {
   const {
     profile,
     balance,
     history,
+    affiliate,
     isLoading,
     statusMessage,
     saveIban,
@@ -54,6 +56,8 @@ export function PayoutsTab() {
           <PayoutIbanForm profile={profile} onSave={saveIban} />
         </div>
       </div>
+
+      <AffiliateReferralCard affiliate={affiliate} />
 
       <PayoutHistoryTable history={history} />
 

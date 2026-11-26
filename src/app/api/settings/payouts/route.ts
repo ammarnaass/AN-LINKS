@@ -8,6 +8,7 @@ import {
   requestPayout,
   getPayoutHistory,
 } from "@/features/settings/server/payouts.service";
+import { getCreatorAffiliateSummary } from "@/features/affiliate/server/affiliate.service";
 
 export async function GET() {
   try {
@@ -16,15 +17,16 @@ export async function GET() {
       return NextResponse.json({ success: false, error: "غير مصرح" }, { status: 401 });
     }
 
-    const [profile, balance, history] = await Promise.all([
+    const [profile, balance, history, affiliate] = await Promise.all([
       getPayoutProfile(session.user.id),
       getPayoutBalance(session.user.id),
       getPayoutHistory(session.user.id),
+      getCreatorAffiliateSummary(session.user.id),
     ]);
 
     return NextResponse.json({
       success: true,
-      data: { profile, balance, history },
+      data: { profile, balance, history, affiliate },
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "فشل جلب بيانات تحصيل الأرباح";

@@ -6,6 +6,7 @@ export * from "./components/ProfileTab";
 export * from "./components/NewsletterTab";
 export * from "./components/SubscriptionTab";
 export * from "./components/PayoutsTab";
+export * from "./components/payouts/AffiliateReferralCard";
 export * from "./components/SecurityTab";
 export * from "./components/DangerZoneTab";
 

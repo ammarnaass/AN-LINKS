@@ -29,10 +29,21 @@ export interface PayoutRequestDTO {
   processedAt?: string | null;
 }
 
+export interface AffiliateSummaryDTO {
+  referralCode: string;
+  referralLink: string;
+  totalReferrals: number;
+  escrowBalance: number;
+  clearedBalance: number;
+  paidBalance: number;
+  commissionRate: number;
+}
+
 export function useSettingsPayouts() {
   const [profile, setProfile] = useState<PayoutProfileDTO | null>(null);
   const [balance, setBalance] = useState<PayoutBalanceDTO | null>(null);
   const [history, setHistory] = useState<PayoutRequestDTO[]>([]);
+  const [affiliate, setAffiliate] = useState<AffiliateSummaryDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
@@ -49,6 +60,7 @@ export function useSettingsPayouts() {
           setProfile(res.data.profile);
           setBalance(res.data.balance);
           setHistory(res.data.history || []);
+          setAffiliate(res.data.affiliate || null);
         }
       })
       .catch((err) => setStatusMessage({ type: "error", text: err.message }))
@@ -94,6 +106,7 @@ export function useSettingsPayouts() {
     profile,
     balance,
     history,
+    affiliate,
     isLoading,
     statusMessage,
     saveIban,
