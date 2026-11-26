@@ -7,6 +7,7 @@ export * from "./constants/features-data";
 export * from "./constants/templates-data";
 export * from "./constants/testimonials-data";
 export * from "./components/LandingHeader";
+export * from "./components/LandingMobileDrawer";
 export * from "./components/HeroSection";
 export * from "./components/PhoneMockup";
 export * from "./components/PartnersMarqueeSection";

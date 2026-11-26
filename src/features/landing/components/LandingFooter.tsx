@@ -1,14 +1,49 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { BrandLogo, LanguageSwitcher } from "@/shared/ui";
 import { useTranslation } from "@/shared/i18n";
 import { getLandingContent } from "../constants/i18n";
+import { Check, Loader2 } from "lucide-react";
 
 export function LandingFooter() {
   const { locale } = useTranslation();
   const footer = getLandingContent(locale).footer;
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [feedback, setFeedback] = useState("");
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes("@")) {
+      setStatus("error");
+      setFeedback("يرجى إدخال بريد إلكتروني صالح");
+      return;
+    }
+
+    setStatus("loading");
+    setFeedback("");
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "تعذر الاشتراك، يرجى المحاولة لاحقاً");
+      }
+
+      setStatus("success");
+      setFeedback(data.message || "تم انضمامك للنشرة بنجاح! تفقد بريدك قريباً 🎉");
+      setEmail("");
+    } catch (err) {
+      setStatus("error");
+      setFeedback(err instanceof Error ? err.message : "حدث خطأ أثناء الاشتراك");
+    }
+  };
 
   return (
     <footer className="w-full bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-16 pb-12 border-t border-outline-variant/15 text-on-surface">
@@ -21,19 +56,37 @@ export function LandingFooter() {
             </p>
             <div className="flex flex-col gap-3 mt-2">
               <span className="text-xs font-semibold text-on-surface">{footer.newsletterTitle}</span>
-              <div className="flex items-center gap-2 max-w-sm">
-                <input
-                  className="flex-1 bg-surface-container-low px-4 py-2.5 rounded-lg text-on-surface text-xs placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary-container"
-                  placeholder={footer.newsletterPlaceholder}
-                  type="email"
-                />
-                <button
-                  className="bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary px-4 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-                  type="button"
-                >
-                  {footer.newsletterButton}
-                </button>
-              </div>
+              {status === "success" ? (
+                <div className="p-3 rounded-xl bg-primary/15 border border-primary/20 text-primary text-xs font-bold flex items-center gap-2 max-w-sm">
+                  <Check className="w-4 h-4 shrink-0" />
+                  <span>{feedback}</span>
+                </div>
+              ) : (
+                <form onSubmit={handleSubscribe} className="space-y-2 max-w-sm">
+                  <div className="flex items-center gap-2">
+                    <input
+                      className="flex-1 bg-surface-container-low px-4 py-2.5 rounded-lg text-on-surface text-xs placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary-container border border-outline-variant/20"
+                      placeholder={footer.newsletterPlaceholder}
+                      type="email"
+                      required
+                      value={email}
+                      disabled={status === "loading"}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <button
+                      className="bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary px-4 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                      type="submit"
+                      disabled={status === "loading" || !email}
+                    >
+                      {status === "loading" && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                      <span>{footer.newsletterButton}</span>
+                    </button>
+                  </div>
+                  {status === "error" && (
+                    <p className="text-[11px] text-error font-medium">{feedback}</p>
+                  )}
+                </form>
+              )}
             </div>
           </div>
 
