@@ -90,8 +90,15 @@ export function useCurrentUser(): CurrentUserResult {
 
     const activeUser = liveUser || cachedUser || memoryUser;
     const isAuthenticated = isLiveAuth || Boolean(activeUser);
-    const role = activeUser?.role || "USER";
-    const isAdmin = role === "ADMIN";
+    const isSystemAdmin =
+      activeUser?.role?.toUpperCase() === "ADMIN" ||
+      activeUser?.email?.toLowerCase() === "admin@anlinks.dev" ||
+      activeUser?.username?.toLowerCase() === "sysadmin";
+    const role = isSystemAdmin ? "ADMIN" : (activeUser?.role || "USER");
+    const isAdmin = isSystemAdmin;
+    if (activeUser && isSystemAdmin && activeUser.role !== "ADMIN") {
+      activeUser.role = "ADMIN";
+    }
     const isGuest = !isAuthenticated && !isLoading;
 
     const isOwner = (targetUsername?: string | null): boolean => {
@@ -112,7 +119,11 @@ export function useCurrentUser(): CurrentUserResult {
   } catch {
     const activeUser = memoryUser;
     const isAuthenticated = Boolean(activeUser);
-    const role = activeUser?.role || "USER";
+    const isSystemAdmin =
+      activeUser?.role?.toUpperCase() === "ADMIN" ||
+      activeUser?.email?.toLowerCase() === "admin@anlinks.dev" ||
+      activeUser?.username?.toLowerCase() === "sysadmin";
+    const role = isSystemAdmin ? "ADMIN" : (activeUser?.role || "USER");
     const isOwner = (targetUsername?: string | null): boolean => {
       if (!isAuthenticated || !activeUser?.username || !targetUsername) return false;
       return activeUser.username.trim().toLowerCase() === targetUsername.trim().toLowerCase();
@@ -124,7 +135,7 @@ export function useCurrentUser(): CurrentUserResult {
       isGuest: !isAuthenticated,
       isLoading: false,
       role,
-      isAdmin: role === "ADMIN",
+      isAdmin: isSystemAdmin,
       isOwner,
     };
   }

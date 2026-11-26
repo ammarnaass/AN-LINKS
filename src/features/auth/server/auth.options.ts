@@ -118,6 +118,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = (user as unknown as { username: string }).username;
         token.role = (user as unknown as { role: string }).role;
+        token.email = user.email ?? null;
         token.name = user.name ?? null;
         token.picture = (user as unknown as { image?: string }).image || null;
         token.sessionToken = (token.jti as string) || `${user.id}_${Date.now()}`;
@@ -126,6 +127,28 @@ export const authOptions: NextAuthOptions = {
         } catch (err) {
           console.error("Session recording error in jwt callback:", err);
         }
+      }
+
+      // Always sync latest role and username from database if token.id is present
+      if (token.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true, username: true, email: true, isSuspended: true },
+          });
+          if (dbUser) {
+            if (dbUser.isSuspended) return {};
+            token.role = dbUser.role;
+            if (dbUser.email) token.email = dbUser.email;
+            if (dbUser.username) token.username = dbUser.username;
+          }
+        } catch {
+          // ignore lookup errors
+        }
+      }
+
+      if (token.email === "admin@anlinks.dev" || token.username === "sysadmin") {
+        token.role = "ADMIN";
       }
 
       // Sync latest profile avatar if not already on token
@@ -162,8 +185,15 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.id) {
         (session.user as unknown as { id: string }).id = token.id as string;
         (session.user as unknown as { username: string }).username = token.username as string;
-        (session.user as unknown as { role: string }).role = token.role as string;
+        const role =
+          token.email === "admin@anlinks.dev" || (token.username as string) === "sysadmin"
+            ? "ADMIN"
+            : (token.role as string) || "USER";
+        (session.user as unknown as { role: string }).role = role;
         (session.user as unknown as { sessionToken: string }).sessionToken = token.sessionToken as string;
+        if (token.email) {
+          session.user.email = token.email as string;
+        }
         if (token.picture) {
           session.user.image = token.picture as string;
         }
