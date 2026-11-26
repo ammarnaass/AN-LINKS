@@ -79,9 +79,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. Determine currency & base price
+    // 5. Determine currency & base price with real exchange rate calculation
     const currency = (rawCurrency || "SAR").trim().toUpperCase();
     const cycle = (billingCycle || "MONTHLY").toUpperCase();
+    const currConfig = await prisma.currencyConfig.findUnique({ where: { code: currency } });
+    const fxRate = currConfig?.exchangeRateToUSD || (currency === "USD" ? 1.0 : 3.75);
 
     const matchedPrice =
       plan.prices?.find(
@@ -96,7 +98,18 @@ export async function POST(request: NextRequest) {
           p.isActive !== false
       );
 
-    const amountSubtotal = matchedPrice ? matchedPrice.amount : (plan.slug === "pro" ? 49 : plan.slug === "agency" ? 149 : 0);
+    let amountSubtotal: number;
+    if (matchedPrice) {
+      if (matchedPrice.currency.toUpperCase() === currency) {
+        amountSubtotal = matchedPrice.amount;
+      } else {
+        const usdVal = matchedPrice.currency.toUpperCase() === "USD" ? matchedPrice.amount : (matchedPrice.amount / 3.75);
+        amountSubtotal = Math.round(usdVal * fxRate * 100) / 100;
+      }
+    } else {
+      const baseUSD = plan.slug === "pro" ? 24 : plan.slug === "agency" ? 59 : 0;
+      amountSubtotal = Math.round(baseUSD * fxRate * 100) / 100;
+    }
 
     // 6. Validate coupon if provided
     let discountAmount = 0;

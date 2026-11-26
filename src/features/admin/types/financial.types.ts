@@ -113,6 +113,25 @@ export interface UpdateCurrencyInput {
   exchangeRateToUSD?: number;
   isActive?: boolean;
   autoDetectCountries?: string[];
+  isBaseCurrency?: boolean;
+}
+
+export interface CreateCurrencyInput {
+  code: string;
+  nameAr: string;
+  symbol: string;
+  exchangeRateToUSD: number;
+  isActive?: boolean;
+  isBaseCurrency?: boolean;
+  autoDetectCountries?: string[];
+}
+
+export interface SyncRatesResult {
+  success: boolean;
+  provider: string;
+  lastUpdatedUtc: string;
+  updatedCount: number;
+  updatedList: { code: string; oldRate: number; newRate: number }[];
 }
 
 export interface CreateCouponInput {

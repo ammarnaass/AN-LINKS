@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Check, ShieldCheck, Sparkles, Loader2, CreditCard, ChevronLeft } from "lucide-react";
+import { ArrowRight, Check, ShieldCheck, Sparkles, Loader2, ChevronLeft, Globe } from "lucide-react";
 import { BrandLogo, ThemeToggle } from "@/shared/ui";
 import { useCurrentUser, UserNavDropdown } from "@/features/auth";
 import { PRICING_PLANS, calculatePrice } from "@/features/landing";
@@ -13,38 +13,46 @@ const PAYMENT_GATEWAYS = [
   { id: "apple_pay", name: "Apple Pay", badge: "دفع بلمسة واحدة", icon: "🍏" },
   { id: "stc_pay", name: "STC Pay", icon: "📱" },
   { id: "stripe", name: "بطاقة ائتمانية / Visa & MC", icon: "💳" },
-  { id: "tamara", name: "تمارا (قسمها 4 دفعات)", badge: "بدون فوائد", icon: "✨" },
-  { id: "tabby", name: "تابي (قسمها 4 دفعات)", badge: "بدون رسوم", icon: "🛍️" },
+  { id: "tamara", name: "تمارا (4 دفعات)", badge: "بدون فوائد", icon: "✨" },
+  { id: "tabby", name: "تابي (4 دفعات)", badge: "بدون رسوم", icon: "🛍️" },
+];
+
+const CURRENCIES = [
+  { code: "SAR", symbol: "ر.س", rate: 3.7508, flag: "🇸🇦" },
+  { code: "AED", symbol: "د.إ", rate: 3.6725, flag: "🇦🇪" },
+  { code: "USD", symbol: "$", rate: 1.0, flag: "🇺🇸" },
+  { code: "KWD", symbol: "د.ك", rate: 0.3075, flag: "🇰🇼" },
+  { code: "EGP", symbol: "ج.م", rate: 50.25, flag: "🇪🇬" },
+  { code: "EUR", symbol: "€", rate: 0.955, flag: "🇪🇺" },
 ];
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const { isAuthenticated, isLoading, user } = useCurrentUser();
-
+  const { isAuthenticated, isLoading } = useCurrentUser();
   const planParam = searchParams.get("plan") || "pro";
   const billingParam = searchParams.get("billing");
 
   const [isYearly, setIsYearly] = useState(billingParam === "yearly");
   const [selectedGateway, setSelectedGateway] = useState("mada");
+  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState("SAR");
   const [couponCode, setCouponCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const matchedPlan = PRICING_PLANS.find((p) => p.id === planParam && p.priceMonthly > 0) || PRICING_PLANS[1];
+  const activeCurrency = CURRENCIES.find((c) => c.code === selectedCurrencyCode) || CURRENCIES[0];
 
-  const monthlyPrice = calculatePrice(matchedPlan, false);
-  const yearlyMonthlyPrice = calculatePrice(matchedPlan, true);
-  const currentPrice = isYearly ? yearlyMonthlyPrice * 12 : monthlyPrice;
+  const monthlyUSD = calculatePrice(matchedPlan, false);
+  const yearlyMonthlyUSD = calculatePrice(matchedPlan, true);
+  const baseUSD = isYearly ? yearlyMonthlyUSD * 12 : monthlyUSD;
+
+  const currentPrice = Math.round(baseUSD * activeCurrency.rate * 100) / 100;
+  const monthlyConverted = Math.round(monthlyUSD * activeCurrency.rate * 100) / 100;
+  const yearlyMonthlyConverted = Math.round(yearlyMonthlyUSD * activeCurrency.rate * 100) / 100;
 
   if (isLoading) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-xs text-on-surface-variant font-bold">جارٍ تحميل بيانات الاشتراك...</p>
-      </div>
-    );
+    return <div className="min-h-[50vh] flex items-center justify-center text-xs font-bold text-on-surface-variant"><Loader2 className="w-6 h-6 animate-spin text-primary ml-2" /> جارٍ التحميل...</div>;
   }
 
   if (!isAuthenticated) {
@@ -55,8 +63,8 @@ function CheckoutContent() {
           <Sparkles className="w-6 h-6" />
         </div>
         <h2 className="text-xl font-black text-on-surface">تسجيل الدخول مطلوب للمتابعة</h2>
-        <p className="text-xs text-on-surface-variant">يُرجى تسجيل الدخول أو إنشاء حساب لربط خطة {matchedPlan.name} بحسابك.</p>
-        <Link href={`/login?callbackUrl=${encodeURIComponent(callback)}`} className="block w-full py-3 rounded-xl bg-primary text-on-primary font-bold text-xs shadow-lg hover:brightness-110 transition-all">
+        <p className="text-xs text-on-surface-variant">يُرجى تسجيل الدخول لربط خطة {matchedPlan.name} بحسابك.</p>
+        <Link href={`/login?callbackUrl=${encodeURIComponent(callback)}`} className="block w-full py-3 rounded-xl bg-primary text-on-primary font-bold text-xs shadow-lg hover:brightness-110">
           تسجيل الدخول للمتابعة
         </Link>
       </div>
@@ -74,6 +82,7 @@ function CheckoutContent() {
           planSlug: matchedPlan.id,
           interval: isYearly ? "yearly" : "monthly",
           gatewayId: selectedGateway,
+          currency: activeCurrency.code,
           couponCode: couponCode.trim() || undefined,
         }),
       });
@@ -115,22 +124,21 @@ function CheckoutContent() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      {/* Plan Details & Features */}
-      <div className="lg:col-span-5 rounded-3xl p-6 sm:p-7 bg-surface-container-low border border-outline-variant/30 space-y-6 shadow-md">
+      <div className="lg:col-span-5 rounded-3xl p-6 sm:p-7 bg-surface-container-low border border-outline-variant/30 space-y-5 shadow-md">
         <div>
           <span className="text-xs font-bold text-primary">{matchedPlan.tag}</span>
           <h2 className="text-2xl font-black text-on-surface mt-1">{matchedPlan.name}</h2>
-          <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{matchedPlan.description}</p>
+          <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">{matchedPlan.description}</p>
         </div>
 
         <div className="pt-2 pb-4 border-b border-outline-variant/15 flex items-baseline gap-2">
-          <span className="text-4xl font-black text-on-surface font-mono">${currentPrice}</span>
-          <span className="text-xs text-on-surface-variant">/ {isYearly ? "سنوياً" : "شهرياً"}</span>
+          <span className="text-4xl font-black text-on-surface font-mono">{currentPrice}</span>
+          <span className="text-xs text-on-surface-variant">{activeCurrency.symbol} / {isYearly ? "سنوياً" : "شهرياً"}</span>
         </div>
 
-        <ul className="space-y-2.5 text-xs text-on-surface-variant">
+        <ul className="space-y-2 text-xs text-on-surface-variant">
           {matchedPlan.features.map((feat, idx) => (
-            <li key={idx} className="flex items-start gap-2.5">
+            <li key={idx} className="flex items-start gap-2">
               <div className="w-4 h-4 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0 mt-0.5">
                 <Check className="w-2.5 h-2.5 stroke-[3]" />
               </div>
@@ -140,21 +148,32 @@ function CheckoutContent() {
         </ul>
       </div>
 
-      {/* Checkout Form */}
-      <div className="lg:col-span-7 rounded-3xl p-6 sm:p-7 bg-surface-container border border-outline-variant/30 space-y-5 shadow-xl">
-        <h3 className="text-lg font-black text-on-surface">إعدادات الدفع والفاتورة</h3>
+      <div className="lg:col-span-7 rounded-3xl p-6 sm:p-7 bg-surface-container border border-outline-variant/30 space-y-4 shadow-xl">
+        <div className="flex items-center justify-between pb-2 border-b border-outline-variant/15">
+          <h3 className="text-lg font-black text-on-surface">إعدادات الدفع والفاتورة</h3>
+          <div className="flex items-center gap-1.5 bg-surface-container-high px-2.5 py-1 rounded-xl border border-outline-variant/30 text-xs">
+            <Globe className="w-3.5 h-3.5 text-primary" />
+            <select value={selectedCurrencyCode} onChange={(e) => setSelectedCurrencyCode(e.target.value)} className="bg-transparent font-bold text-on-surface text-xs focus:outline-none cursor-pointer">
+              {CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code} className="bg-surface text-on-surface">
+                  {c.flag} {c.code} ({c.symbol})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         <div className="p-1 rounded-2xl bg-surface-container-high flex gap-1">
           <button type="button" onClick={() => setIsYearly(false)} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${!isYearly ? "bg-surface text-primary shadow-sm" : "text-on-surface-variant"}`}>
-            دفع شهري (${monthlyPrice}/شهر)
+            دفع شهري ({monthlyConverted} {activeCurrency.symbol})
           </button>
           <button type="button" onClick={() => setIsYearly(true)} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${isYearly ? "bg-surface text-primary shadow-sm" : "text-on-surface-variant"}`}>
-            <span>دفع سنوي (${yearlyMonthlyPrice}/شهر)</span>
+            <span>دفع سنوي ({yearlyMonthlyConverted} {activeCurrency.symbol})</span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-primary/20 text-primary font-black">وفر 20%</span>
           </button>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <label className="text-xs font-bold text-on-surface block">اختر وسيلة الدفع المفضلة:</label>
           <div className="grid grid-cols-2 gap-2">
             {PAYMENT_GATEWAYS.map((gw) => (
@@ -176,7 +195,7 @@ function CheckoutContent() {
 
         {errorMessage && <div className="p-3 rounded-xl bg-error/10 border border-error/30 text-error text-xs font-bold">{errorMessage}</div>}
 
-        <div className="space-y-2.5 pt-2">
+        <div className="space-y-2.5 pt-1">
           <button type="button" onClick={handleCheckout} disabled={isSubmitting} className="w-full py-3.5 px-6 rounded-xl font-black text-sm bg-primary text-on-primary hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer">
             {isSubmitting ? (
               <>
@@ -185,7 +204,7 @@ function CheckoutContent() {
               </>
             ) : (
               <>
-                <span>تأكيد الدفع والاشتراك (${currentPrice})</span>
+                <span>تأكيد الدفع والاشتراك ({currentPrice} {activeCurrency.symbol})</span>
                 <ChevronLeft className="w-4 h-4" />
               </>
             )}

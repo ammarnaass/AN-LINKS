@@ -7,15 +7,15 @@ import {
   AdminPlanQuotaConfig,
   AdminCurrencyItem,
   UpdateCurrencyInput,
+  CreateCurrencyInput,
+  SyncRatesResult,
   AdminCouponItem,
   CreateCouponInput,
   AdminTransactionsQuery,
   AdminTransactionsResult,
 } from "../types/admin.types";
 
-/**
- * Generic JSON API request handler with automatic JSON parsing and robust error extraction.
- */
+// Generic JSON API request handler with automatic JSON parsing and robust error extraction.
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   if (init?.body && !headers.has("Content-Type")) {
@@ -45,27 +45,21 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   return json as T;
 }
 
-/**
- * 1. Fetch Financial Overview statistics.
- */
+// 1. Fetch Financial Overview statistics.
 export async function fetchFinancialOverview(): Promise<FinancialOverviewStats> {
   return apiRequest<FinancialOverviewStats>("/api/admin/financials/overview", {
     method: "GET",
   });
 }
 
-/**
- * 2. Fetch all configured Payment Gateways.
- */
+// 2. Fetch all configured Payment Gateways.
 export async function fetchAdminGateways(): Promise<AdminGatewayDetails[]> {
   return apiRequest<AdminGatewayDetails[]>("/api/admin/financials/gateways", {
     method: "GET",
   });
 }
 
-/**
- * 3. Update or toggle a Payment Gateway.
- */
+// 3. Update or toggle a Payment Gateway.
 export async function updateAdminGateway(
   input: UpdateGatewayInput
 ): Promise<AdminGatewayDetails> {
@@ -75,18 +69,14 @@ export async function updateAdminGateway(
   });
 }
 
-/**
- * 4. Fetch all Subscription Plans with multi-currency pricing and quotas.
- */
+// 4. Fetch all Subscription Plans with multi-currency pricing and quotas.
 export async function fetchAdminPlans(): Promise<AdminSubscriptionPlanItem[]> {
   return apiRequest<AdminSubscriptionPlanItem[]>("/api/admin/financials/plans", {
     method: "GET",
   });
 }
 
-/**
- * 5. Create or update a Subscription Plan.
- */
+// 5. Create or update a Subscription Plan.
 export async function upsertAdminPlan(
   input: UpsertPlanInput
 ): Promise<AdminSubscriptionPlanItem> {
@@ -106,9 +96,7 @@ export async function upsertAdminPlan(
   });
 }
 
-/**
- * 6. Delete or deactivate a Subscription Plan.
- */
+// 6. Delete or deactivate a Subscription Plan.
 export async function deleteAdminPlan(
   id: string
 ): Promise<{ success: boolean; deactivated?: boolean; message?: string }> {
@@ -120,9 +108,7 @@ export async function deleteAdminPlan(
   );
 }
 
-/**
- * 7. Update plan quota limits and feature toggles.
- */
+// 7. Update plan quota limits and feature toggles.
 export async function updateAdminPlanQuotas(
   planId: string,
   quotas: Partial<AdminPlanQuotaConfig>
@@ -133,18 +119,14 @@ export async function updateAdminPlanQuotas(
   });
 }
 
-/**
- * 8. Fetch all supported currencies and exchange rates.
- */
+// 8. Fetch all supported currencies and exchange rates.
 export async function fetchAdminCurrencies(): Promise<AdminCurrencyItem[]> {
   return apiRequest<AdminCurrencyItem[]>("/api/admin/financials/currencies", {
     method: "GET",
   });
 }
 
-/**
- * 9. Update a currency's exchange rate, status, or auto-detect countries.
- */
+// 9. Update a currency's exchange rate, status, or auto-detect countries.
 export async function updateAdminCurrency(
   code: string,
   input: UpdateCurrencyInput
@@ -155,18 +137,29 @@ export async function updateAdminCurrency(
   });
 }
 
-/**
- * 10. Fetch all discount coupons.
- */
+export async function createAdminCurrency(
+  input: CreateCurrencyInput
+): Promise<AdminCurrencyItem> {
+  return apiRequest<AdminCurrencyItem>("/api/admin/financials/currencies", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function syncLiveExchangeRates(): Promise<SyncRatesResult> {
+  return apiRequest<SyncRatesResult>("/api/admin/financials/currencies/sync", {
+    method: "POST",
+  });
+}
+
+// 10. Fetch all discount coupons.
 export async function fetchAdminCoupons(): Promise<AdminCouponItem[]> {
   return apiRequest<AdminCouponItem[]>("/api/admin/financials/coupons", {
     method: "GET",
   });
 }
 
-/**
- * 11. Create a new discount coupon.
- */
+// 11. Create a new discount coupon.
 export async function createAdminCoupon(
   input: CreateCouponInput
 ): Promise<AdminCouponItem> {
@@ -176,9 +169,7 @@ export async function createAdminCoupon(
   });
 }
 
-/**
- * 12. Toggle active state of a discount coupon.
- */
+// 12. Toggle active state of a discount coupon.
 export async function toggleAdminCoupon(
   id: string,
   isActive: boolean
@@ -192,9 +183,7 @@ export async function toggleAdminCoupon(
   );
 }
 
-/**
- * 13. Delete a discount coupon.
- */
+// 13. Delete a discount coupon.
 export async function deleteAdminCoupon(
   id: string
 ): Promise<{ success: boolean; message?: string }> {
@@ -206,9 +195,7 @@ export async function deleteAdminCoupon(
   );
 }
 
-/**
- * 14. Fetch paginated admin transactions and invoices.
- */
+// 14. Fetch paginated admin transactions and invoices.
 export async function fetchAdminTransactions(
   query?: AdminTransactionsQuery
 ): Promise<AdminTransactionsResult> {

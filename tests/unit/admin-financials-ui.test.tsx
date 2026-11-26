@@ -244,6 +244,8 @@ function createMockFinancialsHook(
     deletePlan: vi.fn().mockResolvedValue(true),
     saveQuotas: vi.fn().mockResolvedValue(true),
     saveCurrency: vi.fn().mockResolvedValue(true),
+    addCurrency: vi.fn().mockResolvedValue(true),
+    syncRates: vi.fn().mockResolvedValue(true),
     createCoupon: vi.fn().mockResolvedValue(true),
     toggleCoupon: vi.fn().mockResolvedValue(true),
     deleteCoupon: vi.fn().mockResolvedValue(true),

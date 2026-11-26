@@ -46,7 +46,7 @@ export function useAdminFinancials(initialSubTab: FinancialSubTab = "gateways") 
 
   const { gateways, setGateways, toggleGateway, updateGatewayConfig } = useFinancialsGateways(callbacks);
   const { plans, setPlans, savePlan, deletePlan, saveQuotas } = useFinancialsPlans(callbacks);
-  const { currencies, setCurrencies, saveCurrency } = useFinancialsCurrencies(callbacks);
+  const { currencies, setCurrencies, saveCurrency, addCurrency, syncRates } = useFinancialsCurrencies(callbacks);
   const { coupons, setCoupons, createCoupon, toggleCoupon, deleteCoupon } = useFinancialsCoupons(callbacks);
   const { transactions, setTransactions, filterTransactions } = useFinancialsTransactions(callbacks);
 
@@ -122,6 +122,8 @@ export function useAdminFinancials(initialSubTab: FinancialSubTab = "gateways") 
     deletePlan,
     saveQuotas,
     saveCurrency,
+    addCurrency,
+    syncRates,
     createCoupon,
     toggleCoupon,
     deleteCoupon,

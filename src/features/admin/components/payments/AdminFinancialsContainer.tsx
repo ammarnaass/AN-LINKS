@@ -117,7 +117,16 @@ export function AdminFinancialsContainer({
         {activeSubTab === "gateways" && <GatewaysSubTab gateways={financials.gateways} onToggleGateway={financials.toggleGateway} onSaveConfig={financials.updateGatewayConfig} isSaving={financials.isSaving} onOpenConfig={(gw) => setGatewayModalState({ isOpen: true, gateway: gw })} />}
         {activeSubTab === "plans" && <PlansSubTab plans={financials.plans} onSavePlan={financials.savePlan} onDeletePlan={financials.deletePlan} isSaving={financials.isSaving} onOpenCreatePlan={() => setPlanModalState({ isOpen: true, plan: null })} onOpenEditPlan={(p) => setPlanModalState({ isOpen: true, plan: p })} />}
         {activeSubTab === "quotas" && <PlanQuotasSubTab plans={financials.plans} onSaveQuotas={financials.saveQuotas} isSaving={financials.isSaving} />}
-        {activeSubTab === "currencies" && <CurrenciesSubTab currencies={financials.currencies} onSaveCurrency={financials.saveCurrency} isSaving={financials.isSaving} onOpenEditRate={(c) => setCurrencyModalState({ isOpen: true, currency: c })} />}
+        {activeSubTab === "currencies" && (
+          <CurrenciesSubTab
+            currencies={financials.currencies}
+            onSaveCurrency={financials.saveCurrency}
+            onAddCurrency={financials.addCurrency}
+            onSyncRates={financials.syncRates}
+            isSaving={financials.isSaving}
+            onOpenEditRate={(c) => setCurrencyModalState({ isOpen: true, currency: c })}
+          />
+        )}
         {activeSubTab === "coupons" && <CouponsSubTab coupons={financials.coupons} availablePlanSlugs={financials.plans.map((p) => ({ slug: p.slug, nameAr: p.nameAr }))} onCreateCoupon={financials.createCoupon} onToggleCoupon={financials.toggleCoupon} onDeleteCoupon={financials.deleteCoupon} isSaving={financials.isSaving} onOpenCreateCoupon={() => setCouponModalOpen(true)} />}
         {activeSubTab === "transactions" && <InvoicesTransactionsSubTab transactions={financials.transactions} onFilterChange={financials.filterTransactions} isLoading={financials.isLoading} />}
       </div>

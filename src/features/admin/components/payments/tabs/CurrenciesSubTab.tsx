@@ -4,14 +4,18 @@ import React, { useState } from "react";
 import {
   AdminCurrencyItem,
   UpdateCurrencyInput,
+  CreateCurrencyInput,
 } from "../../../types/admin.types";
 import { AppCard, AppBadge, AppButton } from "@/shared/ui";
 import { CurrencyRateModal } from "../modals/CurrencyRateModal";
-import { Coins, Edit2, Globe, Check, AlertCircle } from "lucide-react";
+import { NewCurrencyModal } from "../modals/NewCurrencyModal";
+import { Coins, Edit2, RefreshCw, Plus } from "lucide-react";
 
 export interface CurrenciesSubTabProps {
   currencies: AdminCurrencyItem[];
   onSaveCurrency: (code: string, input: UpdateCurrencyInput) => Promise<boolean>;
+  onAddCurrency?: (input: CreateCurrencyInput) => Promise<boolean>;
+  onSyncRates?: () => Promise<boolean>;
   isSaving?: boolean;
   onOpenEditRate?: (currency: AdminCurrencyItem) => void;
 }
@@ -19,11 +23,15 @@ export interface CurrenciesSubTabProps {
 export function CurrenciesSubTab({
   currencies,
   onSaveCurrency,
+  onAddCurrency,
+  onSyncRates,
   isSaving = false,
   onOpenEditRate,
 }: CurrenciesSubTabProps) {
   const [selectedCurrency, setSelectedCurrency] = useState<AdminCurrencyItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const handleEditRate = (currency: AdminCurrencyItem) => {
     if (onOpenEditRate) {
@@ -31,6 +39,16 @@ export function CurrenciesSubTab({
     } else {
       setSelectedCurrency(currency);
       setIsModalOpen(true);
+    }
+  };
+
+  const handleSync = async () => {
+    if (!onSyncRates || isSyncing) return;
+    setIsSyncing(true);
+    try {
+      await onSyncRates();
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -46,7 +64,32 @@ export function CurrenciesSubTab({
             تحديد العملات المتاحة للدفع وحساب أسعار الصرف التلقائية بالنسبة للدولار الأمريكي (USD)
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onSyncRates && (
+            <button
+              type="button"
+              onClick={handleSync}
+              disabled={isSyncing || isSaving}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 transition-all cursor-pointer disabled:opacity-50"
+              title="سحب أحدث أسعار الصرف العالمية للعملات مقابل الدولار الأمريكي"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-primary ${isSyncing ? "animate-spin" : ""}`} />
+              <span>{isSyncing ? "جارٍ المزامنة..." : "تحديث أسعار الصرف الحية"}</span>
+            </button>
+          )}
+
+          {onAddCurrency && (
+            <button
+              type="button"
+              onClick={() => setIsNewModalOpen(true)}
+              disabled={isSaving}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary text-on-primary hover:brightness-110 transition-all shadow-xs cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>إضافة عملة</span>
+            </button>
+          )}
+
           <AppBadge variant="primary" size="sm">
             <Coins className="w-3.5 h-3.5 ml-1 inline" />
             {currencies.length} عملات مهيأة
@@ -174,6 +217,15 @@ export function CurrenciesSubTab({
             setSelectedCurrency(null);
           }}
           onSave={onSaveCurrency}
+          isSaving={isSaving}
+        />
+      )}
+
+      {onAddCurrency && (
+        <NewCurrencyModal
+          isOpen={isNewModalOpen}
+          onClose={() => setIsNewModalOpen(false)}
+          onAdd={onAddCurrency}
           isSaving={isSaving}
         />
       )}
