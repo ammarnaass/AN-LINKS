@@ -8,6 +8,7 @@ import { UserNavDropdown, useCurrentUser } from "@/features/auth";
 import { PreviewProvider } from "../context/PreviewContext";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { resolveDashboardPageTitle } from "./DashboardSidebarNav";
+import { DashboardPlanBadge } from "./DashboardPlanBadge";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "/dashboard";
@@ -51,7 +52,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <DashboardPlanBadge />
             <ThemeToggle />
             <UserNavDropdown />
           </div>
