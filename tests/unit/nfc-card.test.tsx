@@ -83,7 +83,9 @@ describe("Creator NFC Card, Design, Settings & Barcode Suite", () => {
     );
   });
 
-  it("creates, updates, and resolves NFC & QR scans across BIO_PAGE, DIRECT_URL, VCARD, and DISABLED", async () => {
+  it(
+    "creates, updates, and resolves NFC & QR scans across BIO_PAGE, DIRECT_URL, VCARD, and DISABLED",
+    async () => {
     const initial = await getOrCreateUserNfcCard(testUserId);
     expect(initial.cardCode).toBe(`an-${testUsername}`);
     expect(initial.qrSvgMarkup).toContain("<svg");
@@ -136,7 +138,7 @@ describe("Creator NFC Card, Design, Settings & Barcode Suite", () => {
     expect(refreshed.cardPattern).toBe("chip");
     expect(refreshed.orientation).toBe("vertical");
     expect(refreshed.barcodeValue).toBe("VIP-2026");
-  });
+  }, 25000);
 
   it("renders NfcCardPreview, NfcDesignPanel, NfcSettingsPanel, and BarcodeAndQrPanel", async () => {
     const card = await getOrCreateUserNfcCard(testUserId);

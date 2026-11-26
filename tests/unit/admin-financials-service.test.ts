@@ -706,6 +706,9 @@ describe("Admin Financials Service", () => {
         allowPrioritySupport: true,
         customCssAllowed: true,
         storeCommissionRate: 2.5,
+        allowAppointments: false,
+        allowOutgoingWebhooks: false,
+        allowAiCopilot: false,
       });
 
       const updated = await updateAdminPlanQuotas(
@@ -1370,6 +1373,9 @@ describe("Admin Financials Service", () => {
         allowPrioritySupport: true,
         customCssAllowed: true,
         storeCommissionRate: 3.0,
+        allowAppointments: false,
+        allowOutgoingWebhooks: false,
+        allowAiCopilot: false,
       });
 
       const req = new NextRequest("http://localhost:3000/api/admin/financials/quotas", {

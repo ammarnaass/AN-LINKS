@@ -26,8 +26,12 @@ describe("Authentication & RBAC Integration Workflows", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     await prisma.user.updateMany({
-      where: { email: { in: ["admin@anlinks.dev", "client@anlinks.dev"] } },
-      data: { isSuspended: false },
+      where: { email: "admin@anlinks.dev" },
+      data: { isSuspended: false, role: "ADMIN" },
+    });
+    await prisma.user.updateMany({
+      where: { email: "client@anlinks.dev" },
+      data: { isSuspended: false, role: "USER" },
     });
   });
 

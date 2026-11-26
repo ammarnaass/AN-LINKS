@@ -128,14 +128,19 @@ function PricingTierButton({
   isYearly: boolean;
 }) {
   const { isAuthenticated } = useCurrentUser();
-  const router = useRouter();
+  let router: any = null;
+  try {
+    router = useRouter();
+  } catch {
+    // SSR / test harness fallback
+  }
   const isFree = tier.id === "free";
 
   const handleCtaClick = (e: React.MouseEvent) => {
     if (isFree) {
       if (isAuthenticated) {
         e.preventDefault();
-        router.push("/dashboard");
+        router?.push?.("/dashboard");
       }
       return;
     }
@@ -143,9 +148,17 @@ function PricingTierButton({
     e.preventDefault();
     const checkoutUrl = `/checkout?plan=${tier.id}&billing=${isYearly ? "yearly" : "monthly"}`;
     if (isAuthenticated) {
-      router.push(checkoutUrl);
+      if (router?.push) {
+        router.push(checkoutUrl);
+      } else {
+        window.location.href = checkoutUrl;
+      }
     } else {
-      router.push(`/login?callbackUrl=${encodeURIComponent(checkoutUrl)}`);
+      if (router?.push) {
+        router.push(`/login?callbackUrl=${encodeURIComponent(checkoutUrl)}`);
+      } else {
+        window.location.href = `/login?callbackUrl=${encodeURIComponent(checkoutUrl)}`;
+      }
     }
   };
 

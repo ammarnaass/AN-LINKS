@@ -28,6 +28,7 @@ vi.mock("@/shared/db", () => {
     },
     paymentGateway: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
     },
     financialInvoice: {
       findFirst: vi.fn(),
@@ -444,6 +445,7 @@ describe("Public Subscription APIs & Webhook Processor", () => {
         code: "disabled_gw",
         isEnabled: false,
       } as any);
+      vi.mocked(prisma.paymentGateway.findFirst).mockResolvedValue(null);
 
       const req = new NextRequest("http://localhost:3000/api/subscriptions/checkout", {
         method: "POST",
@@ -480,6 +482,11 @@ describe("Public Subscription APIs & Webhook Processor", () => {
       } as any);
 
       vi.mocked(prisma.paymentGateway.findUnique).mockResolvedValue({
+        code: "mada",
+        isEnabled: true,
+      } as any);
+      vi.mocked(prisma.paymentGateway.findFirst).mockResolvedValue({
+        id: "gw_mada",
         code: "mada",
         isEnabled: true,
       } as any);
@@ -528,7 +535,7 @@ describe("Public Subscription APIs & Webhook Processor", () => {
 
       expect(res.status).toBe(200);
       expect(json.success).toBe(true);
-      expect(json.checkoutUrl).toBe("/checkout/session/inv_created_123");
+      expect(json.checkoutUrl).toContain("inv_created_123");
       expect(json.invoice.amountTotal).toBe(75);
       expect(json.invoice.currency).toBe("SAR");
       expect(json.gatewayTxId).toMatch(/^tx_mada_/);

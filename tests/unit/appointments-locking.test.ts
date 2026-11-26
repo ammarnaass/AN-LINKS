@@ -176,7 +176,7 @@ describe("Appointments Scheduler & Concurrency Locking", () => {
       expect(result.id).toBe("booking_123");
       expect(result.status).toBe("PENDING_PAYMENT");
       expect(result.lockedUntil).toBeInstanceOf(Date);
-      expect(result.lockedUntil.getTime()).toBeGreaterThan(Date.now());
+      expect(result.lockedUntil!.getTime()).toBeGreaterThan(Date.now());
     });
 
     it("should throw an error if slot is already reserved or locked", async () => {

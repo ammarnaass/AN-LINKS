@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     if (!gateway) {
       return NextResponse.json(
-        { success: false, error: "لا توجد بوابات دفع مفعلة حالياً" },
+        { success: false, error: "بوابة الدفع المطلوبة غير مفعلة أو غير متوفرة" },
         { status: 400 }
       );
     }
