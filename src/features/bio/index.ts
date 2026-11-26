@@ -10,3 +10,5 @@ export * from "./components/BioPageContent";
 export * from "./components/BioOwnerBar";
 export * from "./components/ProfileJsonLd";
 export * from "./components/profile/ProfileBadgeRenderer";
+export * from "./components/BioGatedMediaCard";
+export * from "./services/gated-media.service";
