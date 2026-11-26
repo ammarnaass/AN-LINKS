@@ -26,6 +26,19 @@ export function SettingsTabsNav({ activeTab, onSelectTab }: SettingsTabsNavProps
 
       <button
         type="button"
+        onClick={() => onSelectTab("newsletter")}
+        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          activeTab === "newsletter"
+            ? "bg-surface-container-high text-primary shadow-sm"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+        }`}
+      >
+        <span className="material-symbols-outlined text-[18px]">mail</span>
+        <span>النشرة البريدية والمشتركون</span>
+      </button>
+
+      <button
+        type="button"
         onClick={() => onSelectTab("subscription")}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
           activeTab === "subscription"

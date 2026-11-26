@@ -9,6 +9,9 @@ interface BioNewsletterCardProps {
   accentColor?: string | null;
   buttonClass?: string;
   isPreview?: boolean;
+  title?: string | null;
+  subtitle?: string | null;
+  buttonText?: string | null;
 }
 
 export function BioNewsletterCard({
@@ -17,8 +20,15 @@ export function BioNewsletterCard({
   accentColor = "#3B82F6",
   buttonClass = "",
   isPreview = false,
+  title,
+  subtitle,
+  buttonText,
 }: BioNewsletterCardProps) {
   const effectiveAccent = accentColor || "#3B82F6";
+  const effectiveTitle = title?.trim() || `النشرة البريدية لـ ${displayName}`;
+  const effectiveSubtitle = subtitle?.trim() || "احصل على أحدث المحتوى والعروض الحصرية أولاً بأول";
+  const effectiveButtonText = buttonText?.trim() || "اشتراك";
+
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -61,7 +71,7 @@ export function BioNewsletterCard({
         <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
         <div className="text-xs">
           <p className="font-bold">تم الاشتراك بنجاح!</p>
-          <p className="text-[11px] text-emerald-300/80 mt-0.5">شكراً لانضمامك إلى النشرة البريدية لـ {displayName}</p>
+          <p className="text-[11px] text-emerald-300/80 mt-0.5">شكراً لانضمامك إلى {effectiveTitle}</p>
         </div>
       </div>
     );
@@ -77,8 +87,8 @@ export function BioNewsletterCard({
           <Mail className="w-4 h-4" />
         </div>
         <div className="text-right flex-1">
-          <h4 className="text-xs font-bold text-on-surface">النشرة البريدية لـ {displayName}</h4>
-          <p className="text-[10px] text-on-surface-variant">احصل على أحدث المحتوى والعروض الحصرية أولاً بأول</p>
+          <h4 className="text-xs font-bold text-on-surface">{effectiveTitle}</h4>
+          <p className="text-[10px] text-on-surface-variant">{effectiveSubtitle}</p>
         </div>
       </div>
 
@@ -101,7 +111,7 @@ export function BioNewsletterCard({
           {isLoading ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
           ) : (
-            <span>اشتراك</span>
+            <span>{effectiveButtonText}</span>
           )}
         </button>
       </form>

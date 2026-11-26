@@ -39,6 +39,10 @@ export interface ProfileData {
   badgeSize?: BadgeSize | string | null;
   badgeColor?: string | null;
   badgeIcon?: string | null;
+  newsletterEnabled?: boolean | null;
+  newsletterTitle?: string | null;
+  newsletterSubtitle?: string | null;
+  newsletterButtonText?: string | null;
 }
 
 export interface SocialItem {

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Mail, Download, Users } from "lucide-react";
+import Link from "next/link";
+import { Mail, Download, Users, ExternalLink } from "lucide-react";
 import { AppButton } from "@/shared/ui";
 
 interface SubscriberItem {
@@ -55,16 +56,26 @@ export function SubscribersListCard() {
           </div>
         </div>
 
-        <AppButton
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleExportCsv}
-          disabled={subscribers.length === 0}
-          leftIcon={<Download className="w-3.5 h-3.5" />}
-        >
-          تصدير CSV
-        </AppButton>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/settings?tab=newsletter"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition"
+          >
+            <span>استوديو النشرة المتقدم</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Link>
+
+          <AppButton
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            disabled={subscribers.length === 0}
+            leftIcon={<Download className="w-3.5 h-3.5" />}
+          >
+            تصدير CSV
+          </AppButton>
+        </div>
       </div>
 
       {isLoading ? (

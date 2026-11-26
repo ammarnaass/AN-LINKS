@@ -73,6 +73,12 @@ model Profile {
   badgeSize          String   @default("md")
   badgeColor         String?
   badgeIcon          String   @default("CheckCircle2")
+
+  // Newsletter Customization
+  newsletterEnabled    Boolean  @default(true)
+  newsletterTitle      String?
+  newsletterSubtitle   String?
+  newsletterButtonText String?
 }
 
 enum PlatformCategory {
@@ -449,9 +455,25 @@ model CreatorSubscriber {
   email     String
   name      String?
   source    String?  @default("bio_page")
+  status    String   @default("ACTIVE") // ACTIVE | UNSUBSCRIBED
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([creatorId, email])
+  @@index([creatorId, createdAt])
+  @@index([creatorId, status])
+}
+
+model NewsletterBroadcast {
+  id         String   @id @default(cuid())
+  creatorId  String
+  subject    String
+  content    String   @db.Text
+  sentCount  Int      @default(0)
+  status     String   @default("SENT") // SENT | DRAFT | FAILED
+  sentAt     DateTime @default(now())
+  createdAt  DateTime @default(now())
+
   @@index([creatorId, createdAt])
 }
 

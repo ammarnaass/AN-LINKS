@@ -38,13 +38,24 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const cleanUsername = username.toLowerCase().trim();
     const creator = await prisma.user.findUnique({
       where: { username: cleanUsername },
-      select: { id: true, isSuspended: true },
+      select: {
+        id: true,
+        isSuspended: true,
+        profile: { select: { newsletterEnabled: true } },
+      },
     });
 
     if (!creator || creator.isSuspended) {
       return NextResponse.json(
         { success: false, error: "صانع المحتوى غير موجود" },
         { status: 404 }
+      );
+    }
+
+    if (creator.profile && creator.profile.newsletterEnabled === false) {
+      return NextResponse.json(
+        { success: false, error: "النشرة البريدية غير مفعلة لهذا الحساب حالياً" },
+        { status: 400 }
       );
     }
 
@@ -58,12 +69,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
       update: {
         name: name || undefined,
+        status: "ACTIVE",
       },
       create: {
         creatorId: creator.id,
         email,
         name,
         source: "bio_page",
+        status: "ACTIVE",
       },
     });
 

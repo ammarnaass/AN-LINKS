@@ -114,13 +114,18 @@ function BioMainFrame({
         isPreview={isPreview}
       />
 
-      <BioNewsletterCard
-        username={username}
-        displayName={profile.displayName}
-        accentColor={profile.accentColor || undefined}
-        buttonClass={styles.buttonClass}
-        isPreview={isPreview}
-      />
+      {profile.newsletterEnabled !== false && (
+        <BioNewsletterCard
+          username={username}
+          displayName={profile.displayName}
+          accentColor={profile.accentColor || undefined}
+          buttonClass={styles.buttonClass}
+          isPreview={isPreview}
+          title={profile.newsletterTitle}
+          subtitle={profile.newsletterSubtitle}
+          buttonText={profile.newsletterButtonText}
+        />
+      )}
 
       {socialPosition === "bottom" && (
         <SocialIconsRow

@@ -7,6 +7,7 @@ import {
   SettingsHeader,
   SettingsTabsNav,
   ProfileTab,
+  NewsletterTab,
   SubscriptionTab,
   PayoutsTab,
   SecurityTab,
@@ -15,6 +16,19 @@ import {
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab") as SettingsTab | null;
+      if (
+        tabParam &&
+        ["profile", "newsletter", "subscription", "payouts", "security", "danger"].includes(tabParam)
+      ) {
+        setActiveTab(tabParam);
+      }
+    }
+  }, []);
 
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
@@ -111,6 +125,8 @@ export default function SettingsPage() {
             setSeoIndexing={setSeoIndexing}
           />
         )}
+
+        {activeTab === "newsletter" && <NewsletterTab />}
 
         {activeTab === "subscription" && <SubscriptionTab />}
         {activeTab === "payouts" && <PayoutsTab />}

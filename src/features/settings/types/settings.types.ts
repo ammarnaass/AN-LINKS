@@ -1,4 +1,10 @@
-export type SettingsTab = "profile" | "subscription" | "payouts" | "security" | "danger";
+export type SettingsTab =
+  | "profile"
+  | "newsletter"
+  | "subscription"
+  | "payouts"
+  | "security"
+  | "danger";
 
 export interface ProfileSettingsData {
   displayName: string;
