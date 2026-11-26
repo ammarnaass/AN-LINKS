@@ -2,14 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Webhook, Send, Key, Copy, Check, Trash2, RefreshCw } from "lucide-react";
-
-interface WebhookDeliveryLog {
-  id: string;
-  event: string;
-  status: string;
-  responseCode: number | null;
-  attempts: number;
-}
+import { WebhookDeliveryStats } from "../webhooks/WebhookDeliveryStats";
 
 const AVAILABLE_EVENTS = [
   { id: "lead.collected", label: "جمع بيانات مشترك جديد (Lead)" },
@@ -21,7 +14,7 @@ export function CreatorWebhooksCard() {
   const [url, setUrl] = useState("");
   const [events, setEvents] = useState<string[]>(["lead.collected", "order.completed"]);
   const [secret, setSecret] = useState<string>("");
-  const [, setDeliveries] = useState<WebhookDeliveryLog[]>([]);
+  const [stats, setStats] = useState({ totalDispatched: 0, deliveredCount: 0, failedCount: 0, successRate: 100 });
   const [saving, setSaving] = useState(false);
   const [pinging, setPinging] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -39,7 +32,9 @@ export function CreatorWebhooksCard() {
         setUrl(json.data.url || "");
         setEvents(json.data.events || []);
         setSecret(json.data.secretEncrypted || "");
-        setDeliveries(json.data.deliveries || []);
+      }
+      if (json.success && json.stats) {
+        setStats(json.stats);
       }
     } catch {
       // ignore network errors on load
@@ -112,7 +107,7 @@ export function CreatorWebhooksCard() {
       if (json.success) {
         setUrl("");
         setSecret("");
-        setDeliveries([]);
+        setStats({ totalDispatched: 0, deliveredCount: 0, failedCount: 0, successRate: 100 });
         setMessage({ type: "success", text: "تم حذف خطاف الويب" });
       }
     } catch {
@@ -142,6 +137,8 @@ export function CreatorWebhooksCard() {
           </div>
         </div>
       </div>
+
+      <WebhookDeliveryStats {...stats} />
 
       {message && (
         <div className={`p-3 rounded-xl text-xs font-semibold ${message.type === "success" ? "bg-primary/10 text-primary border border-primary/20" : "bg-error/10 text-error border border-error/20"}`}>

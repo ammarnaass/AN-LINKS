@@ -65,6 +65,19 @@ export function SettingsTabsNav({ activeTab, onSelectTab }: SettingsTabsNavProps
 
       <button
         type="button"
+        onClick={() => onSelectTab("ai-webhooks")}
+        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          activeTab === "ai-webhooks"
+            ? "bg-surface-container-high text-primary shadow-sm"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+        }`}
+      >
+        <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+        <span>الذكاء الاصطناعي والأتمتة (AI & Webhooks)</span>
+      </button>
+
+      <button
+        type="button"
         onClick={() => onSelectTab("security")}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
           activeTab === "security"

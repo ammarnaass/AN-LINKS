@@ -3,6 +3,7 @@ export type SettingsTab =
   | "newsletter"
   | "subscription"
   | "payouts"
+  | "ai-webhooks"
   | "security"
   | "danger";
 

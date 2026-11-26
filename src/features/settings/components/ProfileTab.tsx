@@ -8,7 +8,6 @@ import { MarketingPixelsCard } from "./profile/MarketingPixelsCard";
 import { CustomDomainCard } from "./profile/CustomDomainCard";
 import { SubscribersListCard } from "./profile/SubscribersListCard";
 import { DigitalProductsCard } from "./profile/DigitalProductsCard";
-import { CreatorWebhooksCard } from "./profile/CreatorWebhooksCard";
 
 export interface ProfileTabProps {
   displayName?: string;
@@ -102,8 +101,6 @@ export function ProfileTab(props?: ProfileTabProps) {
       <SubscribersListCard />
 
       <DigitalProductsCard />
-
-      <CreatorWebhooksCard />
     </section>
   );
 }

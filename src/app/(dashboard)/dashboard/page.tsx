@@ -10,6 +10,7 @@ import {
   LinkData,
   SocialItem,
 } from "@/features/links";
+import { AiWebhooksQuickCard } from "@/features/dashboard";
 import {
   fetchUserLinks,
   createLinkClient,
@@ -185,6 +186,8 @@ export default function DashboardPage() {
         isPageActive={isPageActive}
         onTogglePageActive={handleTogglePageActive}
       />
+
+      <AiWebhooksQuickCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <section className="lg:col-span-7 space-y-6">

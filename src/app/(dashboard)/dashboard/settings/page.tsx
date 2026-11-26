@@ -10,6 +10,7 @@ import {
   NewsletterTab,
   SubscriptionTab,
   PayoutsTab,
+  AiAndWebhooksTab,
   SecurityTab,
   DangerZoneTab,
 } from "@/features/settings";
@@ -23,7 +24,7 @@ export default function SettingsPage() {
       const tabParam = params.get("tab") as SettingsTab | null;
       if (
         tabParam &&
-        ["profile", "newsletter", "subscription", "payouts", "security", "danger"].includes(tabParam)
+        ["profile", "newsletter", "subscription", "payouts", "ai-webhooks", "security", "danger"].includes(tabParam)
       ) {
         setActiveTab(tabParam);
       }
@@ -130,6 +131,7 @@ export default function SettingsPage() {
 
         {activeTab === "subscription" && <SubscriptionTab />}
         {activeTab === "payouts" && <PayoutsTab />}
+        {activeTab === "ai-webhooks" && <AiAndWebhooksTab />}
         {activeTab === "security" && <SecurityTab />}
         {activeTab === "danger" && <DangerZoneTab />}
       </main>

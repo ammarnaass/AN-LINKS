@@ -25,9 +25,31 @@ export async function GET() {
       },
     });
 
+    let stats = {
+      totalDispatched: 0,
+      deliveredCount: 0,
+      failedCount: 0,
+      successRate: 100,
+    };
+
+    if (endpoint) {
+      const [totalDispatched, deliveredCount, failedCount] = await Promise.all([
+        prisma.webhookOutbox.count({ where: { endpointId: endpoint.id } }),
+        prisma.webhookOutbox.count({ where: { endpointId: endpoint.id, status: "DELIVERED" } }),
+        prisma.webhookOutbox.count({ where: { endpointId: endpoint.id, status: "FAILED" } }),
+      ]);
+      stats = {
+        totalDispatched,
+        deliveredCount,
+        failedCount,
+        successRate: totalDispatched > 0 ? Math.round((deliveredCount / totalDispatched) * 100) : 100,
+      };
+    }
+
     return NextResponse.json({
       success: true,
       data: endpoint,
+      stats,
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : "فشل جلب بيانات خطافات الويب";
