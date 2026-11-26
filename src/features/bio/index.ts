@@ -12,3 +12,4 @@ export * from "./components/ProfileJsonLd";
 export * from "./components/profile/ProfileBadgeRenderer";
 export * from "./components/BioGatedMediaCard";
 export * from "./services/gated-media.service";
+export * from "./services/social-counter.service";

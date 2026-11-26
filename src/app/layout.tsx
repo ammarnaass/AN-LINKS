@@ -10,7 +10,7 @@ import {
   normalizeLocale,
   getDirection,
 } from "@/shared/i18n";
-import { CookieConsentBanner } from "@/shared/ui";
+import { CookieConsentBanner, PwaInstallPrompt } from "@/shared/ui";
 import { NotificationToastContainer } from "@/features/notifications";
 
 export const metadata: Metadata = {
@@ -84,6 +84,7 @@ export default async function RootLayout({
             {children}
             <CookieConsentBanner />
             <NotificationToastContainer />
+            <PwaInstallPrompt />
           </I18nProvider>
         </AuthProvider>
       </body>
