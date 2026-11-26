@@ -16,9 +16,11 @@ export interface CurrentUserResult {
   session: unknown;
   user: CurrentUserData | null;
   isAuthenticated: boolean;
+  isGuest: boolean;
   isLoading: boolean;
   role: string;
   isAdmin: boolean;
+  isOwner: (targetUsername?: string | null) => boolean;
 }
 
 const STORAGE_KEY = "an_auth_session";
@@ -90,26 +92,43 @@ export function useCurrentUser(): CurrentUserResult {
     const isAuthenticated = isLiveAuth || Boolean(activeUser);
     const role = activeUser?.role || "USER";
     const isAdmin = role === "ADMIN";
+    const isGuest = !isAuthenticated && !isLoading;
+
+    const isOwner = (targetUsername?: string | null): boolean => {
+      if (!isAuthenticated || !activeUser?.username || !targetUsername) return false;
+      return activeUser.username.trim().toLowerCase() === targetUsername.trim().toLowerCase();
+    };
 
     return {
       session: session.data,
       user: activeUser,
       isAuthenticated,
+      isGuest,
       isLoading: isLoading && !activeUser,
       role,
       isAdmin,
+      isOwner,
     };
   } catch {
     const activeUser = memoryUser;
     const isAuthenticated = Boolean(activeUser);
     const role = activeUser?.role || "USER";
+    const isOwner = (targetUsername?: string | null): boolean => {
+      if (!isAuthenticated || !activeUser?.username || !targetUsername) return false;
+      return activeUser.username.trim().toLowerCase() === targetUsername.trim().toLowerCase();
+    };
     return {
       session: null,
       user: activeUser,
       isAuthenticated,
+      isGuest: !isAuthenticated,
       isLoading: false,
       role,
       isAdmin: role === "ADMIN",
+      isOwner,
     };
   }
 }
+
+export const useAuthStatus = useCurrentUser;
+

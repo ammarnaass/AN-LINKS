@@ -142,3 +142,31 @@ export async function adminRevokeSession(sessionId: string): Promise<boolean> {
   return true;
 }
 
+export async function revokeAllOtherSessions(
+  userId: string,
+  currentToken: string
+): Promise<number> {
+  const result = await prisma.userSession.updateMany({
+    where: {
+      userId,
+      isActive: true,
+      sessionToken: { not: currentToken },
+    },
+    data: { isActive: false },
+  });
+  return result.count;
+}
+
+export async function touchSession(sessionToken: string): Promise<void> {
+  if (!sessionToken) return;
+  try {
+    await prisma.userSession.updateMany({
+      where: { sessionToken, isActive: true },
+      data: { lastActive: new Date() },
+    });
+  } catch {
+    // Non-blocking catch
+  }
+}
+
+

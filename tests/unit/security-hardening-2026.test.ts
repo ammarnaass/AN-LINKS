@@ -96,11 +96,11 @@ describe("2026 Security Hardening & Operations Suite", () => {
     }
   });
 
-  it("attaches Content-Security-Policy and security headers in middleware", () => {
+  it("attaches Content-Security-Policy and security headers in middleware", async () => {
     const req = new NextRequest("http://localhost:3000/faisal_tech", {
       headers: { host: "anlinks.dev" },
     });
-    const res = middleware(req);
+    const res = await middleware(req);
     expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(res.headers.get("X-Frame-Options")).toBe("SAMEORIGIN");
     expect(res.headers.get("Content-Security-Policy")).toContain("default-src 'self'");

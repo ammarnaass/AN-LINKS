@@ -10,6 +10,7 @@ import { QrShareModal } from "./QrShareModal";
 import { TrackingPixels } from "./TrackingPixels";
 import { BioNewsletterCard } from "./BioNewsletterCard";
 import { BioDigitalStoreCard } from "./BioDigitalStoreCard";
+import { BioOwnerBar } from "./BioOwnerBar";
 import { useTranslation } from "@/shared/i18n";
 import { resolveThemeStyles, ResolvedThemeStyles } from "@/features/appearance";
 import { ProfileData, SocialItem, LinkItem, DigitalProductItem } from "../types/bio.types";
@@ -171,29 +172,32 @@ export function BioPageContent({
 
   return (
     <div
-      className={`min-h-screen w-full flex flex-col items-center justify-center p-3 sm:p-6 relative overflow-hidden transition-colors duration-300 ${styles.colorModeClass} ${styles.backgroundClass}`}
+      className={`min-h-screen w-full flex flex-col transition-colors duration-300 ${styles.colorModeClass} ${styles.backgroundClass}`}
       style={styles.backgroundStyle}
       dir={direction}
     >
-      <TrackingPixels profile={profile} isPreview={isPreview} />
-      {styles.overlayStyle && (
-        <div className="absolute inset-0 pointer-events-none z-0" style={styles.overlayStyle} />
-      )}
-      <BioAmbientGlows />
-      <BioMainFrame
-        profile={profile}
-        username={username}
-        links={links}
-        socials={socials}
-        products={products}
-        styles={styles}
-        socialPosition={socialPosition}
-        isPreview={isPreview}
-        onOpenQr={() => setIsQrOpen(true)}
-        onOpenReport={() => setIsReportOpen(true)}
-      />
-      <QrShareModal isOpen={isQrOpen} onClose={() => setIsQrOpen(false)} username={username} displayName={profile.displayName} />
-      {!isPreview && <ReportModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} username={username} />}
+      {!isPreview && <BioOwnerBar username={username} />}
+      <div className="flex-1 w-full flex flex-col items-center justify-center p-3 sm:p-6 relative overflow-hidden">
+        <TrackingPixels profile={profile} isPreview={isPreview} />
+        {styles.overlayStyle && (
+          <div className="absolute inset-0 pointer-events-none z-0" style={styles.overlayStyle} />
+        )}
+        <BioAmbientGlows />
+        <BioMainFrame
+          profile={profile}
+          username={username}
+          links={links}
+          socials={socials}
+          products={products}
+          styles={styles}
+          socialPosition={socialPosition}
+          isPreview={isPreview}
+          onOpenQr={() => setIsQrOpen(true)}
+          onOpenReport={() => setIsReportOpen(true)}
+        />
+        <QrShareModal isOpen={isQrOpen} onClose={() => setIsQrOpen(false)} username={username} displayName={profile.displayName} />
+        {!isPreview && <ReportModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} username={username} />}
+      </div>
     </div>
   );
 }
