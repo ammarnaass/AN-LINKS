@@ -23,15 +23,17 @@ vi.mock("next-auth/react", () => ({
 }));
 
 describe("Dashboard Sidebar Suite", () => {
-  it("renders all 5 dashboard navigation links in sidebar", () => {
+  it("renders all 6 dashboard navigation links in sidebar", () => {
     const html = renderToStaticMarkup(<DashboardSidebar currentPath="/dashboard" />);
-    expect(DASHBOARD_NAV_ITEMS).toHaveLength(5);
+    expect(DASHBOARD_NAV_ITEMS).toHaveLength(6);
     expect(html).toContain('href="/dashboard"');
+    expect(html).toContain('href="/dashboard/newsletter"');
     expect(html).toContain('href="/dashboard/appearance"');
     expect(html).toContain('href="/dashboard/nfc-card"');
     expect(html).toContain('href="/dashboard/analytics"');
     expect(html).toContain('href="/dashboard/settings"');
     expect(html).toContain("الروابط");
+    expect(html).toContain("النشرة البريدية");
     expect(html).toContain("المظهر");
     expect(html).toContain("بطاقة NFC");
     expect(html).toContain("التحليلات");
@@ -46,6 +48,7 @@ describe("Dashboard Sidebar Suite", () => {
     expect(appearanceHtml).toContain('aria-current="page"');
     expect(resolveDashboardPageTitle("/dashboard/analytics")).toBe("التحليلات");
     expect(resolveDashboardPageTitle("/dashboard/settings")).toBe("الإعدادات");
+    expect(resolveDashboardPageTitle("/dashboard/newsletter")).toBe("النشرة البريدية");
     expect(resolveDashboardPageTitle("/dashboard")).toBe("الروابط");
   });
 

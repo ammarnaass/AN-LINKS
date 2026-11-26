@@ -5,4 +5,5 @@ export * from "./components/DashboardShell";
 export * from "./components/DashboardPlanBadge";
 export * from "./components/DashboardPlanPopover";
 export * from "./components/AiWebhooksQuickCard";
+export * from "./components/NewsletterDashboardCard";
 export * from "./hooks/useDashboardPlan";
