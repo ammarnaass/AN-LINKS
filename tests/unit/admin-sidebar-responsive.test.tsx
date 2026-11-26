@@ -213,8 +213,8 @@ describe("AdminSidebar Responsive Unit Tests", () => {
       );
 
       // Accessible tooltip attributes are preserved on buttons
-      expect(html).toContain('title="الإحصائيات والنمو"');
-      expect(html).toContain('aria-label="الإحصائيات والنمو"');
+      expect(html).toContain('title="لوحة التحكم الرئيسية (الإحصائيات والنمو)"');
+      expect(html).toContain('aria-label="لوحة التحكم الرئيسية (الإحصائيات والنمو)"');
       expect(html).toContain('title="المستخدمين"');
       expect(html).toContain('aria-label="المستخدمين"');
       expect(html).toContain('title="لوحة صانع المحتوى"');
@@ -223,7 +223,7 @@ describe("AdminSidebar Responsive Unit Tests", () => {
       expect(html).toContain('aria-label="الموقع الرئيسي"');
 
       // The inner <span>{item.label}</span> elements are not rendered
-      expect(html).not.toContain("<span>الإحصائيات والنمو</span>");
+      expect(html).not.toContain("<span>لوحة التحكم الرئيسية (الإحصائيات والنمو)</span>");
       expect(html).not.toContain("<span>المستخدمين</span>");
       expect(html).not.toContain("<span>لوحة صانع المحتوى</span>");
       expect(html).not.toContain("<span>الموقع الرئيسي</span>");

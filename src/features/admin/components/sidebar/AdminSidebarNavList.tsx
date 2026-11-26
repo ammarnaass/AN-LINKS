@@ -2,6 +2,7 @@
 
 import React from "react";
 import {
+  LayoutDashboard,
   BarChart3,
   Users,
   ShieldCheck,
@@ -52,7 +53,7 @@ export function AdminSidebarNavList({
   plansCount = 0,
 }: AdminSidebarNavListProps) {
   const systemItems: NavItemConfig[] = [
-    { key: "analytics", label: "الإحصائيات والنمو", icon: <BarChart3 className="w-4 h-4 shrink-0" /> },
+    { key: "analytics", label: "لوحة التحكم الرئيسية (الإحصائيات والنمو)", icon: <LayoutDashboard className="w-4 h-4 shrink-0" /> },
     { key: "users", label: "المستخدمين", icon: <Users className="w-4 h-4 shrink-0" />, badge: usersCount > 0 ? usersCount : undefined },
     { key: "sessions", label: "الجلسات النشطة", icon: <ShieldCheck className="w-4 h-4 shrink-0" />, badge: sessionsCount > 0 ? sessionsCount : undefined },
     { key: "links", label: "إدارة الروابط والمنصات", icon: <Link2 className="w-4 h-4 shrink-0" />, badge: linksCount > 0 ? linksCount : undefined },

@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
-import { RefreshCw, Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { RefreshCw, Menu, ChevronLeft, ChevronRight, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "@/shared/ui";
 import { UserNavDropdown } from "@/features/auth";
+import { AdminAnalyticsSkeleton } from "@/features/admin/components/AdminAnalyticsSkeleton";
 import {
   AdminTabKey,
   AdminSidebar,
@@ -30,7 +32,7 @@ import { useAdminSidebar } from "@/features/admin/hooks/useAdminSidebar";
 import { AdminSidebarPullHandle } from "@/features/admin/components/AdminSidebarPullHandle";
 
 const TAB_TITLES: Record<AdminTabKey, string> = {
-  analytics: "الإحصائيات والنمو والتحليلات",
+  analytics: "لوحة التحكم الرئيسية (الإحصائيات والنمو والتحليلات)",
   users: "إدارة المستخدمين والمشتركين",
   sessions: "الجلسات النشطة والأجهزة",
   subscriptions: "خطط وباقات اشتراكات المنصة والمميزات",
@@ -141,6 +143,14 @@ export default function AdminConsolePage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface text-xs font-bold transition-all border border-outline-variant/30"
+              title="الانتقال إلى لوحة صانع المحتوى"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-primary" />
+              <span className="hidden sm:inline">لوحة صانع المحتوى</span>
+            </Link>
             <button
               type="button"
               onClick={reload}
@@ -157,8 +167,12 @@ export default function AdminConsolePage() {
 
         {/* Workspace Body */}
         <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
-          {activeTab === "analytics" && analytics && (
-            <AdminAnalyticsTab data={analytics} />
+          {activeTab === "analytics" && (
+            analytics ? (
+              <AdminAnalyticsTab data={analytics} />
+            ) : (
+              <AdminAnalyticsSkeleton isLoading={isLoading} onRetry={reload} />
+            )
           )}
 
           {activeTab === "users" && (

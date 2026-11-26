@@ -7,10 +7,10 @@ import { LandingHeaderProps } from "../types/landing.types";
 import { useCurrentUser, UserNavDropdown } from "@/features/auth";
 import { DashboardPlanBadge } from "@/features/dashboard";
 import { useTranslation } from "@/shared/i18n";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Shield } from "lucide-react";
 
 export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
-  const { isAuthenticated, isLoading } = useCurrentUser();
+  const { isAuthenticated, isLoading, isAdmin } = useCurrentUser();
   const { t } = useTranslation();
 
   return (
@@ -44,6 +44,16 @@ export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
 
           {isAuthenticated ? (
             <div className="flex items-center gap-2 sm:gap-3">
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-error bg-error-container/25 hover:bg-error-container/40 border border-error/30 px-3 py-2 rounded-xl transition-all"
+                  title="لوحة تحكم مدير النظام"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>لوحة الإدارة</span>
+                </Link>
+              )}
               <DashboardPlanBadge />
               <Link
                 href="/dashboard"

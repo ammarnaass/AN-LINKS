@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu, Shield } from "lucide-react";
 import { ThemeToggle, BrandLogo } from "@/shared/ui";
 import { UserNavDropdown, useCurrentUser } from "@/features/auth";
 import { PreviewProvider } from "../context/PreviewContext";
@@ -53,6 +54,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full sm:rounded-2xl bg-error-container/25 hover:bg-error-container/40 border border-error/30 text-error text-xs font-bold transition-all shadow-xs"
+                title="الانتقال إلى لوحة تحكم مدير النظام"
+              >
+                <Shield className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">لوحة الإدارة</span>
+                <span className="text-[10px] px-1 py-0.2 rounded bg-error/20 font-mono">ADMIN</span>
+              </Link>
+            )}
             <DashboardPlanBadge />
             <ThemeToggle />
             <UserNavDropdown />
