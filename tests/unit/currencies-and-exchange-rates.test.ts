@@ -212,5 +212,35 @@ describe("Real Multi-Currency & Global Exchange Rate Engine Suite", () => {
       expect(result.success).toBe(true);
       expect(typeof result.updatedCount).toBe("number");
     });
+
+    it("designates a currency as the base reference currency and unsets others", async () => {
+      vi.mocked(prisma.currencyConfig.findUnique).mockResolvedValueOnce({
+        code: "USD",
+        isBaseCurrency: false,
+      } as any);
+
+      vi.mocked(prisma.currencyConfig.updateMany).mockResolvedValueOnce({ count: 1 } as any);
+      vi.mocked(prisma.currencyConfig.update).mockResolvedValueOnce({
+        code: "USD",
+        nameAr: "دولار أمريكي",
+        symbol: "$",
+        exchangeRateToUSD: 1.0,
+        isBaseCurrency: true,
+        isActive: true,
+        autoDetectCountries: ["US"],
+        updatedAt: new Date(),
+      } as any);
+
+      const res = await updateAdminCurrency("USD", { code: "USD", isBaseCurrency: true }, "admin_123");
+      expect(res.isBaseCurrency).toBe(true);
+      expect(prisma.currencyConfig.updateMany).toHaveBeenCalledWith({
+        where: { code: { not: "USD" } },
+        data: { isBaseCurrency: false },
+      });
+      expect(prisma.currencyConfig.update).toHaveBeenCalledWith({
+        where: { code: "USD" },
+        data: { isBaseCurrency: true },
+      });
+    });
   });
 });

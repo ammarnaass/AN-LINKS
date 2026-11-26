@@ -9,7 +9,7 @@ import {
 import { AppCard, AppBadge, AppButton } from "@/shared/ui";
 import { CurrencyRateModal } from "../modals/CurrencyRateModal";
 import { NewCurrencyModal } from "../modals/NewCurrencyModal";
-import { Coins, Edit2, RefreshCw, Plus } from "lucide-react";
+import { Coins, Edit2, RefreshCw, Plus, Star } from "lucide-react";
 
 export interface CurrenciesSubTabProps {
   currencies: AdminCurrencyItem[];
@@ -180,14 +180,29 @@ export function CurrenciesSubTab({
 
                   {/* Actions */}
                   <td className="py-3.5 px-4 text-center">
-                    <button
-                      type="button"
-                      onClick={() => handleEditRate(c)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary hover:bg-primary/10 transition-colors cursor-pointer"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                      <span>تعديل سعر الصرف</span>
-                    </button>
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                      {!c.isBaseCurrency && (
+                        <button
+                          type="button"
+                          onClick={() => onSaveCurrency(c.code, { code: c.code, isBaseCurrency: true })}
+                          disabled={isSaving}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 transition-all cursor-pointer disabled:opacity-50"
+                          title="تعيين كعملة مرجعية أساسية للمنصة"
+                        >
+                          <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                          <span>تعيين كمرجع</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleEditRate(c)}
+                        title="تعديل سعر الصرف"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        <span>تعديل</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

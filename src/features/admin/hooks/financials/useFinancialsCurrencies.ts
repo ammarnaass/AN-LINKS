@@ -28,7 +28,17 @@ export function useFinancialsCurrencies(
       cbRef.current?.setError?.(null);
       try {
         const updated = await updateAdminCurrency(code, input);
-        setCurrencies((prev) => prev.map((c) => (c.code === code ? updated : c)));
+        if (input.isBaseCurrency) {
+          setCurrencies((prev) =>
+            prev.map((c) => ({
+              ...c,
+              ...(c.code === code ? updated : {}),
+              isBaseCurrency: c.code === code,
+            }))
+          );
+        } else {
+          setCurrencies((prev) => prev.map((c) => (c.code === code ? updated : c)));
+        }
         cbRef.current?.setFeedback?.({ type: "success", message: "تم تحديث إعدادات العملة بنجاح" });
         return true;
       } catch (err) {

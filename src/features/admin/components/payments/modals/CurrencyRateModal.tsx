@@ -25,6 +25,7 @@ export function CurrencyRateModal({
   const [exchangeRateToUSD, setExchangeRateToUSD] = useState<number>(1);
   const [autoDetectCountries, setAutoDetectCountries] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [isBaseCurrency, setIsBaseCurrency] = useState(false);
 
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
@@ -38,15 +39,14 @@ export function CurrencyRateModal({
       setExchangeRateToUSD(currency.exchangeRateToUSD || 1);
       setAutoDetectCountries(currency.autoDetectCountries?.join(", ") || "");
       setIsActive(currency.isActive ?? true);
+      setIsBaseCurrency(currency.isBaseCurrency ?? false);
       setStatusMessage(null);
     }
   }, [currency, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+    const handleKeyDown = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
@@ -58,10 +58,7 @@ export function CurrencyRateModal({
     setStatusMessage(null);
 
     if (exchangeRateToUSD <= 0) {
-      setStatusMessage({
-        type: "error",
-        text: "سعر الصرف مقابل الدولار يجب أن يكون أكبر من الصفر",
-      });
+      setStatusMessage({ type: "error", text: "سعر الصرف مقابل الدولار يجب أن يكون أكبر من الصفر" });
       return;
     }
 
@@ -76,6 +73,7 @@ export function CurrencyRateModal({
       symbol: symbol.trim() || undefined,
       exchangeRateToUSD: Number(exchangeRateToUSD),
       isActive,
+      isBaseCurrency,
       autoDetectCountries: countriesArray,
     };
 
@@ -188,20 +186,37 @@ export function CurrencyRateModal({
             </span>
           </div>
 
-          {/* Active status */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container border border-outline-variant/20">
-            <span className="text-xs font-bold text-on-surface">حالة العملة في المنصة:</span>
-            <button
-              type="button"
-              onClick={() => setIsActive(!isActive)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                isActive
-                  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                  : "bg-surface-container text-on-surface-variant border border-outline-variant/30"
-              }`}
-            >
-              {isActive ? "مفعلة في الدفع" : "معطلة"}
-            </button>
+          {/* Base currency & Active status */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
+              <span className="text-xs font-bold text-on-surface">حالة العملة:</span>
+              <button
+                type="button"
+                onClick={() => setIsActive(!isActive)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  isActive
+                    ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                    : "bg-surface-container-high text-on-surface-variant border border-outline-variant/30"
+                }`}
+              >
+                {isActive ? "مفعلة" : "معطلة"}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
+              <span className="text-xs font-bold text-on-surface">العملة المرجعية:</span>
+              <button
+                type="button"
+                onClick={() => setIsBaseCurrency(!isBaseCurrency)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  isBaseCurrency
+                    ? "bg-primary/20 text-primary border border-primary/40"
+                    : "bg-surface-container-high text-on-surface-variant border border-outline-variant/30"
+                }`}
+              >
+                {isBaseCurrency ? "المرجعية ★" : "تعيين كمرجع"}
+              </button>
+            </div>
           </div>
 
           {/* Form Actions */}
