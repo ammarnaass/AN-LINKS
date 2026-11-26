@@ -37,6 +37,8 @@ model User {
   availabilityRules AvailabilityRule[]
   appointmentBookings AppointmentBooking[]
   webhookEndpoints  CreatorWebhookEndpoint[]
+  referrerCommissions AffiliateCommissionLog[] @relation("ReferrerCommissions")
+  referredCommissions AffiliateCommissionLog[] @relation("ReferredUserCommissions")
 }
 
 model Profile {
@@ -704,6 +706,30 @@ model WebhookOutbox {
 
   @@index([status, nextRetryAt])
 }
+
+model AffiliateCommissionLog {
+  id               String    @id @default(cuid())
+  referrerId       String
+  referrer         User      @relation("ReferrerCommissions", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUserId   String
+  referredUser     User      @relation("ReferredUserCommissions", fields: [referredUserId], references: [id], onDelete: Cascade)
+  subscriptionId   String
+  invoiceId        String    @unique
+  planSlug         String
+  invoiceAmount    Float
+  commissionRate   Float     @default(20.0) // 20%
+  commissionAmount Float
+  status           String    @default("ESCROW") // ESCROW | CLEARED | PAID
+  escrowUntil      DateTime
+  clearedAt        DateTime?
+  paidAt           DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([referrerId, status])
+  @@index([escrowUntil])
+}
+
 
 
 

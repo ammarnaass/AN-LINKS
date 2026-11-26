@@ -43,7 +43,7 @@ export async function updatePayoutProfile(
 }
 
 export async function getPayoutBalance(userId: string) {
-  const [ordersAgg, bookings, userSub, requests] = await Promise.all([
+  const [ordersAgg, bookings, userSub, requests, affiliateAgg] = await Promise.all([
     prisma.digitalOrder.aggregate({
       where: { creatorId: userId, status: "PAID" },
       _sum: { amount: true },
@@ -60,6 +60,10 @@ export async function getPayoutBalance(userId: string) {
       where: { userId, status: { in: ["PENDING", "APPROVED", "TRANSFERRED"] } },
       select: { amount: true, status: true },
     }),
+    prisma.affiliateCommissionLog.aggregate({
+      where: { referrerId: userId, status: "CLEARED" },
+      _sum: { commissionAmount: true },
+    }),
   ]);
 
   const ordersGross = ordersAgg._sum?.amount ?? 0;
@@ -67,7 +71,9 @@ export async function getPayoutBalance(userId: string) {
   const grossSales = ordersGross + bookingsGross;
 
   const commissionRate = userSub?.plan?.quotas?.storeCommissionRate ?? 5.0;
-  const netEarnings = grossSales * (1 - commissionRate / 100);
+  const netStoreEarnings = grossSales * (1 - commissionRate / 100);
+  const clearedAffiliateEarnings = affiliateAgg._sum?.commissionAmount ?? 0;
+  const totalEarnings = netStoreEarnings + clearedAffiliateEarnings;
 
   const totalWithdrawn = requests
     .filter((r) => r.status === "TRANSFERRED")
@@ -77,11 +83,13 @@ export async function getPayoutBalance(userId: string) {
     .filter((r) => r.status === "PENDING" || r.status === "APPROVED")
     .reduce((sum, r) => sum + r.amount, 0);
 
-  const availableBalance = Math.max(0, netEarnings - totalWithdrawn - pendingWithdrawal);
+  const availableBalance = Math.max(0, totalEarnings - totalWithdrawn - pendingWithdrawal);
 
   return {
     grossSales: Math.round(grossSales * 100) / 100,
-    totalEarnings: Math.round(netEarnings * 100) / 100,
+    storeNetEarnings: Math.round(netStoreEarnings * 100) / 100,
+    affiliateEarnings: Math.round(clearedAffiliateEarnings * 100) / 100,
+    totalEarnings: Math.round(totalEarnings * 100) / 100,
     commissionRate,
     totalWithdrawn: Math.round(totalWithdrawn * 100) / 100,
     pendingWithdrawal: Math.round(pendingWithdrawal * 100) / 100,

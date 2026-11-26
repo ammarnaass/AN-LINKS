@@ -20,12 +20,18 @@ vi.mock("@/shared/db", () => ({
     creatorPayoutProfile: {
       findUnique: vi.fn(),
     },
+    affiliateCommissionLog: {
+      aggregate: vi.fn(),
+    },
   },
 }));
 
 describe("Creator Real Payout Ledger Engine", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(prisma.affiliateCommissionLog.aggregate).mockResolvedValue({
+      _sum: { commissionAmount: 0 },
+    } as any);
   });
 
   it("should calculate real net earnings from digital orders and appointment bookings", async () => {
@@ -55,16 +61,24 @@ describe("Creator Real Payout Ledger Engine", () => {
       { amount: 100.0, status: "PENDING" },
     ] as any);
 
+    // Mock cleared affiliate commissions: 200 SAR
+    vi.mocked(prisma.affiliateCommissionLog.aggregate).mockResolvedValue({
+      _sum: { commissionAmount: 200.0 },
+    } as any);
+
     const balance = await getPayoutBalance("user_creator_1");
 
-    // Gross: 1000 + 500 = 1500 SAR
-    // Commission 5%: 75 SAR -> Net: 1425 SAR
-    // Withdrawn: 200, Pending: 100 -> Available: 1425 - 300 = 1125 SAR
+    // Gross store: 1000 + 500 = 1500 SAR
+    // Commission 5%: 75 SAR -> Net store: 1425 SAR
+    // Cleared affiliate earnings: 200 SAR -> Total: 1425 + 200 = 1625 SAR
+    // Withdrawn: 200, Pending: 100 -> Available: 1625 - 300 = 1325 SAR
     expect(balance.grossSales).toBe(1500.0);
-    expect(balance.totalEarnings).toBe(1425.0);
+    expect(balance.storeNetEarnings).toBe(1425.0);
+    expect(balance.affiliateEarnings).toBe(200.0);
+    expect(balance.totalEarnings).toBe(1625.0);
     expect(balance.totalWithdrawn).toBe(200.0);
     expect(balance.pendingWithdrawal).toBe(100.0);
-    expect(balance.availableBalance).toBe(1125.0);
+    expect(balance.availableBalance).toBe(1325.0);
     expect(balance.currency).toBe("SAR");
   });
 
