@@ -9,6 +9,12 @@ const resolvedDbUrl =
 
 if (resolvedDbUrl && !process.env.DATABASE_URL) {
   process.env.DATABASE_URL = resolvedDbUrl;
+} else if (!resolvedDbUrl && typeof window === "undefined") {
+  console.error(
+    "[Prisma Engine] Warning: No database connection string found in process.env. " +
+    "Checked: DATABASE_URL, DATABASE_URL_POOLED, POSTGRES_URL, PRISMA_DATABASE_URL. " +
+    "On Vercel, ensure DATABASE_URL has checkboxes enabled for both 'Production' and 'Preview'."
+  );
 }
 
 const globalForPrisma = globalThis as unknown as {
