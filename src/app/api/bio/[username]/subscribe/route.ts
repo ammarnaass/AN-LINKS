@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/db";
 import { enforceRateLimit } from "@/lib/rate-limiter";
+import { sendTransactionalEmail } from "@/lib/mailer";
+import { enqueueWebhookEvent } from "@/features/webhooks";
 
 interface RouteParams {
   params: Promise<{ username: string }>;
@@ -41,7 +43,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       select: {
         id: true,
         isSuspended: true,
-        profile: { select: { newsletterEnabled: true } },
+        profile: {
+          select: {
+            newsletterEnabled: true,
+            displayName: true,
+            welcomeSubject: true,
+            welcomeBody: true,
+            welcomeGiftUrl: true,
+          },
+        },
       },
     });
 
@@ -79,6 +89,41 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         status: "ACTIVE",
       },
     });
+
+    // Trigger automated welcome email asynchronously if configured
+    if (creator.profile?.welcomeSubject && creator.profile?.welcomeBody) {
+      const subject = creator.profile.welcomeSubject;
+      const body = creator.profile.welcomeBody;
+      const giftUrl = creator.profile.welcomeGiftUrl;
+      const creatorName = creator.profile.displayName || cleanUsername;
+
+      let html = `<div dir="rtl" style="font-family: sans-serif; line-height: 1.6; color: #1e293b;">
+        <h2>مرحباً بك! 🎉</h2>
+        <p>${body.replace(/\n/g, "<br/>")}</p>`;
+      if (giftUrl) {
+        html += `<p><a href="${giftUrl}" style="display: inline-block; background-color: #4edea3; color: #003822; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">تحميل الهدية الترحيبية 🎁</a></p>`;
+      }
+      html += `<p style="margin-top: 24px; font-size: 14px; color: #64748b;">تحياتنا،<br/>${creatorName} عبر منصة AN LINKS</p></div>`;
+
+      void sendTransactionalEmail({
+        to: email,
+        subject,
+        html,
+      }).catch((err) => console.error("Welcome email dispatch failed:", err));
+    }
+
+    // Enqueue outgoing webhook event for creators with integrations
+    void enqueueWebhookEvent({
+      creatorId: creator.id,
+      event: "lead.collected",
+      payload: {
+        subscriberId: subscriber.id,
+        email: subscriber.email,
+        name: subscriber.name,
+        source: "bio_page",
+        createdAt: subscriber.createdAt,
+      },
+    }).catch((err) => console.error("Webhook lead dispatch failed:", err));
 
     return NextResponse.json({
       success: true,

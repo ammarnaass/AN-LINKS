@@ -21,6 +21,9 @@ export interface NewsletterSettings {
   newsletterButtonText: string;
   displayName?: string;
   accentColor?: string;
+  welcomeSubject?: string | null;
+  welcomeBody?: string | null;
+  welcomeGiftUrl?: string | null;
 }
 
 export interface NewsletterBroadcastItem {
