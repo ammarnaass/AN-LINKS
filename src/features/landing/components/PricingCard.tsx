@@ -1,17 +1,56 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, ArrowLeft, Star } from "lucide-react";
 import { PricingPlan } from "../types/pricing.types";
 import { calculatePrice } from "../constants/pricing-plans";
+import { useCurrentUser } from "@/features/auth";
 
-interface PricingCardProps {
+export interface PricingCardProps {
   plan: PricingPlan;
   isYearly: boolean;
+  onSelectPlan?: (plan: PricingPlan) => void;
 }
 
-export function PricingCard({ plan, isYearly }: PricingCardProps) {
+export function PricingCard({ plan, isYearly, onSelectPlan }: PricingCardProps) {
+  const { isAuthenticated } = useCurrentUser();
+  const router = useRouter();
   const price = calculatePrice(plan, isYearly);
   const isFree = plan.priceMonthly === 0;
+
+  const handleCtaClick = (e: React.MouseEvent) => {
+    if (isFree) {
+      if (isAuthenticated) {
+        e.preventDefault();
+        router.push("/dashboard");
+      }
+      return;
+    }
+
+    // Paid Plan
+    if (isAuthenticated) {
+      e.preventDefault();
+      if (onSelectPlan) {
+        onSelectPlan(plan);
+      } else {
+        router.push(`/checkout?plan=${plan.id}&billing=${isYearly ? "yearly" : "monthly"}`);
+      }
+    } else {
+      e.preventDefault();
+      const checkoutUrl = `/checkout?plan=${plan.id}&billing=${isYearly ? "yearly" : "monthly"}`;
+      router.push(`/login?callbackUrl=${encodeURIComponent(checkoutUrl)}`);
+    }
+  };
+
+  const ctaButtonText = isFree
+    ? isAuthenticated
+      ? "لوحة التحكم"
+      : plan.ctaText
+    : isAuthenticated
+      ? "الترقية والاشتراك في الخطة"
+      : plan.ctaText;
 
   return (
     <div
@@ -69,17 +108,18 @@ export function PricingCard({ plan, isYearly }: PricingCardProps) {
 
       {/* CTA Button */}
       <div className="pt-8">
-        <Link
-          href={plan.ctaLink}
-          className={`w-full py-3.5 px-6 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 ${
+        <button
+          type="button"
+          onClick={handleCtaClick}
+          className={`w-full py-3.5 px-6 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
             plan.isPopular
               ? "bg-primary text-on-primary hover:bg-primary-container shadow-[0_0_20px_rgba(78,222,163,0.3)]"
               : "bg-surface-container-highest hover:bg-surface-container-high text-on-surface border border-white/5"
           }`}
         >
-          <span>{plan.ctaText}</span>
+          <span>{ctaButtonText}</span>
           <ArrowLeft className="w-4 h-4" />
-        </Link>
+        </button>
       </div>
     </div>
   );

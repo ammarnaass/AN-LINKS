@@ -23,6 +23,7 @@ export * from "./components/PricingHeader";
 export * from "./components/PricingCard";
 export * from "./components/PricingComparisonTable";
 export * from "./components/PricingFaq";
+export * from "./components/SubscriptionCheckoutModal";
 export * from "./components/FeaturesHero";
 export * from "./components/FeaturesDetailGrid";
 export * from "./components/AlternativeComparison";

@@ -26,18 +26,19 @@ export async function middleware(request: NextRequest) {
   // 1. Session & Auth Guards for protected routes
   const isDashboardRoute = pathname.startsWith("/dashboard");
   const isAdminRoute = pathname.startsWith("/admin");
+  const isCheckoutRoute = pathname.startsWith("/checkout");
   const isAuthFormRoute = pathname === "/login" || pathname === "/register";
 
-  if (isDashboardRoute || isAdminRoute || isAuthFormRoute) {
+  if (isDashboardRoute || isAdminRoute || isCheckoutRoute || isAuthFormRoute) {
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
     });
 
-    if (isDashboardRoute || isAdminRoute) {
+    if (isDashboardRoute || isAdminRoute || isCheckoutRoute) {
       if (!token) {
         const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("callbackUrl", pathname);
+        loginUrl.searchParams.set("callbackUrl", pathname + request.nextUrl.search);
         return NextResponse.redirect(loginUrl);
       }
       if (isAdminRoute && token.role !== "ADMIN") {
@@ -47,6 +48,12 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isAuthFormRoute && token) {
+      const planParam = request.nextUrl.searchParams.get("plan");
+      if (planParam && planParam !== "free") {
+        const checkoutUrl = new URL("/checkout", request.url);
+        checkoutUrl.searchParams.set("plan", planParam);
+        return NextResponse.redirect(checkoutUrl);
+      }
       const dashboardUrl = new URL("/dashboard", request.url);
       return NextResponse.redirect(dashboardUrl);
     }

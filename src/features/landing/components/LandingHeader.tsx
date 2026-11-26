@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ThemeToggle, BrandLogo, LanguageSwitcher } from "@/shared/ui";
 import { LandingHeaderProps } from "../types/landing.types";
 import { useCurrentUser, UserNavDropdown } from "@/features/auth";
+import { DashboardPlanBadge } from "@/features/dashboard";
 import { useTranslation } from "@/shared/i18n";
 import { LayoutDashboard } from "lucide-react";
 
@@ -42,10 +43,11 @@ export function LandingHeader({ onOpenAuth }: LandingHeaderProps = {}) {
           <ThemeToggle />
 
           {isAuthenticated ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <DashboardPlanBadge />
               <Link
                 href="/dashboard"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.25)] transition-all"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-on-primary-container bg-primary-container hover:bg-primary hover:text-on-primary px-3.5 py-2 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.25)] transition-all"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 <span>{t("nav.dashboard")}</span>

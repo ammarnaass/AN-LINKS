@@ -8,11 +8,14 @@ import {
   PricingComparisonTable,
   PricingFaq,
   LandingFooter,
+  SubscriptionCheckoutModal,
   PRICING_PLANS,
+  PricingPlan,
 } from "@/features/landing";
 
 export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
 
   return (
     <div
@@ -28,7 +31,12 @@ export default function PricingPage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
             {PRICING_PLANS.map((plan) => (
-              <PricingCard key={plan.id} plan={plan} isYearly={isYearly} />
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                isYearly={isYearly}
+                onSelectPlan={setSelectedPlan}
+              />
             ))}
           </div>
         </section>
@@ -41,7 +49,13 @@ export default function PricingPage() {
       </main>
 
       <LandingFooter />
+
+      <SubscriptionCheckoutModal
+        isOpen={Boolean(selectedPlan)}
+        onClose={() => setSelectedPlan(null)}
+        plan={selectedPlan}
+        initialBilling={isYearly}
+      />
     </div>
   );
 }
-

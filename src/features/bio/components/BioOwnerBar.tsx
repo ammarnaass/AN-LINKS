@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { LayoutDashboard, Palette, BarChart3, ShieldCheck } from "lucide-react";
 import { useCurrentUser } from "@/features/auth";
+import { DashboardPlanBadge } from "@/features/dashboard";
 
 export interface BioOwnerBarProps {
   username: string;
@@ -32,6 +33,8 @@ export function BioOwnerBar({ username }: BioOwnerBarProps) {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
+          <DashboardPlanBadge />
+
           <Link
             href="/dashboard"
             className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-primary text-on-primary font-bold hover:brightness-110 transition-all text-[11px] shadow-xs"

@@ -2,9 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LandingPricingTier, PricingBannerSectionProps } from "../types/landing.types";
 import { useTranslation } from "@/shared/i18n";
 import { getLandingContent } from "../constants/i18n";
+import { useCurrentUser } from "@/features/auth";
 
 function PricingBannerHeader() {
   const { locale } = useTranslation();
@@ -113,17 +115,60 @@ function PricingTierCard({
         </div>
       </div>
 
-      <Link
-        href={tier.ctaPath || "/register"}
-        className={`mt-8 block w-full py-3.5 px-4 rounded-lg font-bold text-xs text-center transition-all cursor-pointer ${
-          tier.isPopular
-            ? "bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary shadow-[0_0_20px_rgba(16,185,129,0.4)]"
-            : "bg-surface-container-high hover:bg-surface-container-highest text-on-surface"
-        }`}
-      >
-        {tier.ctaText}
-      </Link>
+      <PricingTierButton tier={tier} isYearly={isYearly} />
     </div>
+  );
+}
+
+function PricingTierButton({
+  tier,
+  isYearly,
+}: {
+  tier: LandingPricingTier;
+  isYearly: boolean;
+}) {
+  const { isAuthenticated } = useCurrentUser();
+  const router = useRouter();
+  const isFree = tier.id === "free";
+
+  const handleCtaClick = (e: React.MouseEvent) => {
+    if (isFree) {
+      if (isAuthenticated) {
+        e.preventDefault();
+        router.push("/dashboard");
+      }
+      return;
+    }
+
+    e.preventDefault();
+    const checkoutUrl = `/checkout?plan=${tier.id}&billing=${isYearly ? "yearly" : "monthly"}`;
+    if (isAuthenticated) {
+      router.push(checkoutUrl);
+    } else {
+      router.push(`/login?callbackUrl=${encodeURIComponent(checkoutUrl)}`);
+    }
+  };
+
+  const buttonText = isFree
+    ? isAuthenticated
+      ? "لوحة التحكم"
+      : tier.ctaText
+    : isAuthenticated
+      ? "الترقية والاشتراك الآن"
+      : tier.ctaText;
+
+  return (
+    <button
+      type="button"
+      onClick={handleCtaClick}
+      className={`mt-8 block w-full py-3.5 px-4 rounded-lg font-bold text-xs text-center transition-all cursor-pointer ${
+        tier.isPopular
+          ? "bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+          : "bg-surface-container-high hover:bg-surface-container-highest text-on-surface"
+      }`}
+    >
+      {buttonText}
+    </button>
   );
 }
 
