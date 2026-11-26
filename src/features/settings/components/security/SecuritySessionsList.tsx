@@ -95,11 +95,10 @@ export function SecuritySessionsList() {
 
       {feedback && (
         <div
-          className={`p-3 rounded-xl text-xs font-semibold ${
-            feedback.type === "success"
-              ? "bg-primary/10 text-primary border border-primary/20"
-              : "bg-error/10 text-error border border-error/20"
-          }`}
+          className={`p-3 rounded-xl text-xs font-semibold ${feedback.type === "success"
+            ? "bg-primary/10 text-primary border border-primary/20"
+            : "bg-error/10 text-error border border-error/20"
+            }`}
         >
           {feedback.message}
         </div>
@@ -114,11 +113,10 @@ export function SecuritySessionsList() {
           {sessions.map((s) => (
             <div
               key={s.id}
-              className={`flex items-center justify-between p-3.5 rounded-xl border text-xs transition-colors ${
-                s.isCurrent
-                  ? "bg-primary/5 border-primary/25"
-                  : "bg-surface-container border-outline-variant/20"
-              }`}
+              className={`flex items-center justify-between p-3.5 rounded-xl border text-xs transition-colors ${s.isCurrent
+                ? "bg-primary/5 border-primary/25"
+                : "bg-surface-container border-outline-variant/20"
+                }`}
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-surface-container-high">{getDeviceIcon(s.deviceType)}</div>
