@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import Link from "next/link";
+import { Check, Copy, Sparkles } from "lucide-react";
 import { ThemeToggle, LanguageSwitcher } from "@/shared/ui";
 import { useTranslation } from "@/shared/i18n";
 
@@ -69,13 +70,21 @@ export function DashboardHeader({
             </div>
 
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-xl font-bold text-on-surface">
                   {t("dashboard.welcome", { name: displayName })}
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary text-xs font-semibold">
                   {t("dashboard.verified")}
                 </span>
+                <Link
+                  href="/dashboard/settings?tab=subscription"
+                  title="عرض خطة الحساب والاشتراك الشهري"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-high hover:bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-xs text-on-surface font-semibold transition-all group shadow-xs"
+                >
+                  <Sparkles className="w-3 h-3 text-primary group-hover:scale-110 transition-transform" />
+                  <span>الخطة والاشتراك الشهري</span>
+                </Link>
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <span className="font-mono text-on-surface-variant text-xs" dir="ltr">
