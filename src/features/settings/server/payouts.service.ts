@@ -49,8 +49,12 @@ export async function getPayoutBalance(userId: string) {
       _sum: { amount: true },
     }),
     prisma.appointmentBooking.findMany({
-      where: { creatorId: userId, status: "CONFIRMED" },
-      include: { service: { select: { price: true } } },
+      where: { creatorId: userId, status: { in: ["CONFIRMED", "COMPLETED"] } },
+      select: {
+        amountPaid: true,
+        creatorNetAmount: true,
+        service: { select: { price: true } },
+      },
     }),
     prisma.userSubscription.findFirst({
       where: { userId, status: "ACTIVE" },
@@ -67,11 +71,18 @@ export async function getPayoutBalance(userId: string) {
   ]);
 
   const ordersGross = ordersAgg._sum?.amount ?? 0;
-  const bookingsGross = bookings.reduce((sum, b) => sum + (b.service?.price ?? 0), 0);
+  const commissionRate = userSub?.plan?.quotas?.storeCommissionRate ?? 5.0;
+  const bookingsGross = bookings.reduce((sum, b) => {
+    const gross = b.amountPaid > 0 ? b.amountPaid : (b.service?.price ?? 0);
+    return sum + gross;
+  }, 0);
+  const bookingsNet = bookings.reduce((sum, b) => {
+    if (b.amountPaid > 0 || b.creatorNetAmount > 0) return sum + b.creatorNetAmount;
+    return sum + (b.service?.price ?? 0) * (1 - commissionRate / 100);
+  }, 0);
   const grossSales = ordersGross + bookingsGross;
 
-  const commissionRate = userSub?.plan?.quotas?.storeCommissionRate ?? 5.0;
-  const netStoreEarnings = grossSales * (1 - commissionRate / 100);
+  const netStoreEarnings = ordersGross * (1 - commissionRate / 100) + bookingsNet;
   const clearedAffiliateEarnings = affiliateAgg._sum?.commissionAmount ?? 0;
   const totalEarnings = netStoreEarnings + clearedAffiliateEarnings;
 

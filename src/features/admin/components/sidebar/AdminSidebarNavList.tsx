@@ -18,6 +18,7 @@ import {
   KeyRound,
   Bell,
   Mail,
+  Calendar,
 } from "lucide-react";
 import { AdminTabKey } from "../AdminNavTabs";
 
@@ -71,6 +72,7 @@ export function AdminSidebarNavList({
     { key: "quotas", label: "الصلاحيات والمحددات", icon: <Sliders className="w-4 h-4 shrink-0" /> },
     { key: "currencies", label: "العملات وأسعار الصرف", icon: <Coins className="w-4 h-4 shrink-0" /> },
     { key: "coupons", label: "أكواد وقسائم الخصم", icon: <Tag className="w-4 h-4 shrink-0" /> },
+    { key: "bookings", label: "الحجوزات والمواعيد", icon: <Calendar className="w-4 h-4 shrink-0" /> },
     { key: "payments", label: "العمليات المالية والفواتير", icon: <Receipt className="w-4 h-4 shrink-0" />, matches: ["payments", "transactions"] },
   ];
 

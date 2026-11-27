@@ -10,6 +10,7 @@ export type AdminTabKey =
   | "currencies"
   | "coupons"
   | "transactions"
+  | "bookings"
   | "links"
   | "settings"
   | "auth_providers"

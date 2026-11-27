@@ -4,6 +4,7 @@ import { SocialIcons } from "../SocialIcons";
 import { resolveThemeStyles, BORDER_RADIUS_MAP, getAvatarFrameStyles } from "@/features/appearance";
 import { ProfileBadgeRenderer } from "@/features/bio";
 import { PhoneInteractiveLink } from "./PhoneInteractiveLink";
+import { PhoneBookingsBadge } from "./PhoneBookingsBadge";
 
 export interface PhoneScreenContentProps {
   displayName?: string;
@@ -42,6 +43,7 @@ export interface PhoneScreenContentProps {
   socialPosition?: string | null;
   bgOverlayOpacity?: number | null;
   cardStyle?: string | null;
+  servicesCount?: number;
 }
 
 export function PhoneScreenContent({
@@ -71,6 +73,7 @@ export function PhoneScreenContent({
   socialPosition = "top",
   bgOverlayOpacity,
   cardStyle,
+  servicesCount = 0,
 }: PhoneScreenContentProps) {
   const styles = resolveThemeStyles({
     themeKey,
@@ -191,6 +194,8 @@ export function PhoneScreenContent({
             </p>
           </div>
         )}
+
+        <PhoneBookingsBadge servicesCount={servicesCount} />
 
         {/* Bottom Socials */}
         {socialPosition === "bottom" && socialIconsBar}

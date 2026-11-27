@@ -123,6 +123,7 @@ function BioMainFrame({
       <BioBookingCard
         username={username}
         services={services}
+        creatorTimezone={profile.timezone || "Asia/Riyadh"}
         accentColor={profile.accentColor}
         isPreview={isPreview}
       />

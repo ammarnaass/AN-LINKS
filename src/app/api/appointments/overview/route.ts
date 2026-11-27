@@ -4,7 +4,8 @@ import { authOptions } from "@/features/auth/server/auth.options";
 import {
   getCreatorBookingsOverview,
   getCreatorServices,
-  getCreatorAvailability,
+  getCreatorAvailabilityConfig,
+  getCreatorAppointmentQuota,
 } from "@/features/appointments";
 
 export async function GET() {
@@ -16,10 +17,11 @@ export async function GET() {
 
     const creatorId = session.user.id;
 
-    const [{ bookings, stats }, services, availability] = await Promise.all([
+    const [{ bookings, stats }, services, availConfig, quota] = await Promise.all([
       getCreatorBookingsOverview(creatorId),
       getCreatorServices(creatorId),
-      getCreatorAvailability(creatorId),
+      getCreatorAvailabilityConfig(creatorId),
+      getCreatorAppointmentQuota(creatorId),
     ]);
 
     return NextResponse.json({
@@ -27,7 +29,10 @@ export async function GET() {
       stats,
       bookings,
       services,
-      availability,
+      availability: availConfig.availability,
+      timezone: availConfig.timezone,
+      exceptions: availConfig.exceptions,
+      quota,
     });
   } catch (error) {
     console.error("Appointments overview error:", error);

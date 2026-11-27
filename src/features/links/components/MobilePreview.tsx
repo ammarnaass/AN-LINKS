@@ -12,9 +12,10 @@ interface MobilePreviewProps {
   username: string;
   links: LinkData[];
   socials: SocialItem[];
+  servicesCount?: number;
 }
 
-export function MobilePreview({ profile, username, links, socials }: MobilePreviewProps) {
+export function MobilePreview({ profile, username, links, socials, servicesCount = 0 }: MobilePreviewProps) {
   const [finish, setFinish] = useState<PhoneFinish>("titanium");
   const [mode, setMode] = useState<PhonePreviewMode>("simulator");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -146,6 +147,7 @@ export function MobilePreview({ profile, username, links, socials }: MobilePrevi
         backgroundType={profile.backgroundType}
         customBackground={profile.customBackground}
         socialPosition={profile.socialPosition}
+        servicesCount={servicesCount}
         links={links.map((l) => ({
           id: l.id,
           title: l.title,

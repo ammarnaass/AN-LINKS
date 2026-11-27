@@ -42,6 +42,7 @@ export default function DashboardPage() {
 
   const [links, setLinks] = useState<LinkData[]>([]);
   const [socials, setSocials] = useState<SocialItem[]>([]);
+  const [servicesCount, setServicesCount] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -195,7 +196,7 @@ export default function DashboardPage() {
 
       <NewsletterDashboardCard />
 
-      <AppointmentsDashboardCard />
+      <AppointmentsDashboardCard onServicesCount={setServicesCount} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <section className="lg:col-span-7 space-y-6">
@@ -227,6 +228,7 @@ export default function DashboardPage() {
             username={username}
             links={links}
             socials={socials}
+            servicesCount={servicesCount}
           />
         </section>
       </div>

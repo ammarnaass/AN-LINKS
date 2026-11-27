@@ -1,4 +1,5 @@
 export * from "./types/admin.types";
+export * from "./constants/admin-tabs";
 export * from "./services/admin.defaults";
 export * from "./services/admin.service";
 export * from "./services/admin-financials.client";
@@ -55,3 +56,4 @@ export * from "./components/notifications/NotificationTable";
 export * from "./components/notifications/NotificationPreviewCard";
 export * from "./components/notifications/NotificationStatsCards";
 export * from "./components/newsletter/AdminNewsletterTab";
+export * from "./components/bookings/AdminBookingsTab";

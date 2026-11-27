@@ -1,5 +1,7 @@
 import { prisma } from "@/shared/db";
 import { BookingOverviewStats } from "../types/appointments.types";
+import { acquireCreatorBookingLock } from "./slot-locker.service";
+import { enqueueBookingWebhookTx } from "./booking-notifications.service";
 
 export async function getCreatorBookingsOverview(creatorId: string) {
   const now = new Date();
@@ -8,36 +10,67 @@ export async function getCreatorBookingsOverview(creatorId: string) {
     prisma.appointmentBooking.findMany({
       where: {
         creatorId,
-        // Exclude abandoned/expired temporary locks
         NOT: {
           status: "PENDING_PAYMENT",
           lockedUntil: { lte: now },
         },
       },
-      include: { service: true },
+      select: {
+        id: true,
+        serviceId: true,
+        clientName: true,
+        clientEmail: true,
+        clientPhone: true,
+        clientNotes: true,
+        clientTimezone: true,
+        startTime: true,
+        endTime: true,
+        status: true,
+        amountPaid: true,
+        platformCommission: true,
+        creatorNetAmount: true,
+        gatewayCode: true,
+        meetingUrl: true,
+        cancelReason: true,
+        rescheduleCount: true,
+        createdAt: true,
+        service: {
+          select: {
+            title: true,
+            price: true,
+            currency: true,
+            durationMinutes: true,
+            meetingType: true,
+            meetingLocation: true,
+          },
+        },
+      },
       orderBy: { startTime: "desc" },
       take: 100,
     }),
     prisma.consultationService.findMany({
-      where: { creatorId, isActive: true },
+      where: { creatorId },
       select: { currency: true },
     }),
   ]);
 
   const defaultCurrency = services[0]?.currency || "SAR";
-
   let upcomingConfirmed = 0;
   let completedBookings = 0;
   let totalRevenue = 0;
+  let netRevenue = 0;
 
   for (const b of bookings) {
-    if (b.status === "CONFIRMED") {
-      if (b.startTime > now) {
-        upcomingConfirmed++;
-      } else {
+    if (b.status === "CONFIRMED" || b.status === "COMPLETED") {
+      if (b.status === "COMPLETED" || b.startTime <= now) {
         completedBookings++;
+      } else {
+        upcomingConfirmed++;
       }
-      totalRevenue += b.service?.price || 0;
+      const gross = b.amountPaid > 0 ? b.amountPaid : (b.service?.price ?? 0);
+      const net = b.amountPaid > 0 || b.creatorNetAmount > 0 ? b.creatorNetAmount : gross * 0.95;
+      totalRevenue += gross;
+      netRevenue += net;
     }
   }
 
@@ -45,7 +78,8 @@ export async function getCreatorBookingsOverview(creatorId: string) {
     totalBookings: bookings.length,
     upcomingConfirmed,
     completedBookings,
-    totalRevenue,
+    totalRevenue: Math.round(totalRevenue * 100) / 100,
+    netRevenue: Math.round(netRevenue * 100) / 100,
     currency: defaultCurrency,
   };
 
@@ -55,21 +89,48 @@ export async function getCreatorBookingsOverview(creatorId: string) {
 export async function updateCreatorBookingStatus(
   creatorId: string,
   bookingId: string,
-  status: "CONFIRMED" | "CANCELLED"
+  nextStatus: "COMPLETED" | "CANCELLED",
+  cancelReason?: string
 ) {
-  const booking = await prisma.appointmentBooking.findFirst({
-    where: { id: bookingId, creatorId },
-  });
+  return await prisma.$transaction(async (tx) => {
+    const booking = await tx.appointmentBooking.findFirst({
+      where: { id: bookingId, creatorId },
+      include: { service: true },
+    });
+    if (!booking) throw new Error("BOOKING_NOT_FOUND");
 
-  if (!booking) {
-    throw new Error("BOOKING_NOT_FOUND");
-  }
+    if (booking.status === "CANCELLED") {
+      throw new Error("ALREADY_CANCELLED");
+    }
+    if (booking.status === "COMPLETED") {
+      throw new Error("ALREADY_COMPLETED");
+    }
+    if (nextStatus === "COMPLETED" && booking.status !== "CONFIRMED") {
+      throw new Error("INVALID_TRANSITION: لا يمكن إتمام موعد غير مؤكد");
+    }
 
-  return await prisma.appointmentBooking.update({
-    where: { id: bookingId },
-    data: {
-      status,
-      lockedUntil: null,
-    },
+    await acquireCreatorBookingLock(tx, creatorId);
+
+    const updated = await tx.appointmentBooking.update({
+      where: { id: booking.id },
+      data: {
+        status: nextStatus,
+        lockedUntil: null,
+        ...(nextStatus === "CANCELLED"
+          ? { cancelReason: cancelReason?.trim() || "تم الإلغاء من قبل مقدم الاستشارة" }
+          : {}),
+      },
+      include: { service: true },
+    });
+
+    if (nextStatus === "CANCELLED") {
+      await enqueueBookingWebhookTx(tx, creatorId, "booking.cancelled", {
+        bookingId: updated.id,
+        clientName: updated.clientName,
+        cancelReason: updated.cancelReason,
+      });
+    }
+
+    return updated;
   });
 }

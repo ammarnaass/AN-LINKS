@@ -40,6 +40,8 @@ export async function getActiveSubscription(userId: string) {
         advancedThemes: quota?.allowAdvancedThemes ?? false,
         removeBranding: quota?.allowRemoveBranding ?? false,
         detailedAnalytics: quota?.allowDetailedAnalytics ?? false,
+        allowAppointments: quota?.allowAppointments ?? true,
+        storeCommissionRate: quota?.storeCommissionRate ?? 5.0,
       },
     };
   }
@@ -73,6 +75,8 @@ export async function getActiveSubscription(userId: string) {
       advancedThemes: quota?.allowAdvancedThemes ?? false,
       removeBranding: quota?.allowRemoveBranding ?? false,
       detailedAnalytics: quota?.allowDetailedAnalytics ?? false,
+      allowAppointments: quota?.allowAppointments ?? false,
+      storeCommissionRate: quota?.storeCommissionRate ?? 10.0,
     },
   };
 }

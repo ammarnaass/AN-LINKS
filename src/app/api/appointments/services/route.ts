@@ -31,36 +31,28 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    if (!body.title || typeof body.title !== "string" || !body.title.trim()) {
-      return NextResponse.json(
-        { success: false, error: "عنوان الخدمة مطلوب" },
-        { status: 400 }
-      );
-    }
-
-    const duration = Number(body.durationMinutes) || 30;
-    if (duration <= 0 || duration > 480) {
-      return NextResponse.json(
-        { success: false, error: "مدة الخدمة غير صالحة" },
-        { status: 400 }
-      );
-    }
-
     const service = await createCreatorService(session.user.id, {
       title: body.title,
       description: body.description,
-      durationMinutes: duration,
+      durationMinutes: Number(body.durationMinutes) || 30,
       price: Number(body.price) || 0,
       currency: body.currency || "SAR",
+      meetingType: body.meetingType || "ONLINE",
+      meetingLocation: body.meetingLocation,
+      bufferMinutes: body.bufferMinutes !== undefined ? Number(body.bufferMinutes) : 10,
+      intakePrompt: body.intakePrompt,
       isActive: body.isActive !== false,
     });
 
     return NextResponse.json({ success: true, service }, { status: 201 });
   } catch (error) {
-    console.error("Create service error:", error);
-    return NextResponse.json(
-      { success: false, error: "فشل إنشاء باقة الخدمة" },
-      { status: 500 }
-    );
+    const msg = error instanceof Error ? error.message : "فشل إنشاء باقة الخدمة";
+    if (msg.startsWith("QUOTA_")) {
+      return NextResponse.json(
+        { success: false, error: msg.replace(/^QUOTA_[A-Z_]+:\s*/, "") },
+        { status: 403 }
+      );
+    }
+    return NextResponse.json({ success: false, error: msg }, { status: 400 });
   }
 }

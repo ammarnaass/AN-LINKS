@@ -21,6 +21,7 @@ const DEFAULT_QUOTAS: AdminPlanQuotaConfig = {
   allowDetailedAnalytics: false,
   allowPrioritySupport: false,
   customCssAllowed: false,
+  allowAppointments: false,
   storeCommissionRate: 10,
 };
 

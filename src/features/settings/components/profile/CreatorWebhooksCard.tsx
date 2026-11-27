@@ -8,6 +8,8 @@ const AVAILABLE_EVENTS = [
   { id: "lead.collected", label: "جمع بيانات مشترك جديد (Lead)" },
   { id: "order.completed", label: "شراء منتج رقمي (Order Paid)" },
   { id: "booking.confirmed", label: "تأكيد حجز استشارة (Booking Confirmed)" },
+  { id: "booking.rescheduled", label: "إعادة جدولة موعد (Booking Rescheduled)" },
+  { id: "booking.cancelled", label: "إلغاء حجز موعد (Booking Cancelled)" },
 ];
 
 export function CreatorWebhooksCard() {

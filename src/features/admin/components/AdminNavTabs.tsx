@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LayoutDashboard, BarChart3, Users, CreditCard, Settings, AlertTriangle, ShieldCheck, Link2, Package, KeyRound, Bell, Mail } from "lucide-react";
+import { LayoutDashboard, BarChart3, Users, CreditCard, Settings, AlertTriangle, ShieldCheck, Link2, Package, KeyRound, Bell, Mail, Calendar } from "lucide-react";
 import { AdminTabKey } from "../types/admin.types";
 
 export type { AdminTabKey };
@@ -59,6 +59,11 @@ export function AdminNavTabs({
       key: "payments",
       label: "العمليات المالية والفواتير",
       icon: <CreditCard className="w-4 h-4 shrink-0" />,
+    },
+    {
+      key: "bookings",
+      label: "الحجوزات والمواعيد",
+      icon: <Calendar className="w-4 h-4 shrink-0" />,
     },
     {
       key: "links",

@@ -7,7 +7,6 @@ import { ThemeToggle } from "@/shared/ui";
 import { UserNavDropdown } from "@/features/auth";
 import { AdminAnalyticsSkeleton } from "@/features/admin/components/AdminAnalyticsSkeleton";
 import {
-  AdminTabKey,
   AdminSidebar,
   AdminAnalyticsTab,
   AdminUsersTab,
@@ -19,38 +18,20 @@ import {
   AdminCurrenciesTab,
   AdminCouponsTab,
   AdminTransactionsTab,
+  AdminBookingsTab,
   AdminSettingsTab,
   AdminAuthProvidersTab,
   AdminNotificationsTab,
   AdminNewsletterTab,
   AdminReportsTab,
   AdminLinksContainer,
+  ADMIN_TAB_TITLES,
   DEFAULT_PLATFORM_SETTINGS,
 } from "@/features/admin";
 import { useAdminConsole } from "@/features/admin/hooks/useAdminConsole";
 import { AdminSessionsTab } from "@/features/admin/components/AdminSessionsTab";
 import { useAdminSidebar } from "@/features/admin/hooks/useAdminSidebar";
 import { AdminSidebarPullHandle } from "@/features/admin/components/AdminSidebarPullHandle";
-
-const TAB_TITLES: Record<AdminTabKey, string> = {
-  analytics: "لوحة التحكم الرئيسية (الإحصائيات والنمو والتحليلات)",
-  users: "إدارة المستخدمين والمشتركين",
-  sessions: "الجلسات النشطة والأجهزة",
-  subscriptions: "خطط وباقات اشتراكات المنصة والمميزات",
-  payments: "سجل العمليات المالية والفواتير والتحصيلات",
-  gateways: "إدارة بوابات الدفع الإلكتروني",
-  plans: "خطط وباقات اشتراكات المنصة",
-  quotas: "الصلاحيات والمحددات المخصصة",
-  currencies: "العملات وأسعار الصرف الرسمية",
-  coupons: "كوبونات وأكواد الخصم الترويجية",
-  transactions: "سجل العمليات المالية والفواتير",
-  links: "إدارة الروابط والمنصات وحوكمة المحتوى",
-  settings: "إعدادات المنصة والسياسات",
-  auth_providers: "إعدادات نظام الدخول الخارجي (Google / Facebook / Apple)",
-  notifications: "نظام الإشعارات المباشرة والتنبيهات",
-  newsletter: "نظام إدارة النشرة البريدية وحملات المنصة",
-  reports: "مركز البلاغات والاعتدال",
-};
 
 export default function AdminConsolePage() {
   const {
@@ -139,7 +120,7 @@ export default function AdminConsolePage() {
             <div>
               <span className="text-xs text-on-surface-variant font-medium">لوحة المشغّل والمدير &gt; </span>
               <h1 className="inline-block font-black text-sm sm:text-base text-on-surface">
-                {TAB_TITLES[activeTab]}
+                {ADMIN_TAB_TITLES[activeTab]}
               </h1>
             </div>
           </div>
@@ -204,6 +185,7 @@ export default function AdminConsolePage() {
           {activeTab === "gateways" && <AdminGatewaysTab />}
           {activeTab === "currencies" && <AdminCurrenciesTab />}
           {activeTab === "transactions" && <AdminTransactionsTab />}
+          {activeTab === "bookings" && <AdminBookingsTab />}
 
           {activeTab === "payments" && (
             <AdminPaymentsTab

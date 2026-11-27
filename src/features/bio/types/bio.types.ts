@@ -15,6 +15,7 @@ export interface ProfileData {
   bio?: string | null;
   avatarUrl?: string | null;
   location?: string | null;
+  timezone?: string | null;
   themeKey?: string | null;
   accentColor?: string | null;
   buttonStyle?: string | null;

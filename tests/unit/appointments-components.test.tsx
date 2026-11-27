@@ -3,6 +3,9 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AppointmentsStatsCards } from "@/features/appointments/components/AppointmentsStatsCards";
 import { BookingServiceStep } from "@/features/bio/components/booking/BookingServiceStep";
+import { BioBookingCard } from "@/features/bio/components/booking/BioBookingCard";
+import { PhoneBookingsBadge } from "@/shared/ui/phone/PhoneBookingsBadge";
+import { AdminBookingsTab } from "@/features/admin/components/bookings/AdminBookingsTab";
 import { DASHBOARD_NAV_ITEMS } from "@/features/dashboard";
 
 describe("Appointments UI Components Unit Tests", () => {
@@ -12,6 +15,7 @@ describe("Appointments UI Components Unit Tests", () => {
       upcomingConfirmed: 4,
       completedBookings: 8,
       totalRevenue: 2400,
+      netRevenue: 2280,
       currency: "SAR",
     };
 
@@ -27,14 +31,12 @@ describe("Appointments UI Components Unit Tests", () => {
   });
 
   it("includes 'حجز المواعيد' in dashboard sidebar navigation items", () => {
-    const bookingsItem = DASHBOARD_NAV_ITEMS.find(
-      (item) => item.href === "/dashboard/bookings"
-    );
+    const bookingsItem = DASHBOARD_NAV_ITEMS.find((item) => item.href === "/dashboard/bookings");
     expect(bookingsItem).toBeDefined();
     expect(bookingsItem?.label).toBe("حجز المواعيد");
   });
 
-  it("renders BookingServiceStep with services and prices", () => {
+  it("renders BookingServiceStep with semantic Stitch classes and meeting types", () => {
     const services = [
       {
         id: "srv-1",
@@ -43,20 +45,50 @@ describe("Appointments UI Components Unit Tests", () => {
         durationMinutes: 45,
         price: 350,
         currency: "SAR",
+        meetingType: "ONLINE",
         isActive: true,
       },
     ];
 
     const html = renderToStaticMarkup(
-      <BookingServiceStep
-        services={services}
-        onSelectService={() => {}}
-        accentColor="#4edea3"
-      />
+      <BookingServiceStep services={services} onSelectService={() => {}} accentColor="#4edea3" />
     );
 
     expect(html).toContain("استشارة تسويقية 1:1");
     expect(html).toContain("350 SAR");
     expect(html).toContain("45 دقيقة");
+    expect(html).toContain("اجتماع أونلاين");
+    expect(html).toContain("text-on-surface");
+    expect(html).not.toContain("bg-white/5");
+  });
+
+  it("renders BioBookingCard, PhoneBookingsBadge, and AdminBookingsTab cleanly", () => {
+    const cardHtml = renderToStaticMarkup(
+      <BioBookingCard
+        username="sysadmin"
+        creatorTimezone="Asia/Riyadh"
+        services={[
+          {
+            id: "srv-1",
+            title: "جلسة تأسيسية",
+            durationMinutes: 30,
+            price: 0,
+            currency: "SAR",
+            meetingType: "PHONE",
+            isActive: true,
+          },
+        ]}
+      />
+    );
+    expect(cardHtml).toContain("حجز موعد أو استشارة مباشرة");
+    expect(cardHtml).toContain("مكالمة هاتفية");
+    expect(cardHtml).toContain("مجاناً");
+
+    const badgeHtml = renderToStaticMarkup(<PhoneBookingsBadge servicesCount={2} />);
+    expect(badgeHtml).toContain("2 باقة استشارة متاحة للحجز");
+    expect(renderToStaticMarkup(<PhoneBookingsBadge servicesCount={0} />)).toBe("");
+
+    const adminHtml = renderToStaticMarkup(<AdminBookingsTab />);
+    expect(adminHtml).toContain("بحث باسم العميل");
   });
 });

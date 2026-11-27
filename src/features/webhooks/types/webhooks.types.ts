@@ -2,6 +2,8 @@ export type WebhookEventType =
   | "order.completed"
   | "lead.collected"
   | "booking.confirmed"
+  | "booking.cancelled"
+  | "booking.rescheduled"
   | "subscription.created";
 
 export interface CreatorWebhookConfig {

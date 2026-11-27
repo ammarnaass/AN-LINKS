@@ -7,6 +7,8 @@ export interface DashboardPlanQuotas {
   linksMax: number;
   customDomain: boolean;
   removeBranding: boolean;
+  allowAppointments?: boolean;
+  storeCommissionRate?: number;
 }
 
 export interface DashboardPlanData {
@@ -38,6 +40,8 @@ const DEFAULT_PLAN: DashboardPlanData = {
     linksMax: 5,
     customDomain: false,
     removeBranding: false,
+    allowAppointments: false,
+    storeCommissionRate: 10.0,
   },
 };
 
@@ -98,6 +102,8 @@ export function useDashboardPlan() {
               linksMax: quotas?.links?.max ?? 5,
               customDomain: Boolean(quotas?.customDomain),
               removeBranding: Boolean(quotas?.removeBranding),
+              allowAppointments: Boolean(quotas?.allowAppointments),
+              storeCommissionRate: typeof quotas?.storeCommissionRate === "number" ? quotas.storeCommissionRate : (isSub ? 5.0 : 10.0),
             },
           };
           setCachedDashboardPlan(data);
