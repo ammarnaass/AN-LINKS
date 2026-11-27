@@ -72,19 +72,34 @@ export async function getPublicProfileData(username: string) {
       isSensitive: Boolean(l.isSensitive),
     }));
 
-  const products = await prisma.digitalProduct.findMany({
-    where: { creatorId: user.id, isActive: true },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      price: true,
-      currency: true,
-      productType: true,
-      salesCount: true,
-    },
-  });
+  const [products, services] = await Promise.all([
+    prisma.digitalProduct.findMany({
+      where: { creatorId: user.id, isActive: true },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        currency: true,
+        productType: true,
+        salesCount: true,
+      },
+    }),
+    prisma.consultationService.findMany({
+      where: { creatorId: user.id, isActive: true },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        durationMinutes: true,
+        price: true,
+        currency: true,
+        isActive: true,
+      },
+    }),
+  ]);
 
   return {
     user: {
@@ -95,6 +110,7 @@ export async function getPublicProfileData(username: string) {
     links: visibleLinks,
     socials: user.socials,
     products,
+    services,
   };
 }
 

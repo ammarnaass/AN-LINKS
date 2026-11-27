@@ -14,6 +14,8 @@ import { BioOwnerBar } from "./BioOwnerBar";
 import { useTranslation } from "@/shared/i18n";
 import { resolveThemeStyles, ResolvedThemeStyles } from "@/features/appearance";
 import { ProfileData, SocialItem, LinkItem, DigitalProductItem } from "../types/bio.types";
+import { BioBookingCard } from "./booking/BioBookingCard";
+import { ConsultationServiceItem } from "@/features/appointments/types/appointments.types";
 
 export type { ProfileData };
 
@@ -23,6 +25,7 @@ export interface BioPageContentProps {
   links?: LinkItem[];
   socials?: SocialItem[];
   products?: DigitalProductItem[];
+  services?: ConsultationServiceItem[];
   isPreview?: boolean;
 }
 
@@ -42,6 +45,7 @@ interface BioMainFrameProps {
   links: LinkItem[];
   socials: SocialItem[];
   products: DigitalProductItem[];
+  services?: ConsultationServiceItem[];
   styles: ResolvedThemeStyles;
   socialPosition: string;
   isPreview: boolean;
@@ -55,6 +59,7 @@ function BioMainFrame({
   links,
   socials,
   products,
+  services = [],
   styles,
   socialPosition,
   isPreview,
@@ -115,6 +120,13 @@ function BioMainFrame({
         isPreview={isPreview}
       />
 
+      <BioBookingCard
+        username={username}
+        services={services}
+        accentColor={profile.accentColor}
+        isPreview={isPreview}
+      />
+
       {profile.newsletterEnabled !== false && (
         <BioNewsletterCard
           username={username}
@@ -160,6 +172,7 @@ export function BioPageContent({
   links = [],
   socials = [],
   products = [],
+  services = [],
   isPreview = false,
 }: BioPageContentProps) {
   const [isQrOpen, setIsQrOpen] = useState(false);
@@ -189,6 +202,7 @@ export function BioPageContent({
           links={links}
           socials={socials}
           products={products}
+          services={services}
           styles={styles}
           socialPosition={socialPosition}
           isPreview={isPreview}

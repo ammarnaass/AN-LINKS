@@ -28,29 +28,40 @@ interface CalculateSlotsParams {
   date: Date;
   rule: AvailabilityRuleInput;
   existingBookings: ExistingBookingStub[];
+  durationMinutes?: number;
 }
+
+const MINIMUM_NOTICE_MINUTES = 15;
 
 export function calculateAvailableSlots({
   date,
   rule,
   existingBookings,
+  durationMinutes,
 }: CalculateSlotsParams): ConsultationSlot[] {
   const slots: ConsultationSlot[] = [];
   const startM = parseMinutes(rule.startTime);
   const endM = parseMinutes(rule.endTime);
-  const duration = rule.slotMinutes;
+  const step = rule.slotMinutes || 30;
+  const serviceDuration = durationMinutes && durationMinutes > 0 ? durationMinutes : step;
 
   const datePrefix = date.toISOString().split("T")[0];
   const now = new Date();
+  const minimumBookingTime = new Date(now.getTime() + MINIMUM_NOTICE_MINUTES * 60 * 1000);
 
-  for (let current = startM; current + duration <= endM; current += duration) {
+  for (let current = startM; current + serviceDuration <= endM; current += step) {
     const slotStartStr = formatMinutes(current);
-    const slotEndStr = formatMinutes(current + duration);
+    const slotEndStr = formatMinutes(current + serviceDuration);
 
     const startDateTime = new Date(`${datePrefix}T${slotStartStr}:00.000Z`);
     const endDateTime = new Date(`${datePrefix}T${slotEndStr}:00.000Z`);
 
-    // Check collision against active bookings
+    // Past slot filter
+    if (startDateTime.getTime() <= minimumBookingTime.getTime()) {
+      continue;
+    }
+
+    // Collision check against active bookings
     const isBooked = existingBookings.some((b) => {
       const isTimeIntersect = isSlotOverlapping(
         startDateTime,
@@ -60,10 +71,8 @@ export function calculateAvailableSlots({
       );
       if (!isTimeIntersect) return false;
 
-      // Confirmed bookings are always unavailable
       if (b.status === "CONFIRMED") return true;
 
-      // Pending bookings are unavailable only if lock has not expired
       if (b.status === "PENDING_PAYMENT" && b.lockedUntil) {
         return b.lockedUntil.getTime() > now.getTime();
       }
