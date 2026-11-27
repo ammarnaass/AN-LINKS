@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth.options";
 import { prisma } from "@/shared/db";
+import { sanitizeHttpUrl } from "@/lib/html-escape";
 
 export async function GET() {
   try {
@@ -19,6 +20,9 @@ export async function GET() {
         newsletterTitle: true,
         newsletterSubtitle: true,
         newsletterButtonText: true,
+        welcomeSubject: true,
+        welcomeBody: true,
+        welcomeGiftUrl: true,
       },
     });
 
@@ -29,6 +33,9 @@ export async function GET() {
         newsletterTitle: profile?.newsletterTitle || "",
         newsletterSubtitle: profile?.newsletterSubtitle || "",
         newsletterButtonText: profile?.newsletterButtonText || "",
+        welcomeSubject: profile?.welcomeSubject || "",
+        welcomeBody: profile?.welcomeBody || "",
+        welcomeGiftUrl: profile?.welcomeGiftUrl || "",
         displayName: profile?.displayName || "",
         accentColor: profile?.accentColor || "#3B82F6",
       },
@@ -52,6 +59,9 @@ export async function PATCH(request: NextRequest) {
       newsletterTitle?: string | null;
       newsletterSubtitle?: string | null;
       newsletterButtonText?: string | null;
+      welcomeSubject?: string | null;
+      welcomeBody?: string | null;
+      welcomeGiftUrl?: string | null;
     } = {};
 
     if (typeof body.newsletterEnabled === "boolean") {
@@ -66,6 +76,16 @@ export async function PATCH(request: NextRequest) {
     if (body.newsletterButtonText !== undefined) {
       data.newsletterButtonText = typeof body.newsletterButtonText === "string" ? body.newsletterButtonText.trim() || null : null;
     }
+    if (body.welcomeSubject !== undefined) {
+      data.welcomeSubject = typeof body.welcomeSubject === "string" ? body.welcomeSubject.trim() || null : null;
+    }
+    if (body.welcomeBody !== undefined) {
+      data.welcomeBody = typeof body.welcomeBody === "string" ? body.welcomeBody.trim() || null : null;
+    }
+    if (body.welcomeGiftUrl !== undefined) {
+      const rawUrl = typeof body.welcomeGiftUrl === "string" ? body.welcomeGiftUrl.trim() : "";
+      data.welcomeGiftUrl = rawUrl ? sanitizeHttpUrl(rawUrl) : null;
+    }
 
     const updated = await prisma.profile.update({
       where: { userId: session.user.id },
@@ -75,6 +95,9 @@ export async function PATCH(request: NextRequest) {
         newsletterTitle: true,
         newsletterSubtitle: true,
         newsletterButtonText: true,
+        welcomeSubject: true,
+        welcomeBody: true,
+        welcomeGiftUrl: true,
       },
     });
 

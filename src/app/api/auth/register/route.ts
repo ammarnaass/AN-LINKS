@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { validateRegistrationInput, hashPassword } from "@/lib/auth";
 import { enforceRateLimit } from "@/lib/rate-limiter";
+import { recordReferralAttribution } from "@/features/affiliate/server/affiliate.service";
+
+function readCookieValue(cookieHeader: string | null, name: string): string | undefined {
+  if (!cookieHeader) return undefined;
+  const match = cookieHeader
+    .split(";")
+    .map((p) => p.trim())
+    .find((p) => p.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.slice(name.length + 1)) : undefined;
+}
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +22,10 @@ export async function POST(request: Request) {
     if (limited) return limited;
 
     const body = await request.json();
-    const { email, password, username, displayName } = body;
+    const { email, password, username, displayName, referralCode } = body;
+    const rawRef =
+      (typeof referralCode === "string" && referralCode.trim()) ||
+      readCookieValue(request.headers.get("cookie"), "anlinks_ref");
 
     const validation = validateRegistrationInput({
       email,
@@ -31,7 +44,6 @@ export async function POST(request: Request) {
     const cleanEmail = email.toLowerCase().trim();
     const cleanUsername = username.toLowerCase().trim();
 
-    // Check email uniqueness
     const existingEmail = await prisma.user.findUnique({
       where: { email: cleanEmail },
     });
@@ -42,7 +54,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check username uniqueness
     const existingUsername = await prisma.user.findUnique({
       where: { username: cleanUsername },
     });
@@ -55,7 +66,6 @@ export async function POST(request: Request) {
 
     const passwordHash = await hashPassword(password);
 
-    // Create user and profile in transaction
     const newUser = await prisma.user.create({
       data: {
         email: cleanEmail,
@@ -79,6 +89,12 @@ export async function POST(request: Request) {
       },
     });
 
+    if (rawRef) {
+      await recordReferralAttribution(newUser.id, rawRef).catch((err) =>
+        console.error("Referral attribution error on register:", err)
+      );
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -99,4 +115,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

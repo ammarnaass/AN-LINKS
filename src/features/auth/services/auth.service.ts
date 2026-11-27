@@ -30,11 +30,16 @@ export async function registerAccount(formData: RegistrationInput): Promise<Regi
   }
 }
 
-export async function loginWithCredentials(email: string, password: string) {
+export async function loginWithCredentials(
+  email: string,
+  password: string,
+  totpCode?: string
+) {
   return signIn("credentials", {
     redirect: false,
     email,
     password,
+    ...(totpCode ? { totpCode } : {}),
   });
 }
 

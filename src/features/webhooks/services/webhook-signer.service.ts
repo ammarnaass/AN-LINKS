@@ -1,4 +1,19 @@
 import crypto from "crypto";
+import { decryptSecret } from "@/shared/lib/crypto";
+
+const ENCRYPTED_SECRET_REGEX = /^[0-9a-f]{24}:[0-9a-f]{32}:[0-9a-f]+$/i;
+
+export function resolveWebhookSigningSecret(storedSecret: string): string {
+  if (!storedSecret) return "";
+  if (ENCRYPTED_SECRET_REGEX.test(storedSecret.trim())) {
+    try {
+      return decryptSecret(storedSecret.trim());
+    } catch {
+      return storedSecret;
+    }
+  }
+  return storedSecret;
+}
 
 export function createWebhookSignature(
   payload: string,

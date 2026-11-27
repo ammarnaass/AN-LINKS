@@ -72,16 +72,16 @@ export function SubscriptionCheckoutModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           planSlug: plan.id,
-          interval: isYearly ? "yearly" : "monthly",
-          gatewayId: selectedGateway,
+          billingCycle: isYearly ? "YEARLY" : "MONTHLY",
+          gatewayCode: selectedGateway,
           currency: activeCurrency.code,
           couponCode: couponCode.trim() || undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "فشل إنشاء طلب الاشتراك");
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
+      if (!data.activated && (data.redirectUrl || data.checkoutUrl)) {
+        window.location.href = data.redirectUrl || data.checkoutUrl;
         return;
       }
       if (data.activated || data.success) setIsSuccess(true);

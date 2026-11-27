@@ -1,4 +1,5 @@
 import { prisma } from "@/shared/db";
+import { recordReferralAttribution } from "@/features/affiliate/server/affiliate.service";
 
 export interface ProvisionedOAuthUser {
   id: string;
@@ -38,7 +39,8 @@ async function generateUniqueUsername(email: string): Promise<string> {
 export async function provisionOAuthUser(
   email?: string | null,
   name?: string | null,
-  image?: string | null
+  image?: string | null,
+  referralCode?: string | null
 ): Promise<ProvisionedOAuthUser | null> {
   if (!email) return null;
   const cleanEmail = email.toLowerCase().trim();
@@ -58,6 +60,16 @@ export async function provisionOAuthUser(
       name: existing.profile?.displayName ?? existing.username,
       image: existing.profile?.avatarUrl ?? image,
     };
+  }
+
+  let resolvedRef = referralCode?.trim() || undefined;
+  if (!resolvedRef) {
+    try {
+      const { cookies } = await import("next/headers");
+      resolvedRef = (await cookies()).get("anlinks_ref")?.value?.trim() || undefined;
+    } catch {
+      // Outside Next.js request store (e.g. unit tests)
+    }
   }
 
   const username = await generateUniqueUsername(cleanEmail);
@@ -80,6 +92,12 @@ export async function provisionOAuthUser(
     },
     include: { profile: true },
   });
+
+  if (resolvedRef) {
+    await recordReferralAttribution(created.id, resolvedRef).catch((err) =>
+      console.error("OAuth referral attribution error:", err)
+    );
+  }
 
   return {
     id: created.id,

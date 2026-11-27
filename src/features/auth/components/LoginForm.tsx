@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogIn, AlertCircle, Mail, Lock } from "lucide-react";
+import { LogIn, AlertCircle, Mail, Lock, KeyRound } from "lucide-react";
 import { loginWithCredentials } from "../services/auth.service";
 import { setAuthCache } from "../hooks/useCurrentUser";
 import { AppButton, AppInput } from "@/shared/ui";
@@ -13,6 +13,8 @@ export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [needsTwoFactor, setNeedsTwoFactor] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,18 +25,36 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      const result = await loginWithCredentials(email, password);
+      const result = await loginWithCredentials(
+        email,
+        password,
+        needsTwoFactor && totpCode.trim() ? totpCode.trim() : undefined
+      );
 
       if (result?.error) {
-        setError(result.error);
+        if (result.error === "2FA_REQUIRED" || result.error.includes("2FA")) {
+          setNeedsTwoFactor(true);
+          setError("هذا الحساب محمي بالمصادقة الثنائية. أدخل رمز التحقق للمتابعة.");
+        } else {
+          setError(result.error);
+        }
       } else {
-        const isAdminEmail = email.toLowerCase().includes("admin");
+        let verifiedRole: "ADMIN" | "USER" = "USER";
+        let verifiedUsername = email.split("@")[0];
+        try {
+          const sessRes = await fetch("/api/auth/session", { cache: "no-store" });
+          const sessJson = await sessRes.json();
+          if (sessJson?.user?.role === "ADMIN") verifiedRole = "ADMIN";
+          if (sessJson?.user?.username) verifiedUsername = sessJson.user.username;
+        } catch {
+          // Fall back cleanly to default USER navigation if session fetch fails
+        }
         setAuthCache({
           email,
-          role: isAdminEmail ? "ADMIN" : "USER",
-          username: email.split("@")[0],
+          role: verifiedRole,
+          username: verifiedUsername,
         });
-        router.push(isAdminEmail ? "/admin" : "/dashboard");
+        router.push(verifiedRole === "ADMIN" ? "/admin" : "/dashboard");
         router.refresh();
       }
     } catch {
@@ -108,6 +128,20 @@ export function LoginForm() {
             startAdornment={<Lock className="w-4 h-4" />}
           />
         </div>
+
+        {needsTwoFactor && (
+          <AppInput
+            label="رمز التحقق الثنائي (2FA)"
+            type="text"
+            required
+            value={totpCode}
+            onChange={(e) => setTotpCode(e.target.value)}
+            placeholder="000000 أو XXXX-XXXX"
+            dir="ltr"
+            autoComplete="one-time-code"
+            startAdornment={<KeyRound className="w-4 h-4" />}
+          />
+        )}
 
         <div className="flex items-center gap-2 pt-1">
           <input

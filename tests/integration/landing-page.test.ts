@@ -1,5 +1,19 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { sanitizeClaimUsername } from "@/lib/claim-validator";
+
+vi.mock("next-auth/react", () => ({
+  useSession: vi.fn().mockReturnValue({ data: null, status: "unauthenticated" }),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/",
+}));
 
 describe("Landing Page Handle Claim Validator", () => {
   it("should sanitize valid latin username", () => {
@@ -39,19 +53,19 @@ describe("Landing Page Handle Claim Validator", () => {
 describe("LandingHeader Component", () => {
   it("should render logo, login link, and register CTA button", async () => {
     const { LandingHeader } = await import("@/components/landing/LandingHeader");
-    const element = LandingHeader();
-    expect(element).toBeDefined();
-    // React element type verification
-    expect(element.type).toBe("header");
+    const html = renderToStaticMarkup(React.createElement(LandingHeader));
+    expect(html).toContain("<header");
+    expect(html).toContain('href="/login"');
+    expect(html).toContain('href="/register"');
   });
 });
 
 describe("LandingFooter Component", () => {
   it("should render copyright, legal links, and platform mission", async () => {
     const { LandingFooter } = await import("@/components/landing/LandingFooter");
-    const element = LandingFooter();
-    expect(element).toBeDefined();
-    expect(element.type).toBe("footer");
+    const html = renderToStaticMarkup(React.createElement(LandingFooter));
+    expect(html).toContain("<footer");
+    expect(html).toContain("AN LINKS");
   });
 });
 

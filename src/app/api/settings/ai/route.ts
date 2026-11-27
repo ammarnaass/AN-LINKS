@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth.options";
+import { prisma } from "@/shared/db";
 import { validateAiSettings, AiSettingsInput } from "@/features/settings/validators/ai-settings.validator";
+import { getActiveSubscription } from "@/features/settings/server/subscription.service";
 
-// In-memory persistent preferences cache by userId
-const userAiPreferences = new Map<string, AiSettingsInput & { totalGenerations: number }>();
+interface StoredAiPrefs extends AiSettingsInput {
+  totalGenerations: number;
+}
+
+function parseAiPrefs(raw: unknown): StoredAiPrefs {
+  const obj = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  return {
+    tone: (typeof obj.tone === "string" ? obj.tone : "professional") as AiSettingsInput["tone"],
+    niche: typeof obj.niche === "string" && obj.niche.trim() ? obj.niche : "صانع محتوى محترف",
+    autoSuggestTitle: obj.autoSuggestTitle !== false,
+    totalGenerations: typeof obj.totalGenerations === "number" ? obj.totalGenerations : 0,
+  };
+}
 
 export async function GET() {
   try {
@@ -13,20 +26,26 @@ export async function GET() {
       return NextResponse.json({ success: false, error: "غير مصرح" }, { status: 401 });
     }
 
-    const current = userAiPreferences.get(session.user.id) || {
-      tone: "professional",
-      niche: "صانع محتوى محترف",
-      autoSuggestTitle: true,
-      totalGenerations: 12,
-    };
+    const [profile, sub] = await Promise.all([
+      prisma.profile.findUnique({
+        where: { userId: session.user.id },
+        select: { aiPreferences: true },
+      }),
+      getActiveSubscription(session.user.id),
+    ]);
+
+    const current = parseAiPrefs(profile?.aiPreferences);
+    const allowed = session.user.role === "ADMIN" || Boolean(sub.quotas.allowAiCopilot);
 
     return NextResponse.json({
       success: true,
       data: current,
       quota: {
-        model: "Gemini 1.5 Flash",
-        status: "ACTIVE",
-        tier: "PRO_UNLIMITED",
+        model: "Gemini 2.5 Flash",
+        status: allowed ? "ACTIVE" : "LOCKED",
+        allowed,
+        tier: sub.plan.slug.toUpperCase(),
+        planName: sub.plan.nameAr,
       },
     });
   } catch (error) {
@@ -48,12 +67,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: validation.error }, { status: 400 });
     }
 
-    const existing = userAiPreferences.get(session.user.id);
-    const updated = {
+    const existingProfile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+      select: { aiPreferences: true },
+    });
+    const prev = parseAiPrefs(existingProfile?.aiPreferences);
+    const updated: StoredAiPrefs = {
       ...validation.data,
-      totalGenerations: existing ? existing.totalGenerations + 1 : 13,
+      totalGenerations: prev.totalGenerations,
     };
-    userAiPreferences.set(session.user.id, updated);
+
+    await prisma.profile.update({
+      where: { userId: session.user.id },
+      data: { aiPreferences: updated as object },
+    });
 
     return NextResponse.json({
       success: true,

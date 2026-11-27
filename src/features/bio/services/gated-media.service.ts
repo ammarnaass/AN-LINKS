@@ -1,5 +1,18 @@
 import crypto from "crypto";
 
+export function resolveMediaEntitlementSecret(): string {
+  const secret =
+    process.env.MEDIA_ENTITLEMENT_SECRET?.trim() ||
+    process.env.NEXTAUTH_SECRET?.trim() ||
+    process.env.PAYMENT_ENCRYPTION_KEY?.trim();
+
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("MEDIA_ENTITLEMENT_SECRET_NOT_CONFIGURED");
+  }
+  return crypto.createHash("sha256").update(process.cwd()).digest("hex");
+}
+
 export interface EntitlementVerificationResult {
   valid: boolean;
   productId?: string;

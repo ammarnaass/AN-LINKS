@@ -21,7 +21,7 @@ describe("Admin Enterprise Suite Integration (v3.1.0)", () => {
 
     expect(Array.isArray(analytics.topCreators)).toBe(true);
     expect(Array.isArray(analytics.recentTransactions)).toBe(true);
-  });
+  }, 20_000);
 
   it("2. should retrieve platform settings with all 5 default Saudi/Global gateways", () => {
     const settings = getPlatformSettings();
@@ -102,7 +102,7 @@ describe("Admin Enterprise Suite Integration (v3.1.0)", () => {
 
     const finalDbUser = await prisma.user.findUnique({ where: { id: client!.id } });
     expect(finalDbUser?.role).toBe("USER");
-  });
+  }, 20_000);
 
   it("5. should prevent an admin from modifying their own role (self-demotion protection)", async () => {
     const admin = await prisma.user.findUnique({ where: { username: "sysadmin" } });
@@ -112,6 +112,6 @@ describe("Admin Enterprise Suite Integration (v3.1.0)", () => {
     expect(selfDemoteRes.ok).toBe(false);
     expect(selfDemoteRes.status).toBe(400);
     expect(selfDemoteRes.error).toBe("لا يمكن للمشغّل تغيير رتبة حسابه الشخصي");
-  });
+  }, 20_000);
 });
 

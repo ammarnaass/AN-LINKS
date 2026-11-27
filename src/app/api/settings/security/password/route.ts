@@ -15,13 +15,15 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || undefined;
     const ua = req.headers.get("user-agent") || undefined;
 
+    const currentSessionToken = (session.user as unknown as { sessionToken?: string }).sessionToken;
     const result = await changePassword(
       session.user.id,
       currentPassword,
       newPassword,
       confirmPassword,
       ip,
-      ua
+      ua,
+      currentSessionToken
     );
 
     return NextResponse.json(result);

@@ -23,7 +23,7 @@ export function DigitalProductsCard() {
   const [products, setProducts] = useState<CreatorProduct[]>([]);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("49");
-  const [productType, setProductType] = useState<"DIGITAL" | "TIP">("DIGITAL");
+  const [productType, setProductType] = useState<"DIGITAL" | "TIP" | "LOCKED_MEDIA">("DIGITAL");
   const [fileUrl, setFileUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +51,7 @@ export function DigitalProductsCard() {
           title,
           price: Number(price),
           productType,
-          fileUrl: productType === "DIGITAL" ? fileUrl : undefined,
+          fileUrl: productType !== "TIP" ? fileUrl : undefined,
         }),
       });
       const data = await res.json();
@@ -93,10 +93,11 @@ export function DigitalProductsCard() {
       <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">
         <select
           value={productType}
-          onChange={(e) => setProductType(e.target.value as "DIGITAL" | "TIP")}
+          onChange={(e) => setProductType(e.target.value as "DIGITAL" | "TIP" | "LOCKED_MEDIA")}
           className="sm:col-span-3 px-3 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-on-surface"
         >
           <option value="DIGITAL">منتج رقمي (ملف/دورة)</option>
+          <option value="LOCKED_MEDIA">محتوى مقفل (LOCKED_MEDIA)</option>
           <option value="TIP">دعم مالي (Tip Jar)</option>
         </select>
 
@@ -120,10 +121,10 @@ export function DigitalProductsCard() {
           className="sm:col-span-2 px-3 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-on-surface font-mono"
         />
 
-        {productType === "DIGITAL" && (
+        {productType !== "TIP" && (
           <input
             type="url"
-            placeholder="رابط تحميل الملف (https://...)"
+            placeholder={productType === "LOCKED_MEDIA" ? "رابط الفيديو/المحتوى الحصري (https://...)" : "رابط تحميل الملف (https://...)"}
             value={fileUrl}
             onChange={(e) => setFileUrl(e.target.value)}
             dir="ltr"
@@ -131,7 +132,7 @@ export function DigitalProductsCard() {
           />
         )}
 
-        <div className={productType === "DIGITAL" ? "sm:col-span-3" : "sm:col-span-3"}>
+        <div className="sm:col-span-3">
           <AppButton
             type="submit"
             variant="primary"

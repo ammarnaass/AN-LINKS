@@ -100,6 +100,32 @@ export function NewsletterBioCardCustomizer({
             />
           </div>
 
+          <div className="pt-3 border-t border-outline-variant/20 space-y-3">
+            <h4 className="text-xs font-bold text-primary">رسالة الترحيب التلقائية للمشتركين (اختياري)</h4>
+            <input
+              type="text"
+              value={settings.welcomeSubject || ""}
+              onChange={(e) => onChange({ welcomeSubject: e.target.value })}
+              placeholder="عنوان رسالة الترحيب (مثال: أهلاً بك في قائمتي!)"
+              className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3.5 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition"
+            />
+            <textarea
+              rows={2}
+              value={settings.welcomeBody || ""}
+              onChange={(e) => onChange({ welcomeBody: e.target.value })}
+              placeholder="نص الرسالة الترحيبية أو كود الخصم الحصري..."
+              className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3.5 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition resize-none"
+            />
+            <input
+              type="url"
+              dir="ltr"
+              value={settings.welcomeGiftUrl || ""}
+              onChange={(e) => onChange({ welcomeGiftUrl: e.target.value })}
+              placeholder="https://... (رابط هدية أو ملف PDF تلقائي)"
+              className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3.5 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition"
+            />
+          </div>
+
           <div className="pt-2">
             <AppButton
               type="button"

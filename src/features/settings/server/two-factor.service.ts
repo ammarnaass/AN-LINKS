@@ -27,7 +27,11 @@ export async function setupTwoFactor(userId: string) {
   );
 
   const secretEncrypted = encryptSecret(secret);
-  const backupPayload = JSON.stringify(backupCodes.map((code) => ({ code, used: false })));
+  const hashCode = (code: string) =>
+    crypto.createHash("sha256").update(code.trim().toUpperCase()).digest("hex");
+  const backupPayload = JSON.stringify(
+    backupCodes.map((code) => ({ codeHash: hashCode(code), used: false }))
+  );
   const backupCodesEncrypted = encryptSecret(backupPayload);
 
   await prisma.userTwoFactorAuth.upsert({
@@ -98,20 +102,30 @@ export async function verifyTwoFactorCodeOrBackup(userId: string, codeOrBackup: 
   if (result.valid) return true;
 
   try {
-    const rawCodes = decryptSecret(record.backupCodesEncrypted);
-    const codesList: Array<{ code: string; used: boolean; usedAt?: string }> = JSON.parse(rawCodes);
-    const matchedIndex = codesList.findIndex((item) => !item.used && item.code.toUpperCase() === clean.toUpperCase());
-    if (matchedIndex !== -1) {
+    const cleanHash = crypto.createHash("sha256").update(clean.toUpperCase()).digest("hex");
+    return await prisma.$transaction(async (tx) => {
+      const freshRecord = await tx.userTwoFactorAuth.findUnique({ where: { userId } });
+      if (!freshRecord || !freshRecord.isEnabled) return false;
+      const rawCodes = decryptSecret(freshRecord.backupCodesEncrypted);
+      const codesList: Array<{ code?: string; codeHash?: string; used: boolean; usedAt?: string }> =
+        JSON.parse(rawCodes);
+      const matchedIndex = codesList.findIndex(
+        (item) =>
+          !item.used &&
+          (item.codeHash === cleanHash ||
+            (typeof item.code === "string" && item.code.toUpperCase() === clean.toUpperCase()))
+      );
+      if (matchedIndex === -1) return false;
+
       codesList[matchedIndex].used = true;
       codesList[matchedIndex].usedAt = new Date().toISOString();
-      await prisma.userTwoFactorAuth.update({
+      await tx.userTwoFactorAuth.update({
         where: { userId },
         data: { backupCodesEncrypted: encryptSecret(JSON.stringify(codesList)) },
       });
       return true;
-    }
+    });
   } catch {
     return false;
   }
-  return false;
 }

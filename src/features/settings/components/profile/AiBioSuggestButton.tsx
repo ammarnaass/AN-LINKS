@@ -32,10 +32,12 @@ export function AiBioSuggestButton({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (data.success && data.data) {
-        if (data.data.bio) onSuggest(data.data.bio);
-        if (Array.isArray(data.data.options) && data.data.options.length > 0) {
-          setVariants(data.data.options);
+      if (data.success) {
+        const options = data.data?.options || data.suggestions;
+        const primaryBio = data.data?.bio || (Array.isArray(options) ? options[0] : undefined);
+        if (primaryBio) onSuggest(primaryBio);
+        if (Array.isArray(options) && options.length > 0) {
+          setVariants(options);
           setIsOpen(true);
         }
       }

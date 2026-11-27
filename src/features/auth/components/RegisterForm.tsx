@@ -52,7 +52,16 @@ export function RegisterForm() {
     setIsLoading(true);
 
     try {
-      const regRes = await registerAccount(formData);
+      const refFromQuery = searchParams?.get("ref")?.trim();
+      const refFromCookie =
+        typeof document !== "undefined"
+          ? document.cookie
+              .split("; ")
+              .find((c) => c.startsWith("anlinks_ref="))
+              ?.split("=")[1]
+          : undefined;
+      const referralCode = refFromQuery || refFromCookie || undefined;
+      const regRes = await registerAccount({ ...formData, referralCode });
 
       if (!regRes.ok) {
         setErrors(regRes.errors || ["فشل إنشاء الحساب"]);

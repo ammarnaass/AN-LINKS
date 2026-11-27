@@ -9,7 +9,7 @@ describe("Stitch Pixel Fidelity Verification", () => {
   it("should render all 5 Stitch _9 Bento Cards with micro-mockups", () => {
     const html = renderToString(React.createElement(FeaturesSection));
     expect(html).toContain("فحص الروابط الذاتي الذكي");
-    expect(html).toContain("تنبيه واتساب من روابط:");
+    expect(html).toContain("تنبيه فوري من Link Sentinel:");
     expect(html).toContain("محرر بصري يعشق العربية");
     expect(html).toContain("IBM Plex Sans");
     expect(html).toContain("تحليلات دقيقة ولحظية");

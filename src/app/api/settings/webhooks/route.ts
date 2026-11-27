@@ -3,10 +3,21 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth.options";
 import { prisma } from "@/shared/db";
 import {
+  assertSafeWebhookUrl,
   validateWebhookEndpointInput,
 } from "@/features/webhooks/validators/webhooks.validator";
-import { createWebhookSignature } from "@/features/webhooks/services/webhook-signer.service";
+import {
+  createWebhookSignature,
+  resolveWebhookSigningSecret,
+} from "@/features/webhooks/services/webhook-signer.service";
+import { encryptSecret, maskSecret } from "@/shared/lib/crypto";
+import { getActiveSubscription } from "@/features/settings/server/subscription.service";
 import crypto from "crypto";
+
+function maskEndpointForClient<T extends { secretEncrypted: string }>(endpoint: T): T {
+  const plain = resolveWebhookSigningSecret(endpoint.secretEncrypted);
+  return { ...endpoint, secretEncrypted: maskSecret(plain) };
+}
 
 export async function GET() {
   try {
@@ -48,7 +59,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      data: endpoint,
+      data: endpoint ? maskEndpointForClient(endpoint) : null,
       stats,
     });
   } catch (error) {
@@ -74,6 +85,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, message: "تم حذف رابط الويب بنجاح" });
     }
 
+    const sub = await getActiveSubscription(session.user.id);
+    if (!sub.quotas.allowOutgoingWebhooks) {
+      return NextResponse.json(
+        { success: false, error: "خطافات الويب التلقائية متاحة في باقة المحترفين والوكالات فقط" },
+        { status: 403 }
+      );
+    }
+
     if (action === "ping") {
       const endpoint = await prisma.creatorWebhookEndpoint.findFirst({
         where: { creatorId: session.user.id },
@@ -85,13 +104,22 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      const ssrfCheck = await assertSafeWebhookUrl(endpoint.url);
+      if (!ssrfCheck.ok) {
+        return NextResponse.json(
+          { success: false, error: ssrfCheck.error || "الرابط محظور أمنياً" },
+          { status: 400 }
+        );
+      }
+
       const pingPayload = JSON.stringify({
         event: "test.ping",
         timestamp: new Date().toISOString(),
         message: "تجربة ربط خطاف الويب مع منصة AN LINKS بنجاح!",
       });
 
-      const signature = createWebhookSignature(pingPayload, endpoint.secretEncrypted);
+      const signingSecret = resolveWebhookSigningSecret(endpoint.secretEncrypted);
+      const signature = createWebhookSignature(pingPayload, signingSecret);
 
       const startTime = Date.now();
       let responseCode = 0;
@@ -100,6 +128,8 @@ export async function POST(req: NextRequest) {
       try {
         const pingRes = await fetch(endpoint.url, {
           method: "POST",
+          redirect: "manual",
+          signal: AbortSignal.timeout(4000),
           headers: {
             "Content-Type": "application/json",
             "X-AnLinks-Signature": signature,
@@ -151,25 +181,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const ssrfCheck = await assertSafeWebhookUrl(url.trim());
+    if (!ssrfCheck.ok) {
+      return NextResponse.json(
+        { success: false, error: ssrfCheck.error || "الرابط غير مسموح به" },
+        { status: 400 }
+      );
+    }
+
     const existing = await prisma.creatorWebhookEndpoint.findFirst({
       where: { creatorId: session.user.id },
     });
 
-    const secret =
-      existing?.secretEncrypted ||
-      `whsec_${crypto.randomBytes(24).toString("hex")}`;
+    const isNewlyCreated = !existing;
+    const rawSecret = existing
+      ? resolveWebhookSigningSecret(existing.secretEncrypted)
+      : `whsec_${crypto.randomBytes(24).toString("hex")}`;
+    const storedSecretEncrypted = encryptSecret(rawSecret);
 
     const saved = await prisma.creatorWebhookEndpoint.upsert({
       where: { id: existing?.id || "new" },
       create: {
         creatorId: session.user.id,
         url: url.trim(),
-        secretEncrypted: secret,
+        secretEncrypted: storedSecretEncrypted,
         events,
         isActive: true,
       },
       update: {
         url: url.trim(),
+        secretEncrypted: storedSecretEncrypted,
         events,
         isActive: true,
       },
@@ -177,7 +218,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: saved,
+      data: isNewlyCreated ? { ...saved, secretEncrypted: rawSecret } : maskEndpointForClient(saved),
       message: "تم حفظ وتفعيل خطاف الويب بنجاح",
     });
   } catch (error) {

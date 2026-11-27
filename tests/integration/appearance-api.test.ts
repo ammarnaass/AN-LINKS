@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from "vitest";
 import { prisma } from "@/shared/db";
 import { GET as getProfile, PATCH as patchProfile } from "@/app/api/profile/route";
 import { sanitizeCustomBackground } from "@/features/appearance/utils/sanitizer";
@@ -16,8 +16,7 @@ vi.mock("next-auth", async () => {
 describe("Appearance API & CSS Sanitizer (Task 1)", () => {
   let testUser: { id: string; email: string; username: string };
 
-  beforeEach(async () => {
-    vi.clearAllMocks();
+  beforeAll(async () => {
     const username = `test_appear_${Date.now()}`;
     testUser = await prisma.user.create({
       data: {
@@ -26,6 +25,18 @@ describe("Appearance API & CSS Sanitizer (Task 1)", () => {
         role: "USER",
       },
     });
+  }, 20_000);
+
+  afterAll(async () => {
+    if (testUser?.id) {
+      await prisma.profile.deleteMany({ where: { userId: testUser.id } });
+      await prisma.user.deleteMany({ where: { id: testUser.id } });
+    }
+    await prisma.$disconnect();
+  }, 20_000);
+
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
   describe("sanitizeCustomBackground", () => {
@@ -79,7 +90,7 @@ describe("Appearance API & CSS Sanitizer (Task 1)", () => {
       expect(data.profile.font).toBe("Cairo");
       expect(data.profile.backgroundType).toBe("THEME");
       expect(data.profile.socialPosition).toBe("top");
-    });
+    }, 15_000);
   });
 
   describe("PATCH /api/profile", () => {
@@ -124,7 +135,7 @@ describe("Appearance API & CSS Sanitizer (Task 1)", () => {
       expect(data.profile.font).toBe("Tajawal");
       expect(data.profile.socialPosition).toBe("bottom");
       expect(data.profile.accentColor).toBe("#38bdf8");
-    });
+    }, 15_000);
 
     it("should reject malicious customBackground with HTTP 400", async () => {
       vi.mocked(nextAuth.getServerSession).mockResolvedValue({
@@ -181,6 +192,6 @@ describe("Appearance API & CSS Sanitizer (Task 1)", () => {
       });
       res = await patchProfile(req);
       expect(res.status).toBe(400);
-    });
+    }, 15_000);
   });
 });

@@ -3,6 +3,7 @@ export interface RegistrationInput {
   password: string;
   username: string;
   displayName: string;
+  referralCode?: string;
 }
 
 export interface ValidationResult {

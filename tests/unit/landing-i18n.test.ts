@@ -50,7 +50,7 @@ describe("Landing Page Multilingual i18n System", () => {
         // Pricing
         expect(content.pricing.tiers).toHaveLength(3);
         const tierIds = content.pricing.tiers.map((t) => t.id);
-        expect(tierIds).toEqual(["free", "pro", "business"]);
+        expect(tierIds).toEqual(["free", "pro", "agency"]);
         content.pricing.tiers.forEach((t) => {
           expect(t.name).toBeTruthy();
           expect(t.subtitle).toBeTruthy();

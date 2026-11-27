@@ -32,6 +32,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: meta.title,
     description: meta.description,
+    robots:
+      (data.profile as { seoIndexing?: boolean }).seoIndexing === false
+        ? { index: false, follow: false }
+        : undefined,
     openGraph: {
       title: meta.openGraph.title,
       description: meta.openGraph.description,
@@ -69,6 +73,7 @@ export default async function CustomDomainBioPage({ params }: PageProps) {
         links={data.links}
         socials={data.socials}
         products={data.products}
+        services={data.services}
         isPreview={false}
       />
     </main>

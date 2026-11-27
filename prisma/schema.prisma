@@ -94,6 +94,7 @@ model Profile {
   welcomeBody          String?
   welcomeGiftUrl       String?
   timezone             String   @default("Asia/Riyadh")
+  aiPreferences        Json?
 }
 
 enum PlatformCategory {
@@ -522,6 +523,8 @@ model DigitalOrder {
   amount      Float
   currency    String         @default("SAR")
   status      String         @default("PAID")
+  gatewayCode String?
+  isSandbox   Boolean        @default(false)
   deliveryUrl String?
   createdAt   DateTime       @default(now())
 

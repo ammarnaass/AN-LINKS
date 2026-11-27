@@ -8,6 +8,10 @@ vi.mock("@/features/admin/server/admin.guard", () => ({
   requireAdminSession: vi.fn(),
 }));
 
+vi.mock("@/lib/mailer", () => ({
+  sendTransactionalEmail: vi.fn().mockResolvedValue({ sent: true, provider: "console" }),
+}));
+
 vi.mock("@/shared/db", () => ({
   prisma: {
     creatorSubscriber: {
@@ -23,13 +27,14 @@ vi.mock("@/shared/db", () => ({
     },
     user: {
       count: vi.fn(),
+      findMany: vi.fn(),
     },
   },
 }));
 
 describe("Admin Newsletter API Suite", () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   it("blocks non-admin access with 403 or redirect", async () => {
@@ -55,6 +60,7 @@ describe("Admin Newsletter API Suite", () => {
     vi.mocked(prisma.creatorSubscriber.count).mockResolvedValueOnce(150); // total
     vi.mocked(prisma.creatorSubscriber.count).mockResolvedValueOnce(142); // active
     vi.mocked(prisma.newsletterBroadcast.count).mockResolvedValueOnce(12); // broadcasts
+    vi.mocked(prisma.newsletterBroadcast.count).mockResolvedValueOnce(12); // sentBroadcasts
     vi.mocked(prisma.creatorSubscriber.findMany).mockResolvedValueOnce([
       {
         id: "sub-1",
@@ -96,13 +102,16 @@ describe("Admin Newsletter API Suite", () => {
       authorized: true,
       user: { id: "admin-1", role: "ADMIN" } as any,
     });
-    vi.mocked(prisma.creatorSubscriber.count).mockResolvedValueOnce(142);
+    vi.mocked(prisma.creatorSubscriber.findMany).mockResolvedValueOnce([
+      { email: "fan1@example.com" },
+      { email: "fan2@example.com" },
+    ] as any);
     vi.mocked(prisma.newsletterBroadcast.create).mockResolvedValueOnce({
       id: "bc-new",
       creatorId: "admin-1",
       subject: "إعلان هام للمشتركين",
       content: "محتوى الإعلان",
-      sentCount: 142,
+      sentCount: 2,
       status: "SENT",
       sentAt: new Date(),
       createdAt: new Date(),
@@ -122,6 +131,6 @@ describe("Admin Newsletter API Suite", () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.success).toBe(true);
-    expect(data.broadcast.sentCount).toBe(142);
+    expect(data.broadcast.sentCount).toBe(2);
   });
 });

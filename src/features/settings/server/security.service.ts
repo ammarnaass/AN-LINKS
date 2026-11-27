@@ -30,7 +30,8 @@ export async function changePassword(
   newPass: string,
   confirmPass: string,
   ipAddress?: string,
-  userAgent?: string
+  userAgent?: string,
+  currentSessionToken?: string
 ) {
   const validation = validatePasswordChange(currentPass, newPass, confirmPass);
   if (!validation.valid) {
@@ -55,10 +56,20 @@ export async function changePassword(
   const salt = await bcrypt.genSalt(10);
   const newHash = await bcrypt.hash(newPass, salt);
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { passwordHash: newHash },
-  });
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHash },
+    }),
+    prisma.userSession.updateMany({
+      where: {
+        userId,
+        isActive: true,
+        ...(currentSessionToken ? { sessionToken: { not: currentSessionToken } } : {}),
+      },
+      data: { isActive: false },
+    }),
+  ]);
 
   await logSecurityEvent(userId, "PASSWORD_CHANGE", ipAddress, userAgent);
   return { success: true, message: "تم تحديث كلمة المرور بنجاح" };

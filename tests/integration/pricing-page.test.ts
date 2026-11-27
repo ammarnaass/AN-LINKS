@@ -13,7 +13,7 @@ describe("Pricing Page Data & Logic", () => {
     const monthly = calculatePrice(PRICING_PLANS[1], false);
     const yearlyMonthlyEquiv = calculatePrice(PRICING_PLANS[1], true);
     expect(yearlyMonthlyEquiv).toBeLessThan(monthly);
-    expect(yearlyMonthlyEquiv).toBe(19); // 24/mo -> 19/mo on yearly
+    expect(yearlyMonthlyEquiv).toBe(12); // $14/mo -> $12/mo on yearly
   });
 
   it("should provide full feature comparison matrix", () => {

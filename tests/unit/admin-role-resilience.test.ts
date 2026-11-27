@@ -8,14 +8,30 @@ vi.mock("next-auth", () => ({
 
 import { getServerSession } from "next-auth";
 
-describe("Admin Role Resilience & Visibility Guarantee Suite", () => {
-  it("recognizes sysadmin / admin@anlinks.dev as ADMIN even if role was stale or USER", async () => {
+describe("Admin Role Strictly Enforced RBAC Suite", () => {
+  it("does NOT elevate hardcoded admin@anlinks.dev email when session role is USER", async () => {
     vi.mocked(getServerSession).mockResolvedValueOnce({
       user: {
         id: "admin-1",
         email: "admin@anlinks.dev",
         username: "sysadmin",
-        role: "USER", // Stale role
+        role: "USER",
+      },
+    });
+
+    const status = await getServerAuthStatus();
+    expect(status.isAuthenticated).toBe(true);
+    expect(status.isAdmin).toBe(false);
+    expect(status.user?.role).toBe("USER");
+  });
+
+  it("recognizes verified ADMIN role cleanly", async () => {
+    vi.mocked(getServerSession).mockResolvedValueOnce({
+      user: {
+        id: "admin-1",
+        email: "admin@anlinks.dev",
+        username: "sysadmin",
+        role: "ADMIN",
       },
     });
 

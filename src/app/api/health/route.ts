@@ -12,6 +12,8 @@ export async function GET() {
       {
         status: "healthy",
         database: "connected",
+        storageConfigured: Boolean(process.env.S3_BUCKET && process.env.S3_ENDPOINT),
+        authConfigured: Boolean(process.env.NEXTAUTH_SECRET || process.env.NODE_ENV !== "production"),
         latencyMs: Date.now() - startedAt,
         uptimeSeconds: Math.round(process.uptime()),
         timestamp: new Date().toISOString(),

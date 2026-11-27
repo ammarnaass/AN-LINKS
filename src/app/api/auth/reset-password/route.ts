@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAndResetPassword } from "@/features/auth/services/password-reset.service";
+import { enforceRateLimit } from "@/lib/rate-limiter";
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = enforceRateLimit(request, "reset_password", {
+      maxAttempts: 10,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (limited) return limited;
+
     const body = await request.json();
     const { token, newPassword } = body;
 

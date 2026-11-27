@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/features/auth/server/auth.options";
+import { enforceRateLimit } from "@/lib/rate-limiter";
 import {
   getTwoFactorStatus,
   setupTwoFactor,
@@ -29,6 +30,12 @@ export async function POST(req: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: "غير مصرح" }, { status: 401 });
     }
+
+    const limited = enforceRateLimit(req, `2fa:${session.user.id}`, {
+      maxAttempts: 10,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (limited) return limited;
 
     const body = await req.json();
     const { action, token, password } = body;

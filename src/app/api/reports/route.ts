@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { validateReportInput } from "@/lib/report-validator";
 import { truncateIp } from "@/lib/bot-detector";
+import { enforceRateLimit } from "@/lib/rate-limiter";
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = enforceRateLimit(request, "reports_submit", {
+      maxAttempts: 5,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (limited) return limited;
+
     const body = await request.json();
     const validation = validateReportInput(body);
 

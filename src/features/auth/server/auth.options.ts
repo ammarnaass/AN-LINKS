@@ -147,10 +147,6 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      if (token.email === "admin@anlinks.dev" || token.username === "sysadmin") {
-        token.role = "ADMIN";
-      }
-
       // Sync latest profile avatar if not already on token
       if (token.id && !token.picture) {
         try {
@@ -185,10 +181,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.id) {
         (session.user as unknown as { id: string }).id = token.id as string;
         (session.user as unknown as { username: string }).username = token.username as string;
-        const role =
-          token.email === "admin@anlinks.dev" || (token.username as string) === "sysadmin"
-            ? "ADMIN"
-            : (token.role as string) || "USER";
+        const role = (token.role as string) || "USER";
         (session.user as unknown as { role: string }).role = role;
         (session.user as unknown as { sessionToken: string }).sessionToken = token.sessionToken as string;
         if (token.email) {
@@ -204,7 +197,9 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || "default_development_secret_key_change_in_production",
+  secret:
+    process.env.NEXTAUTH_SECRET ||
+    (process.env.NODE_ENV !== "production" ? "dev_only_anlinks_secret" : undefined),
 };
 
 /**

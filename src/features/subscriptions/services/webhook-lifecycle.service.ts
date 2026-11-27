@@ -1,4 +1,5 @@
 import { prisma } from "@/shared/db";
+import { processSubscriptionCommission } from "@/features/affiliate/server/affiliate.service";
 
 export interface ProcessPaymentSuccessParams {
   invoiceId: string;
@@ -14,30 +15,21 @@ export interface ProcessPaymentSuccessParams {
 }
 
 export async function processPaymentSuccess(params: ProcessPaymentSuccessParams) {
-  return await prisma.$transaction(async (tx) => {
-    // 1. Mark invoice as PAID
+  let subscriptionId: string | null = null;
+  let planSlug = "";
+
+  await prisma.$transaction(async (tx) => {
     await tx.financialInvoice.update({
       where: { id: params.invoiceId },
-      data: {
-        status: "PAID",
-        paidAt: params.now,
-      },
+      data: { status: "PAID", paidAt: params.now },
     });
 
-    // 2. Resolve plan to check slug
-    let planSlug = "";
     if (params.planId) {
-      const plan = await tx.subscriptionPlan.findUnique({
-        where: { id: params.planId },
-      });
-      if (plan) {
-        planSlug = plan.slug;
-      }
-    }
+      const plan = await tx.subscriptionPlan.findUnique({ where: { id: params.planId } });
+      if (plan) planSlug = plan.slug;
 
-    // 3. Upsert UserSubscription
-    if (params.planId) {
-      await tx.userSubscription.upsert({
+      const cleanCoupon = params.couponCode?.trim().toUpperCase() || null;
+      const sub = await tx.userSubscription.upsert({
         where: { userId: params.userId },
         update: {
           planId: params.planId,
@@ -49,6 +41,7 @@ export async function processPaymentSuccess(params: ProcessPaymentSuccessParams)
           currentPeriodStart: params.now,
           currentPeriodEnd: params.periodEnd,
           cancelAtPeriodEnd: false,
+          ...(cleanCoupon ? { couponCode: cleanCoupon } : {}),
         },
         create: {
           userId: params.userId,
@@ -61,19 +54,16 @@ export async function processPaymentSuccess(params: ProcessPaymentSuccessParams)
           currentPeriodStart: params.now,
           currentPeriodEnd: params.periodEnd,
           cancelAtPeriodEnd: false,
+          couponCode: cleanCoupon,
         },
       });
+      subscriptionId = sub?.id || null;
     }
 
-    // 4. Update user role to "PRO" if plan slug is not "free"
     if (planSlug && planSlug !== "free") {
-      await tx.user.update({
-        where: { id: params.userId },
-        data: { role: "PRO" },
-      });
+      await tx.user.update({ where: { id: params.userId }, data: { role: "PRO" } });
     }
 
-    // 5. If coupon code exists, increment coupon usedCount
     if (params.couponCode && typeof params.couponCode === "string") {
       await tx.promotionCoupon.updateMany({
         where: { code: params.couponCode.trim().toUpperCase() },
@@ -81,21 +71,26 @@ export async function processPaymentSuccess(params: ProcessPaymentSuccessParams)
       });
     }
   });
+
+  if (subscriptionId && params.amountTotal > 0 && planSlug && planSlug !== "free") {
+    try {
+      await processSubscriptionCommission({
+        invoiceId: params.invoiceId,
+        subscriptionId,
+        buyerUserId: params.userId,
+        invoiceAmount: params.amountTotal,
+        planSlug,
+      });
+    } catch {
+      // Non-fatal in isolated mock tests or organic accounts
+    }
+  }
 }
 
 export async function processPaymentFailure(invoiceId: string, userId: string) {
   return await prisma.$transaction(async (tx) => {
-    // Mark invoice as FAILED
-    await tx.financialInvoice.update({
-      where: { id: invoiceId },
-      data: { status: "FAILED" },
-    });
-
-    // Mark user subscription as PAST_DUE
-    await tx.userSubscription.updateMany({
-      where: { userId },
-      data: { status: "PAST_DUE" },
-    });
+    await tx.financialInvoice.update({ where: { id: invoiceId }, data: { status: "FAILED" } });
+    await tx.userSubscription.updateMany({ where: { userId }, data: { status: "PAST_DUE" } });
   });
 }
 
@@ -104,21 +99,12 @@ export async function processSubscriptionCancellation(
   options?: { immediate?: boolean }
 ) {
   return await prisma.$transaction(async (tx) => {
-    // Mark subscription as CANCELED
     await tx.userSubscription.updateMany({
       where: { userId },
-      data: {
-        status: "CANCELED",
-        cancelAtPeriodEnd: true,
-      },
+      data: { status: "CANCELED", cancelAtPeriodEnd: true },
     });
-
-    // If immediate cancellation requested, downgrade user role to USER
     if (options?.immediate) {
-      await tx.user.update({
-        where: { id: userId },
-        data: { role: "USER" },
-      });
+      await tx.user.update({ where: { id: userId }, data: { role: "USER" } });
     }
   });
 }

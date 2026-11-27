@@ -41,10 +41,7 @@ export async function middleware(request: NextRequest) {
         loginUrl.searchParams.set("callbackUrl", pathname + request.nextUrl.search);
         return NextResponse.redirect(loginUrl);
       }
-      const isTokenAdmin =
-        token.role === "ADMIN" ||
-        token.email === "admin@anlinks.dev" ||
-        token.username === "sysadmin";
+      const isTokenAdmin = token.role === "ADMIN";
       if (isAdminRoute && !isTokenAdmin) {
         const dashboardUrl = new URL("/dashboard", request.url);
         return NextResponse.redirect(dashboardUrl);
@@ -119,6 +116,16 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/go/")) {
     response.headers.set("Cache-Control", "no-store, max-age=0");
+  }
+
+  const refCode = request.nextUrl.searchParams.get("ref")?.trim();
+  if (refCode && /^[a-zA-Z0-9_-]{2,40}$/.test(refCode)) {
+    response.cookies.set("anlinks_ref", refCode, {
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
   }
 
   return response;

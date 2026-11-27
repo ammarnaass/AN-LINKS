@@ -32,6 +32,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: meta.title,
     description: meta.description,
+    robots:
+      (data.profile as { seoIndexing?: boolean }).seoIndexing === false
+        ? { index: false, follow: false }
+        : undefined,
     openGraph: {
       title: meta.openGraph.title,
       description: meta.openGraph.description,

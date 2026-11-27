@@ -9,6 +9,10 @@ export interface PasswordResetResult {
   token?: string;
 }
 
+function hashResetToken(rawToken: string): string {
+  return crypto.createHash("sha256").update(rawToken).digest("hex");
+}
+
 /**
  * Creates a secure time-limited password reset token for a registered user.
  */
@@ -29,12 +33,13 @@ export async function createPasswordResetToken(email: string): Promise<PasswordR
   });
 
   const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashResetToken(token);
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
   await prisma.passwordResetToken.create({
     data: {
       email: cleanEmail,
-      token,
+      token: tokenHash,
       expiresAt,
     },
   });
@@ -59,8 +64,12 @@ export async function verifyAndResetPassword(
     return { ok: false, error: "يجب ألا تقل كلمة المرور عن 8 أحرف" };
   }
 
-  const resetRecord = await prisma.passwordResetToken.findUnique({
-    where: { token: token.trim() },
+  const trimmed = token.trim();
+  const tokenHash = hashResetToken(trimmed);
+  const resetRecord = await prisma.passwordResetToken.findFirst({
+    where: {
+      OR: [{ token: tokenHash }, { token: trimmed }],
+    },
   });
 
   if (!resetRecord) {
@@ -89,6 +98,10 @@ export async function verifyAndResetPassword(
     }),
     prisma.passwordResetToken.delete({
       where: { id: resetRecord.id },
+    }),
+    prisma.userSession.updateMany({
+      where: { userId: user.id, isActive: true },
+      data: { isActive: false },
     }),
     prisma.securityAuditLog.create({
       data: {

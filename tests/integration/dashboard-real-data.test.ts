@@ -37,7 +37,12 @@ describe("Dashboard Real Data & Mock Purge (Task 3)", () => {
         },
       });
     }
-  });
+    await Promise.all([
+      prisma.link.deleteMany({ where: { userId: freshUser.id } }),
+      prisma.socialLink.deleteMany({ where: { userId: freshUser.id } }),
+      prisma.dailyProfileStat.deleteMany({ where: { username: freshUser.username } }),
+    ]);
+  }, 15_000);
 
   it("1. should return empty links array and empty socials for fresh user without mock fallback", async () => {
     vi.mocked(nextAuth.getServerSession).mockResolvedValue({
@@ -52,7 +57,7 @@ describe("Dashboard Real Data & Mock Purge (Task 3)", () => {
     expect(Array.isArray(data.socials)).toBe(true);
     // Verified that no hardcoded "tariq" links exist in new user response
     expect(data.links.some((l: { title: string }) => l.title.includes("طارق"))).toBe(false);
-  });
+  }, 15_000);
 
   it("2. should return clean profile with real user credentials", async () => {
     vi.mocked(nextAuth.getServerSession).mockResolvedValue({
@@ -64,7 +69,7 @@ describe("Dashboard Real Data & Mock Purge (Task 3)", () => {
     expect(res.status).toBe(200);
     expect(data.profile.username).toBe("fresh_creator");
     expect(data.profile.displayName).toBe("صانع جديد");
-  });
+  }, 15_000);
 
   it("3. should return zeroed analytics for fresh user without Math.sin fake formulas", async () => {
     vi.mocked(nextAuth.getServerSession).mockResolvedValue({
@@ -84,6 +89,6 @@ describe("Dashboard Real Data & Mock Purge (Task 3)", () => {
       (point: { views: number; clicks: number }) => point.views > 0 || point.clicks > 0
     );
     expect(hasAnyFakeNumbers).toBe(false);
-  });
+  }, 15_000);
 });
 

@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/db";
+import { enforceRateLimit } from "@/lib/rate-limiter";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = enforceRateLimit(req, "newsletter_footer", {
+      maxAttempts: 10,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (limited) return limited;
+
     const body = await req.json().catch(() => ({}));
     const rawEmail = body.email;
     const name = body.name;

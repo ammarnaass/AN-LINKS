@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShoppingBag, Heart, CheckCircle2, Download, Loader2 } from "lucide-react";
+import { ShoppingBag, Heart, CheckCircle2, Download, Loader2, CreditCard } from "lucide-react";
 import { DigitalProductItem } from "../types/bio.types";
+import { BioGatedMediaCard } from "./BioGatedMediaCard";
 
 interface BioDigitalStoreCardProps {
   username: string;
@@ -11,9 +12,13 @@ interface BioDigitalStoreCardProps {
   isPreview?: boolean;
 }
 
-/**
- * Interactive Digital Products & Tip Jar storefront embedded cleanly on creator Bio pages.
- */
+const STORE_GATEWAYS = [
+  { code: "mada", label: "مدى (تجريبي)" },
+  { code: "apple_pay", label: "Apple Pay" },
+  { code: "stc_pay", label: "STC Pay" },
+  { code: "stripe", label: "بطاقة ائتمانية" },
+];
+
 export function BioDigitalStoreCard({
   username,
   products,
@@ -22,6 +27,7 @@ export function BioDigitalStoreCard({
 }: BioDigitalStoreCardProps) {
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [buyerEmail, setBuyerEmail] = useState("");
+  const [gatewayCode, setGatewayCode] = useState("mada");
   const [isProcessing, setIsProcessing] = useState(false);
   const [receipt, setReceipt] = useState<{
     productId: string;
@@ -34,12 +40,12 @@ export function BioDigitalStoreCard({
 
   const effectiveAccent = accentColor || "#4edea3";
 
-  const handleCheckout = async (e: React.FormEvent, productId: string) => {
+  const handleCheckout = async (e: React.FormEvent, product: DigitalProductItem) => {
     e.preventDefault();
     setError(null);
 
     if (isPreview) {
-      setReceipt({ productId, message: "وضع المعاينة: تمت المحاكاة بنجاح!" });
+      setReceipt({ productId: product.id, message: "وضع المعاينة: تمت المحاكاة بنجاح!" });
       setActiveProductId(null);
       return;
     }
@@ -49,15 +55,19 @@ export function BioDigitalStoreCard({
       const res = await fetch(`/api/bio/${encodeURIComponent(username)}/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, buyerEmail }),
+        body: JSON.stringify({ productId: product.id, buyerEmail, gatewayCode }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
         setError(data.error || "تعذر إتمام العملية");
         return;
       }
+      if (data.entitlementToken && typeof window !== "undefined") {
+        window.localStorage.setItem(`anlinks_media_token_${product.id}`, data.entitlementToken);
+        window.dispatchEvent(new CustomEvent("anlinks-media-unlocked", { detail: { productId: product.id } }));
+      }
       setReceipt({
-        productId,
+        productId: product.id,
         message: data.message,
         deliveryUrl: data.deliveryUrl,
       });
@@ -81,8 +91,23 @@ export function BioDigitalStoreCard({
 
       {products.map((product) => {
         const isTip = product.productType === "TIP";
+        const isLockedMedia = product.productType === "LOCKED_MEDIA";
         const isBuying = activeProductId === product.id;
         const itemReceipt = receipt?.productId === product.id ? receipt : null;
+
+        if (isLockedMedia && !isBuying) {
+          return (
+            <BioGatedMediaCard
+              key={product.id}
+              product={product}
+              username={username}
+              onOpenCheckout={() => {
+                setError(null);
+                setActiveProductId(product.id);
+              }}
+            />
+          );
+        }
 
         return (
           <div
@@ -113,7 +138,7 @@ export function BioDigitalStoreCard({
                   setError(null);
                   setActiveProductId(isBuying ? null : product.id);
                 }}
-                className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-950 shrink-0 shadow-sm hover:brightness-110 transition"
+                className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-950 shrink-0 shadow-sm hover:brightness-110 transition cursor-pointer"
                 style={{ backgroundColor: effectiveAccent }}
               >
                 {product.price} {product.currency}
@@ -121,29 +146,48 @@ export function BioDigitalStoreCard({
             </div>
 
             {isBuying && (
-              <form onSubmit={(e) => handleCheckout(e, product.id)} className="flex gap-2 pt-1">
-                <input
-                  type="email"
-                  required
-                  value={buyerEmail}
-                  onChange={(e) => setBuyerEmail(e.target.value)}
-                  placeholder="أدخل بريدك لاستلام الإيصال والملف..."
-                  className="flex-1 bg-surface-container-lowest/85 border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
-                />
-                <button
-                  type="submit"
-                  disabled={isProcessing}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary flex items-center gap-1 shrink-0"
-                >
-                  {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>{isTip ? "ادعم" : "شراء"}</span>}
-                </button>
+              <form onSubmit={(e) => handleCheckout(e, product)} className="space-y-2 pt-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <CreditCard className="w-3.5 h-3.5 text-primary shrink-0" />
+                  {STORE_GATEWAYS.map((gw) => (
+                    <button
+                      key={gw.code}
+                      type="button"
+                      onClick={() => setGatewayCode(gw.code)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+                        gatewayCode === gw.code
+                          ? "bg-primary/15 border-primary text-on-surface"
+                          : "bg-surface-container-lowest/70 border-outline-variant/30 text-on-surface-variant"
+                      }`}
+                    >
+                      {gw.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    required
+                    value={buyerEmail}
+                    onChange={(e) => setBuyerEmail(e.target.value)}
+                    placeholder="أدخل بريدك لاستلام الإيصال والملف..."
+                    className="flex-1 bg-surface-container-lowest/85 border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary flex items-center gap-1 shrink-0 cursor-pointer"
+                  >
+                    {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>{isTip ? "ادعم" : "شراء"}</span>}
+                  </button>
+                </div>
               </form>
             )}
 
-            {isBuying && error && <p className="text-[11px] text-red-400 font-medium">{error}</p>}
+            {isBuying && error && <p className="text-[11px] text-error font-medium">{error}</p>}
 
             {itemReceipt && (
-              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center justify-between gap-2">
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs flex items-center justify-between gap-2">
                 <span className="flex items-center gap-1.5 font-semibold">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>{itemReceipt.message}</span>

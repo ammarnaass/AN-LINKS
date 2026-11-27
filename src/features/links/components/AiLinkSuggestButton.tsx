@@ -21,8 +21,9 @@ export function AiLinkSuggestButton({ url, onSuggest }: AiLinkSuggestButtonProps
         body: JSON.stringify({ mode: "link_suggest", url: url.trim() }),
       });
       const data = await res.json().catch(() => ({}));
-      if (data.success && data.data?.title) {
-        onSuggest(data.data.title);
+      const suggestedTitle = data.data?.title || data.title;
+      if (data.success && suggestedTitle) {
+        onSuggest(suggestedTitle);
       }
     } catch {
       // Fallback gracefully on network error

@@ -62,6 +62,11 @@ export async function recordSession(
   });
 }
 
+function redactSessionToken(token: string): string {
+  if (!token || token.length <= 8) return "****";
+  return `****${token.slice(-8)}`;
+}
+
 export async function getUserActiveSessions(userId: string, currentToken?: string): Promise<UserSessionDTO[]> {
   const sessions = await prisma.userSession.findMany({
     where: { userId, isActive: true },
@@ -70,7 +75,7 @@ export async function getUserActiveSessions(userId: string, currentToken?: strin
 
   return sessions.map((s) => ({
     id: s.id,
-    sessionToken: s.sessionToken,
+    sessionToken: redactSessionToken(s.sessionToken),
     ipAddress: s.ipAddress,
     userAgent: s.userAgent,
     deviceType: s.deviceType as "desktop" | "mobile" | "tablet",
@@ -118,7 +123,7 @@ export async function getAllPlatformSessions(): Promise<AdminSessionDTO[]> {
     userEmail: s.user.email,
     userRole: s.user.role as "ADMIN" | "USER",
     username: s.user.username,
-    sessionToken: s.sessionToken,
+    sessionToken: redactSessionToken(s.sessionToken),
     ipAddress: s.ipAddress,
     userAgent: s.userAgent,
     deviceType: s.deviceType as "desktop" | "mobile" | "tablet",

@@ -38,6 +38,7 @@ export function ProfileTab(props?: ProfileTabProps) {
   } = useSettingsProfile();
 
   const profile = {
+    ...hookProfile,
     displayName: props?.displayName !== undefined && props?.displayName !== "" ? props.displayName : hookProfile.displayName,
     username: props?.username !== undefined && props?.username !== "" ? props.username : hookProfile.username,
     email: props?.email !== undefined && props?.email !== "" ? props.email : hookProfile.email,

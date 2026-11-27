@@ -15,7 +15,12 @@ export function AiCopilotSettingsCard() {
   const [tone, setTone] = useState<AiTone>("professional");
   const [niche, setNiche] = useState("صانع محتوى محترف");
   const [autoSuggestTitle, setAutoSuggestTitle] = useState(true);
-  const [totalGenerations, setTotalGenerations] = useState(12);
+  const [totalGenerations, setTotalGenerations] = useState(0);
+  const [quotaInfo, setQuotaInfo] = useState<{ model: string; allowed: boolean; planName: string }>({
+    model: "Gemini 2.5 Flash",
+    allowed: false,
+    planName: "الباقة الحالية",
+  });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -32,7 +37,14 @@ export function AiCopilotSettingsCard() {
           setTone(json.data.tone || "professional");
           setNiche(json.data.niche || "صانع محتوى محترف");
           setAutoSuggestTitle(json.data.autoSuggestTitle !== false);
-          setTotalGenerations(json.data.totalGenerations || 12);
+          setTotalGenerations(json.data.totalGenerations ?? 0);
+        }
+        if (json.quota) {
+          setQuotaInfo({
+            model: json.quota.model || "Gemini 2.5 Flash",
+            allowed: Boolean(json.quota.allowed),
+            planName: json.quota.planName || "الباقة الحالية",
+          });
         }
       })
       .catch(() => {});
@@ -78,8 +90,16 @@ export function AiCopilotSettingsCard() {
       });
       const data = await res.json();
       if (data.success) {
-        setTestResult(data.data?.title || data.data?.bio || "تم التوليد بنجاح");
+        setTestResult(
+          data.data?.title ||
+            data.data?.bio ||
+            data.title ||
+            data.suggestions?.[0] ||
+            "تم التوليد بنجاح"
+        );
         setTotalGenerations((prev) => prev + 1);
+      } else {
+        setTestResult(data.error || "تعذر تشغيل المساعد في باقتك الحالية");
       }
     } catch {
       setTestResult("تعذر الاتصال بنموذج الذكاء الاصطناعي");
@@ -97,7 +117,7 @@ export function AiCopilotSettingsCard() {
           </div>
           <div>
             <h3 className="text-base font-bold text-on-surface">مساعد الذكاء الاصطناعي (AI Copilot)</h3>
-            <p className="text-xs text-on-surface-variant">تخصيص النبرة وصياغة الروابط والبايو بنموذج Gemini 1.5 Flash</p>
+            <p className="text-xs text-on-surface-variant">تخصيص النبرة وصياغة الروابط والبايو بنموذج {quotaInfo.model}</p>
           </div>
         </div>
       </div>
@@ -113,11 +133,13 @@ export function AiCopilotSettingsCard() {
         </div>
         <div className="space-y-1">
           <span className="text-[11px] text-on-surface-variant font-medium">نموذج الذكاء الاصطناعي</span>
-          <p className="text-sm font-bold text-primary font-mono">Gemini 1.5 Flash</p>
+          <p className="text-sm font-bold text-primary font-mono">{quotaInfo.model}</p>
         </div>
         <div className="space-y-1">
-          <span className="text-[11px] text-on-surface-variant font-medium">حصة الاستهلاك</span>
-          <p className="text-sm font-bold text-emerald-400">غير محدود (Pro Plan)</p>
+          <span className="text-[11px] text-on-surface-variant font-medium">حالة الحصة</span>
+          <p className={`text-sm font-bold ${quotaInfo.allowed ? "text-emerald-400" : "text-amber-400"}`}>
+            {quotaInfo.allowed ? `مفعل (${quotaInfo.planName})` : `يتطلب ترقية (${quotaInfo.planName})`}
+          </p>
         </div>
       </div>
 

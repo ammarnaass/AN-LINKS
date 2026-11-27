@@ -41,7 +41,12 @@ export async function POST(request: NextRequest) {
     const description = typeof body.description === "string" ? body.description.trim() : null;
     const price = Number(body.price);
     const currency = typeof body.currency === "string" ? body.currency.trim().toUpperCase() : "SAR";
-    const productType = body.productType === "TIP" ? "TIP" : "DIGITAL";
+    const productType =
+      body.productType === "TIP"
+        ? "TIP"
+        : body.productType === "LOCKED_MEDIA"
+          ? "LOCKED_MEDIA"
+          : "DIGITAL";
     const rawFileUrl = typeof body.fileUrl === "string" ? body.fileUrl.trim() : "";
 
     if (!title || title.length < 2) {
@@ -53,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     let cleanFileUrl: string | null = null;
-    if (productType === "DIGITAL" && rawFileUrl) {
+    if ((productType === "DIGITAL" || productType === "LOCKED_MEDIA") && rawFileUrl) {
       const check = sanitizeUrl(rawFileUrl);
       if (!check.valid || !check.normalizedUrl) {
         return NextResponse.json({ success: false, error: check.error || "رابط الملف غير صالح" }, { status: 400 });

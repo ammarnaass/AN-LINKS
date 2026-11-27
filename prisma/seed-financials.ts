@@ -237,6 +237,8 @@ export async function seedFinancials(prisma: PrismaClient): Promise<void> {
         allowPrioritySupport: false,
         customCssAllowed: false,
         allowAppointments: false,
+        allowOutgoingWebhooks: false,
+        allowAiCopilot: false,
         storeCommissionRate: 10.0,
       },
       prices: [
@@ -263,6 +265,8 @@ export async function seedFinancials(prisma: PrismaClient): Promise<void> {
         allowPrioritySupport: false,
         customCssAllowed: false,
         allowAppointments: true,
+        allowOutgoingWebhooks: false,
+        allowAiCopilot: true,
         storeCommissionRate: 5.0,
       },
       prices: [
@@ -293,6 +297,8 @@ export async function seedFinancials(prisma: PrismaClient): Promise<void> {
         allowPrioritySupport: true,
         customCssAllowed: true,
         allowAppointments: true,
+        allowOutgoingWebhooks: true,
+        allowAiCopilot: true,
         storeCommissionRate: 2.5,
       },
       prices: [
@@ -323,6 +329,8 @@ export async function seedFinancials(prisma: PrismaClient): Promise<void> {
         allowPrioritySupport: true,
         customCssAllowed: true,
         allowAppointments: true,
+        allowOutgoingWebhooks: true,
+        allowAiCopilot: true,
         storeCommissionRate: 1.0,
       },
       prices: [

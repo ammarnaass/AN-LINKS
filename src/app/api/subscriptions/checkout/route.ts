@@ -8,14 +8,22 @@ interface CheckoutRequestBody {
   planId?: string;
   planSlug?: string;
   billingCycle?: "MONTHLY" | "YEARLY" | "LIFETIME";
+  interval?: string;
   currency?: string;
   couponCode?: string;
   gatewayCode?: string;
+  gatewayId?: string;
 }
+
+const FALLBACK_USD_MAP: Record<string, number> = {
+  free: 0,
+  creator: 8,
+  pro: 14,
+  agency: 39,
+};
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Authenticate user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -25,138 +33,128 @@ export async function POST(request: NextRequest) {
     }
     const userId = session.user.id;
 
-    // 2. Parse body
-    let body: CheckoutRequestBody;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "صيغة الطلب غير صحيحة" },
-        { status: 400 }
-      );
+    const body: CheckoutRequestBody | null = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ success: false, error: "صيغة الطلب غير صحيحة" }, { status: 400 });
     }
 
-    const {
-      planId,
-      planSlug,
-      billingCycle = "MONTHLY",
-      gatewayCode = "mada",
-      currency: rawCurrency,
-      couponCode,
-    } = body;
+    const cycle = String(body.billingCycle || body.interval || "MONTHLY").toUpperCase();
+    const rawGateway = (body.gatewayCode || body.gatewayId || "mada").trim();
+    const currency = (body.currency || "SAR").trim().toUpperCase();
 
-    // 3. Resolve plan by ID or by Slug
-    const plan = planId
-      ? await prisma.subscriptionPlan.findUnique({
-          where: { id: planId },
-          include: { prices: true },
-        })
-      : planSlug
+    const plan = body.planId
+      ? await prisma.subscriptionPlan.findUnique({ where: { id: body.planId }, include: { prices: true } })
+      : body.planSlug
         ? await prisma.subscriptionPlan.findFirst({
-            where: { slug: planSlug.toLowerCase().trim(), isActive: true },
+            where: { slug: body.planSlug.toLowerCase().trim(), isActive: true },
             include: { prices: true },
           })
         : null;
 
     if (!plan || !plan.isActive) {
-      return NextResponse.json(
-        { success: false, error: "الباقة المطلوبة غير متوفرة أو غير نشطة" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "الباقة المطلوبة غير متوفرة أو غير نشطة" }, { status: 400 });
     }
 
-    // 4. Verify gateway exists
-    const gateway = await prisma.paymentGateway.findFirst({
-      where: { code: gatewayCode, isEnabled: true },
-    }) || await prisma.paymentGateway.findFirst({
-      where: { isEnabled: true },
-    });
+    const gateway =
+      (await prisma.paymentGateway.findFirst({
+        where: { code: rawGateway, isEnabled: true },
+      })) || (await prisma.paymentGateway.findFirst({ where: { isEnabled: true } }));
 
     if (!gateway) {
+      return NextResponse.json({ success: false, error: "بوابة الدفع المطلوبة غير مفعلة" }, { status: 400 });
+    }
+
+    if (
+      gateway.supportedCurrencies?.length > 0 &&
+      !gateway.supportedCurrencies.includes(currency)
+    ) {
       return NextResponse.json(
-        { success: false, error: "بوابة الدفع المطلوبة غير مفعلة أو غير متوفرة" },
+        { success: false, error: `بوابة ${gateway.nameAr} لا تدعم عملة ${currency}` },
         { status: 400 }
       );
     }
 
-    // 5. Determine currency & base price with real exchange rate calculation
-    const currency = (rawCurrency || "SAR").trim().toUpperCase();
-    const cycle = (billingCycle || "MONTHLY").toUpperCase();
     const currConfig = await prisma.currencyConfig.findUnique({ where: { code: currency } });
-    const fxRate = currConfig?.exchangeRateToUSD || (currency === "USD" ? 1.0 : 3.75);
+    const usdToTarget = currConfig?.exchangeRateToUSD
+      ? 1 / currConfig.exchangeRateToUSD
+      : currency === "USD"
+        ? 1.0
+        : 3.75;
 
     const matchedPrice =
       plan.prices?.find(
-        (p) =>
-          p.currency.toUpperCase() === currency &&
-          p.billingCycle.toUpperCase() === cycle &&
-          p.isActive !== false
-      ) ||
-      plan.prices?.find(
-        (p) =>
-          p.billingCycle.toUpperCase() === cycle &&
-          p.isActive !== false
-      );
+        (p) => p.currency.toUpperCase() === currency && p.billingCycle.toUpperCase() === cycle && p.isActive !== false
+      ) || plan.prices?.find((p) => p.billingCycle.toUpperCase() === cycle && p.isActive !== false);
 
     let amountSubtotal: number;
     if (matchedPrice) {
       if (matchedPrice.currency.toUpperCase() === currency) {
         amountSubtotal = matchedPrice.amount;
       } else {
-        const usdVal = matchedPrice.currency.toUpperCase() === "USD" ? matchedPrice.amount : (matchedPrice.amount / 3.75);
-        amountSubtotal = Math.round(usdVal * fxRate * 100) / 100;
+        const srcCfg = await prisma.currencyConfig.findUnique({ where: { code: matchedPrice.currency.toUpperCase() } });
+        const usdVal = matchedPrice.currency.toUpperCase() === "USD"
+          ? matchedPrice.amount
+          : matchedPrice.amount * (srcCfg?.exchangeRateToUSD || 0.2667);
+        amountSubtotal = Math.round(usdVal * usdToTarget * 100) / 100;
       }
     } else {
-      const baseUSD = plan.slug === "pro" ? 24 : plan.slug === "agency" ? 59 : 0;
-      amountSubtotal = Math.round(baseUSD * fxRate * 100) / 100;
+      const baseUsd = FALLBACK_USD_MAP[plan.slug.toLowerCase()] ?? 14;
+      const mult = cycle === "YEARLY" ? 10 : 1;
+      amountSubtotal = Math.round(baseUsd * mult * usdToTarget * 100) / 100;
     }
 
-    // 6. Validate coupon if provided
     let discountAmount = 0;
-    if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
-      const code = couponCode.trim().toUpperCase();
+    let validCouponCode: string | undefined;
+    if (body.couponCode && typeof body.couponCode === "string" && body.couponCode.trim()) {
+      const code = body.couponCode.trim().toUpperCase();
       const coupon = await prisma.promotionCoupon.findUnique({ where: { code } });
       const now = new Date();
+      const userUses =
+        coupon && typeof prisma.userSubscription?.count === "function"
+          ? await prisma.userSubscription.count({ where: { userId, couponCode: code } })
+          : 0;
 
       if (
         coupon &&
         coupon.isActive &&
         (!coupon.validFrom || new Date(coupon.validFrom) <= now) &&
         (!coupon.validUntil || new Date(coupon.validUntil) >= now) &&
-        (coupon.maxUses === null || coupon.maxUses === undefined || coupon.usedCount < coupon.maxUses)
+        (coupon.maxUses === null || coupon.maxUses === undefined || coupon.usedCount < coupon.maxUses) &&
+        userUses < (coupon.maxUsesPerUser || 1)
       ) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const allowedPlans = coupon.applicablePlanSlugs || (coupon as any).allowedPlans;
+        const allowedPlans = coupon.applicablePlanSlugs;
         const isPlanAllowed =
           !allowedPlans ||
           allowedPlans.length === 0 ||
-          allowedPlans.some(
-            (s: string) => s.trim().toLowerCase() === plan.slug.trim().toLowerCase()
-          );
+          allowedPlans.some((s) => s.trim().toLowerCase() === plan.slug.trim().toLowerCase());
 
         if (isPlanAllowed) {
-          if (coupon.discountType === "PERCENTAGE") {
-            discountAmount = (amountSubtotal * coupon.discountValue) / 100;
-          } else {
-            discountAmount = Math.min(coupon.discountValue, amountSubtotal);
-          }
+          discountAmount =
+            coupon.discountType === "PERCENTAGE"
+              ? (amountSubtotal * coupon.discountValue) / 100
+              : Math.min(coupon.discountValue, amountSubtotal);
           discountAmount = Math.round(discountAmount * 100) / 100;
+          validCouponCode = code;
         }
       }
     }
 
     const amountTotal = Math.max(0, Math.round((amountSubtotal - discountAmount) * 100) / 100);
+    if (gateway.isTestMode === false && amountTotal > 0) {
+      return NextResponse.json(
+        { success: false, error: "تتطلب بوابات الدفع الحية إتمام جلسة مزود الدفع الخارجي" },
+        { status: 402 }
+      );
+    }
 
-    // 7. Generate invoice & transaction
     const invoiceNumber = `INV-${Date.now()}`;
     const gatewayTxId = `tx_${gateway.code}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const now = new Date();
     const periodEnd = new Date(now);
-    if (cycle === "YEARLY") {
-      periodEnd.setDate(periodEnd.getDate() + 365);
-    } else {
-      periodEnd.setDate(periodEnd.getDate() + 30);
-    }
+    periodEnd.setDate(periodEnd.getDate() + (cycle === "YEARLY" ? 365 : 30));
+
+    const shouldInstantActivate =
+      amountTotal === 0 || (gateway.isTestMode === true && process.env.NODE_ENV !== "production");
 
     const invoice = await prisma.financialInvoice.create({
       data: {
@@ -169,15 +167,14 @@ export async function POST(request: NextRequest) {
         taxAmount: 0.0,
         amountTotal,
         currency,
-        status: gateway.isTestMode ? "PAID" : "PENDING",
-        paidAt: gateway.isTestMode ? now : null,
+        status: shouldInstantActivate ? "PAID" : "PENDING",
+        ...(shouldInstantActivate ? { paidAt: now } : {}),
         gatewayCode: gateway.code,
         gatewayTxId,
       },
     });
 
-    // 8. Auto-activate subscription if gateway is in test mode or zero amount
-    if (gateway.isTestMode || amountTotal === 0) {
+    if (shouldInstantActivate) {
       await processPaymentSuccess({
         invoiceId: invoice.id,
         userId,
@@ -188,13 +185,14 @@ export async function POST(request: NextRequest) {
         gatewayCode: gateway.code,
         now,
         periodEnd,
-        couponCode,
+        couponCode: validCouponCode,
       });
     }
 
     return NextResponse.json({
       success: true,
-      activated: gateway.isTestMode || amountTotal === 0,
+      activated: shouldInstantActivate,
+      isSandbox: Boolean(gateway.isTestMode),
       checkoutUrl: `/dashboard/settings?tab=subscription&invoice=${invoice.id}`,
       invoice: {
         id: invoice.id,
@@ -207,9 +205,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error creating checkout session:", error);
-    return NextResponse.json(
-      { success: false, error: "فشل في إنشاء جلسة الدفع" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "فشل في إنشاء جلسة الدفع" }, { status: 500 });
   }
 }

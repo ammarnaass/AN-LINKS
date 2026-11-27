@@ -91,6 +91,7 @@ export async function uploadToS3(
 
   const res = await fetch(targetUrl.toString(), {
     method: "PUT",
+    signal: AbortSignal.timeout(8000),
     headers: {
       "Content-Type": contentType,
       "x-amz-content-sha256": payloadHash,
@@ -121,6 +122,10 @@ export async function uploadProcessedImage(
   if (s3Config) {
     const url = await uploadToS3(buffer, `avatars/${filename}`, contentType, s3Config);
     return { url, provider: "s3" };
+  }
+
+  if (process.env.VERCEL === "1" || process.env.NODE_ENV === "production") {
+    throw new Error("التخزين السحابي S3/R2 غير مهيأ في بيئة الإنتاج");
   }
 
   const uploadsDir = path.join(process.cwd(), "public", "uploads");

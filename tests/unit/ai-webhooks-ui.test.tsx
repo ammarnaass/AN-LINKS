@@ -31,7 +31,7 @@ describe("AI & Webhooks Dashboard UI Components Suite", () => {
       const html = renderToStaticMarkup(<AiCopilotSettingsCard />);
 
       expect(html).toContain("مساعد الذكاء الاصطناعي (AI Copilot)");
-      expect(html).toContain("Gemini 1.5 Flash");
+      expect(html).toContain("Gemini 2.5 Flash");
       expect(html).toContain("نبرة صياغة المحتوى المفضلة (Tone):");
       expect(html).toContain("احترافي ومحفز");
       expect(html).toContain("إبداعي وجريء");

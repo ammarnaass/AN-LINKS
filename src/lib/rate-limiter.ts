@@ -23,6 +23,13 @@ const store = new Map<string, RateLimitBucket>();
  * Extracts a normalized client IP address from incoming proxy/CDN headers.
  */
 export function getClientIp(request: Request): string {
+  if (process.env.VERCEL === "1") {
+    const vercelIp = request.headers.get("x-vercel-forwarded-for");
+    if (vercelIp?.trim()) return vercelIp.split(",")[0]?.trim() || "127.0.0.1";
+    const realIp = request.headers.get("x-real-ip");
+    if (realIp?.trim()) return realIp.trim();
+  }
+
   const cfIp = request.headers.get("cf-connecting-ip");
   if (cfIp?.trim()) return cfIp.trim();
 
@@ -43,6 +50,11 @@ function pruneExpiredBuckets(now: number) {
     if (bucket.resetAt <= now) {
       store.delete(k);
     }
+  }
+  while (store.size >= MAX_STORE_ENTRIES) {
+    const oldestKey = store.keys().next().value;
+    if (oldestKey === undefined) break;
+    store.delete(oldestKey);
   }
 }
 

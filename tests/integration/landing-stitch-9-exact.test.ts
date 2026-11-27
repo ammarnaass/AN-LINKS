@@ -38,17 +38,17 @@ describe("Stitch _9 Landing Page Exact Parity Test Suite", () => {
     expect(LANDING_FAQS).toHaveLength(4);
     expect(LANDING_FAQS[0].question).toContain("هل الخدمة مجانية فعلاً");
     expect(LANDING_FAQS[1].question).toContain("هل يمكنني ربط دوميني الخاص");
-    expect(LANDING_FAQS[2].question).toContain("فحص الروابط المعطلة وتنبيهات واتساب");
+    expect(LANDING_FAQS[2].question).toContain("فحص الروابط المعطلة والتنبيهات الفورية");
     expect(LANDING_FAQS[3].question).toContain("كيف أستلم أرباح مبيعات");
   });
 
-  it("should export dedicated landing pricing tiers with 0, 29/23, 79/63 SAR", () => {
+  it("should export dedicated landing pricing tiers with 0, 49/41, 149/124 SAR", () => {
     expect(LANDING_PRICING_PLANS).toHaveLength(3);
     expect(LANDING_PRICING_PLANS[0].priceMonthly).toBe(0);
-    expect(LANDING_PRICING_PLANS[1].priceMonthly).toBe(29);
-    expect(LANDING_PRICING_PLANS[1].priceYearlyMonthlyEquiv).toBe(23);
-    expect(LANDING_PRICING_PLANS[2].priceMonthly).toBe(79);
-    expect(LANDING_PRICING_PLANS[2].priceYearlyMonthlyEquiv).toBe(63);
+    expect(LANDING_PRICING_PLANS[1].priceMonthly).toBe(49);
+    expect(LANDING_PRICING_PLANS[1].priceYearlyMonthlyEquiv).toBe(41);
+    expect(LANDING_PRICING_PLANS[2].priceMonthly).toBe(149);
+    expect(LANDING_PRICING_PLANS[2].priceYearlyMonthlyEquiv).toBe(124);
   });
 
   it("should render LandingHeader with all 5 anchor links matching _9", () => {
@@ -91,9 +91,9 @@ describe("Stitch _9 Landing Page Exact Parity Test Suite", () => {
 
   it("should render PricingBannerSection with 3 tiers and 20% discount badge", () => {
     const html = renderToStaticMarkup(React.createElement(PricingBannerSection));
-    expect(html).toContain("الخطة المجانية");
-    expect(html).toContain("خطة المحترفين (Pro)");
-    expect(html).toContain("خطة الشركات والفرق");
+    expect(html).toContain("الباقة المجانية");
+    expect(html).toContain("باقة المحترفين (Pro)");
+    expect(html).toContain("باقة الوكالات والشركات");
     expect(html).toContain("وفر 20%");
   });
 

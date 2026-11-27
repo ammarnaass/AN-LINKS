@@ -3,6 +3,11 @@ import { prisma } from "@/shared/db";
 import { enforceRateLimit } from "@/lib/rate-limiter";
 import { sendTransactionalEmail } from "@/lib/mailer";
 import { enqueueWebhookEvent } from "@/features/webhooks";
+import {
+  createUnsubscribeSignature,
+  escapeHtml,
+  sanitizeHttpUrl,
+} from "@/lib/html-escape";
 
 interface RouteParams {
   params: Promise<{ username: string }>;
@@ -94,16 +99,21 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (creator.profile?.welcomeSubject && creator.profile?.welcomeBody) {
       const subject = creator.profile.welcomeSubject;
       const body = creator.profile.welcomeBody;
-      const giftUrl = creator.profile.welcomeGiftUrl;
-      const creatorName = creator.profile.displayName || cleanUsername;
+      const safeGiftUrl = sanitizeHttpUrl(creator.profile.welcomeGiftUrl);
+      const safeCreatorName = escapeHtml(creator.profile.displayName || cleanUsername);
+      const safeBody = escapeHtml(body).replace(/\n/g, "<br/>");
+      const baseUrl = (process.env.NEXTAUTH_URL || "").replace(/\/$/, "");
+      const unsubSig = createUnsubscribeSignature(creator.id, email);
+      const unsubUrl = `${baseUrl}/api/bio/${encodeURIComponent(cleanUsername)}/unsubscribe?email=${encodeURIComponent(email)}&sig=${encodeURIComponent(unsubSig)}`;
 
       let html = `<div dir="rtl" style="font-family: sans-serif; line-height: 1.6; color: #1e293b;">
         <h2>مرحباً بك! 🎉</h2>
-        <p>${body.replace(/\n/g, "<br/>")}</p>`;
-      if (giftUrl) {
-        html += `<p><a href="${giftUrl}" style="display: inline-block; background-color: #4edea3; color: #003822; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">تحميل الهدية الترحيبية 🎁</a></p>`;
+        <p>${safeBody}</p>`;
+      if (safeGiftUrl) {
+        html += `<p><a href="${escapeHtml(safeGiftUrl)}" style="display: inline-block; background-color: #4edea3; color: #003822; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">تحميل الهدية الترحيبية 🎁</a></p>`;
       }
-      html += `<p style="margin-top: 24px; font-size: 14px; color: #64748b;">تحياتنا،<br/>${creatorName} عبر منصة AN LINKS</p></div>`;
+      html += `<p style="margin-top: 24px; font-size: 14px; color: #64748b;">تحياتنا،<br/>${safeCreatorName} عبر منصة AN LINKS</p>`;
+      html += `<p style="margin-top: 16px; font-size: 11px; color: #94a3b8;"><a href="${escapeHtml(unsubUrl)}" style="color: #94a3b8;">إلغاء الاشتراك في هذه النشرة</a></p></div>`;
 
       void sendTransactionalEmail({
         to: email,

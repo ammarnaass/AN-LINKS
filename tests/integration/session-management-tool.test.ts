@@ -61,8 +61,9 @@ describe("Session Management Tool (Task 4)", () => {
 
     const sessions = await getUserActiveSessions(user1.id, token);
     expect(sessions.length).toBeGreaterThan(0);
-    const session = sessions.find((s) => s.sessionToken === token);
+    const session = sessions.find((s) => s.isCurrent);
     expect(session).toBeDefined();
+    expect(session?.sessionToken).not.toBe(token);
     expect(session?.deviceType).toBe("mobile");
     expect(session?.os).toContain("iOS");
     expect(session?.browser).toBe("Safari");
@@ -74,7 +75,7 @@ describe("Session Management Tool (Task 4)", () => {
     await recordSession(user1.id, token, "127.0.0.1", "Mozilla/5.0 (X11; Linux x86_64)");
 
     const sessionsBefore = await getUserActiveSessions(user1.id);
-    const target = sessionsBefore.find((s) => s.sessionToken === token);
+    const target = sessionsBefore.find((s) => s.sessionToken.endsWith(token.slice(-8)));
     expect(target).toBeDefined();
 
     const revoked = await revokeUserSession(target!.id, user1.id);
@@ -98,7 +99,7 @@ describe("Session Management Tool (Task 4)", () => {
     expect(getRes.status).toBe(200);
     expect(getData.sessions.length).toBeGreaterThan(0);
 
-    const currentSession = getData.sessions.find((s: { sessionToken: string }) => s.sessionToken === token);
+    const currentSession = getData.sessions.find((s: { isCurrent: boolean }) => s.isCurrent);
     expect(currentSession).toBeDefined();
 
     // Delete session
@@ -121,7 +122,9 @@ describe("Session Management Tool (Task 4)", () => {
     expect(adminGetData.success).toBe(true);
     expect(Array.isArray(adminGetData.sessions)).toBe(true);
 
-    const targetSession = adminGetData.sessions.find((s: { sessionToken: string }) => s.sessionToken === token);
+    const targetSession = adminGetData.sessions.find((s: { sessionToken: string }) =>
+      s.sessionToken.endsWith(token.slice(-8))
+    );
     expect(targetSession).toBeDefined();
 
     // Admin revoke

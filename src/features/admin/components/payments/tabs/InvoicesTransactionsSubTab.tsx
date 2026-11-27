@@ -6,6 +6,7 @@ import { AppCard } from "@/shared/ui";
 import { InvoicesFilterBar } from "./invoices/InvoicesFilterBar";
 import { InvoicesTable } from "./invoices/InvoicesTable";
 import { InvoicesPagination } from "./invoices/InvoicesPagination";
+import { AdminPayoutsSection } from "./invoices/AdminPayoutsSection";
 
 export interface InvoicesTransactionsSubTabProps {
   transactions: AdminTransactionsResult | null;
@@ -70,6 +71,8 @@ export function InvoicesTransactionsSubTab({
           onPageChange={handlePageChange}
         />
       </AppCard>
+
+      <AdminPayoutsSection />
     </div>
   );
 }

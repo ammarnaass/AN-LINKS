@@ -26,30 +26,39 @@ export function BioGatedMediaCard({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check local entitlement token
-    const token = typeof window !== "undefined"
-      ? localStorage.getItem(`anlinks_media_token_${product.id}`)
-      : null;
+    const verifyStoredToken = () => {
+      const token = typeof window !== "undefined"
+        ? localStorage.getItem(`anlinks_media_token_${product.id}`)
+        : null;
 
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
 
-    fetch("/api/bio/unlock-media", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId: product.id, token }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.unlocked) {
-          setIsUnlocked(true);
-          setMediaUrl(data.mediaUrl);
-        }
+      fetch("/api/bio/unlock-media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id, token }),
       })
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.unlocked) {
+            setIsUnlocked(true);
+            setMediaUrl(data.mediaUrl);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setIsLoading(false));
+    };
+
+    verifyStoredToken();
+    const onUnlocked = (e: Event) => {
+      const custom = e as CustomEvent<{ productId?: string }>;
+      if (custom.detail?.productId === product.id) verifyStoredToken();
+    };
+    window.addEventListener("anlinks-media-unlocked", onUnlocked);
+    return () => window.removeEventListener("anlinks-media-unlocked", onUnlocked);
   }, [product.id]);
 
   if (isLoading) {

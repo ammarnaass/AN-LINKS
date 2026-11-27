@@ -1,6 +1,7 @@
 import { prisma } from "@/shared/db";
 import { EnqueueWebhookInput, WebhookDispatchResult } from "../types/webhooks.types";
-import { createWebhookSignature } from "./webhook-signer.service";
+import { createWebhookSignature, resolveWebhookSigningSecret } from "./webhook-signer.service";
+import { assertSafeWebhookUrl } from "../validators/webhooks.validator";
 
 const RETRY_DELAYS_MS = [
   60 * 1000, // Attempt 1: 1m
@@ -59,8 +60,29 @@ export async function processPendingOutboxBatch(batchSize = 25): Promise<Webhook
   let failedCount = 0;
 
   for (const item of pending) {
+    const claim = await prisma.webhookOutbox.updateMany({
+      where: { id: item.id, status: "PENDING" },
+      data: { status: "PROCESSING" },
+    });
+    if (claim.count === 0) continue;
+
+    const ssrfCheck = await assertSafeWebhookUrl(item.endpoint.url);
+    if (!ssrfCheck.ok) {
+      failedCount++;
+      await prisma.webhookOutbox.update({
+        where: { id: item.id },
+        data: {
+          status: "FAILED",
+          attempts: { increment: 1 },
+          lastError: ssrfCheck.error || "BLOCKED_SSRF_TARGET",
+        },
+      });
+      continue;
+    }
+
     const payloadStr = JSON.stringify(item.payload);
-    const signature = createWebhookSignature(payloadStr, item.endpoint.secretEncrypted);
+    const signingSecret = resolveWebhookSigningSecret(item.endpoint.secretEncrypted);
+    const signature = createWebhookSignature(payloadStr, signingSecret);
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000); // 4s timeout
@@ -68,6 +90,7 @@ export async function processPendingOutboxBatch(batchSize = 25): Promise<Webhook
     try {
       const res = await fetch(item.endpoint.url, {
         method: "POST",
+        redirect: "manual",
         headers: {
           "Content-Type": "application/json",
           "X-AnLinks-Signature": signature,
@@ -100,6 +123,7 @@ export async function processPendingOutboxBatch(batchSize = 25): Promise<Webhook
         await prisma.webhookOutbox.update({
           where: { id: item.id },
           data: {
+            status: "PENDING",
             attempts: { increment: 1 },
             nextRetryAt: new Date(now.getTime() + nextDelay),
             lastError: err?.message || "DISPATCH_FAILED",
