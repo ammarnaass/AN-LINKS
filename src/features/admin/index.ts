@@ -54,3 +54,4 @@ export * from "./components/notifications/NotificationFormFields";
 export * from "./components/notifications/NotificationTable";
 export * from "./components/notifications/NotificationPreviewCard";
 export * from "./components/notifications/NotificationStatsCards";
+export * from "./components/newsletter/AdminNewsletterTab";

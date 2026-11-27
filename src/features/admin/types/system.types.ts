@@ -14,6 +14,7 @@ export type AdminTabKey =
   | "settings"
   | "auth_providers"
   | "notifications"
+  | "newsletter"
   | "reports";
 
 export type GatewayId =
